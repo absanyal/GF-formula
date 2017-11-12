@@ -8,7 +8,7 @@ Created on Mon Nov  6 15:46:02 2017
 import numpy as np
 import matplotlib.pyplot as plt
 
-n = 10 #number of sites
+n = 3 #number of sites
 eta = 0.1
 epsilon = np.zeros(n)
 
@@ -35,5 +35,5 @@ for omega in omega_list:
 
 plt.plot(omega_list, A_mat)
 plt.title(str(n) + ' site matrix inverted directly')
-#plt.savefig(str(n)+'sitematrixdirect_gen.pdf')
+plt.savefig(str(n)+'sitematrixdirect_gen.pdf')
 plt.show()
