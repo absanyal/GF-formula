@@ -8,7 +8,7 @@ Created on Mon Nov  6 15:46:02 2017
 import numpy as np
 import matplotlib.pyplot as plt
 
-n = 3 #number of sites
+n = 16 #number of sites
 eta = 0.1
 epsilon = np.zeros(n)
 

@@ -8,7 +8,7 @@ Created on Mon Nov  6 15:46:02 2017
 import numpy as np
 import matplotlib.pyplot as plt
 
-N = 128 #No of sites to be evaluated
+N = 3 #No of sites to be evaluated
 
 eta = 0.1
 epsilon = np.zeros(N)
