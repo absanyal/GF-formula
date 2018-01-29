@@ -15,7 +15,7 @@ t = 1
 eL = 0
 eR = 0
 
-U = 0
+U = 2
 
 e = [2 * eL, 2 * eR, eL + eR, eL + eR]
 
@@ -41,7 +41,7 @@ def G11(omega):
     h[1][1] = z(omega) - e[3]
     return h
 
-omega_list = np.linspace(-6, 6, 5000)
+omega_list = np.linspace(-12, 4, 5000)
 A_list = []
 
 for omega in omega_list:
@@ -50,9 +50,9 @@ for omega in omega_list:
     A_list.append( (-1/np.pi) * np.imag( Gc[0][0] ) )
 
 plt.plot(omega_list, A_list)
-plt.title('2 sites with 2 particles corrected')
-plt.savefig('2-sites_2-particles-corrected.pdf')
-plt.show()
+plt.title('2 sites with 2 particles')
+#plt.savefig('2-sites_2-particles-corrected.pdf')
+#plt.show()
 
 
 A_list = []
@@ -63,7 +63,7 @@ for omega in omega_list:
     A_list.append( (-1/np.pi) * np.imag( Gc[0][0] ) )
 
 plt.plot(omega_list, A_list)
-plt.title('2 sites with 2 particles by inversion')
+#plt.title('2 sites with 2 particles by inversion')
 #plt.savefig('2-sites_2-particles.pdf')
 plt.show()
 
