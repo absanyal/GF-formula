@@ -15,13 +15,14 @@ t = 1
 eL = 0
 eR = 0
 
-U = 3
+U = 0
 
 e = [2 * eL, 2 * eR, eL + eR, eL + eR]
 
-tau01 = t * np.ones((2, 2))
+tau01 = t * np.array([ [ -1, 1 ],
+                       [ -1, 1 ] ])
 
-tau10 = t * np.ones((2,2))
+tau10 = np.transpose(tau01)
 
 def z(omega):
     return omega + I * eta
@@ -49,31 +50,31 @@ for omega in omega_list:
     A_list.append( (-1/np.pi) * np.imag( Gc[0][0] ) )
 
 plt.plot(omega_list, A_list)
-plt.title('2 sites with 2 particles')
-plt.savefig('2-sites_2-particles.pdf')
+plt.title('2 sites with 2 particles corrected')
+plt.savefig('2-sites_2-particles-corrected.pdf')
 plt.show()
 
 
-#A_list = []
-#for omega in omega_list:
-#    Gc = np.linalg.inv( \
-#    np.block([[G00(omega), tau01],
-#               [tau10, G11(omega)]]))
-#    A_list.append( (-1/np.pi) * np.imag( Gc[0][0] ) )
-#
-#plt.plot(omega_list, A_list)
-#plt.title('2 sites with 2 particles by inversion')
-##plt.savefig('2-sites_2-particles.pdf')
-#plt.show()
+A_list = []
+for omega in omega_list:
+    Gc = np.linalg.inv( \
+    np.block([[G00(omega), tau01],
+               [tau10, G11(omega)]]))
+    A_list.append( (-1/np.pi) * np.imag( Gc[0][0] ) )
 
-#x = np.diag([e[0], e[1]])
-#y = np.diag([e[2], e[3]])
-#
-#Hamil = np.block([[x, tau01],[tau10, y]])
-#
-#evals = np.sort( np.linalg.eigvals( Hamil ) )
-#
-#for ev in evals:
-#    print( round( ev, 3 ), end = '\t' )
-#
-#print('')
+plt.plot(omega_list, A_list)
+plt.title('2 sites with 2 particles by inversion')
+#plt.savefig('2-sites_2-particles.pdf')
+plt.show()
+
+x = np.diag([e[0], e[1]])
+y = np.diag([e[2], e[3]])
+
+Hamil = np.block([[x, tau01],[tau10, y]])
+
+evals = np.sort( np.linalg.eigvals( Hamil ) )
+
+for ev in evals:
+    print( round( ev, 3 ), end = '\t' )
+
+print('')
