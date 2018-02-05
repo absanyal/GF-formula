@@ -69,9 +69,9 @@ class state:
     def getSz(self):
         s = 0
         for i in self.upconfig:
-            s += i * 1
+            s += i * 1/2
         for j in self.downconfig:
-            s += j * (-1)
+            s += j * (-1/2)
         return s
 
     #Definition of the c, c_dagger and n operators
@@ -81,11 +81,11 @@ class state:
         if (sigma == 1 and self.upconfig[site] == 0):
 
             n1 = 0
-            for i in range(0, site):
+            for i in range(site + 1, self.N):
                 n1 += self.upconfig[i]
 
             n2 = 0
-            for i in range(0, site):
+            for i in range(site + 1, self.N):
                 n2 += self.downconfig[i]
 
             self.phase *= pow(-1, n1 + n2)
@@ -94,11 +94,11 @@ class state:
         elif (sigma == -1 and self.downconfig[site] == 0):
 
             n1 = 0
-            for i in range(0, site + 1):
+            for i in range(site, self.N):
                 n1 += self.upconfig[i]
 
             n2 = 0
-            for i in range(0, site + 1):
+            for i in range(site + 1, self.N):
                 n2 += self.downconfig[i]
 
             self.phase *= pow(-1, n1 + n2)
@@ -119,11 +119,11 @@ class state:
         if (sigma == 1 and self.upconfig[site] == 1):
 
             n1 = 0
-            for i in range(0, site+1):
+            for i in range(site + 1, self.N):
                 n1 += self.upconfig[i]
 
             n2 = 0
-            for i in range(0, site+1):
+            for i in range(site + 1, self.N):
                 n2 += self.downconfig[i]
 
             self.phase *= pow(-1, n1 + n2)
@@ -132,14 +132,14 @@ class state:
         elif (sigma == -1 and self.downconfig[site] == 1):
 
             n1 = 0
-            for i in range(0, site):
+            for i in range(site, self.N + 1):
                 n1 += self.upconfig[i]
 
             n2 = 0
-            for i in range(0, site + 1):
+            for i in range(site, self.N + 1):
                 n2 += self.downconfig[i]
 
-            self.phase *= pow(-1, n1 + n2)
+            self.phase *= pow(-1, n1 + n2 - 1)
             self.downconfig[site] = 0
 
         elif (sigma == 1 and self.upconfig[site] == 0):
@@ -156,6 +156,8 @@ class state:
     def getoccupation(self, site, sigma):
         self.destroy(site, sigma)
         self.create(site, sigma)
+
+        return self.phase
 
 ###########################################################################
 
@@ -252,29 +254,26 @@ def getbasissize(N, n_particles, S_z = 0):
 
 ###########################################################################
 
-#basis = createbasis(4, 4, 0)
+#basis = createbasis(6, 4, 1)
 #
 #for b in basis:
-#    print(b.getstate(), end = '\t')
-#    b.getoccupation(0, 1)
-#    print(b.phase)
+#    print(b.getstate(), b.getoccupation(0, 1), sep = '\t')
 
 
-
-a = state([1, 1, 1, 0], [0, 0, 1, 1])
+a = state([1, 0, 1, 0], [0, 1, 1, 0])
 print(a.getstate())
-#print(a.binequiv())
-#print(a.intequiv())
-
+##print(a.binequiv())
+##print(a.intequiv())
+#
 a.destroy(0, 1)
 print(a.getstate())
 print(a.phase)
 a.create(0, 1)
 print(a.getstate())
 print(a.phase)
-a.destroy(2, -1)
+a.destroy(2, 1)
 print(a.getstate())
 print(a.phase)
-a.create(2, -1)
+a.create(2, 1)
 print(a.getstate())
 print(a.phase)
