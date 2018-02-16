@@ -5,8 +5,6 @@ Created on Sat Feb  3 17:10:25 2018
 @author: AB Sanyal
 """
 
-import matplotlib.pyplot as plt
-
 #Reverse a binary and convert to decimal integer
 def makeint(binnum):
     return int(binnum[::-1], 2)
@@ -55,24 +53,6 @@ class state:
     #Given a state, generate its unique decimal integer representation
     def intequiv(self):
         return makeint(self.binequiv())
-
-    #Returns the total number of particles in the state
-    def getnumparticles(self):
-        n = 0
-        for i in self.upconfig:
-            n += i
-        for j in self.downconfig:
-            n += j
-        return n
-
-    #Returns the total spin of the state
-    def getSz(self):
-        s = 0
-        for i in self.upconfig:
-            s += i * 1/2
-        for j in self.downconfig:
-            s += j * (-1/2)
-        return s
 
     #Definition of the c, c_dagger and n operators
 
@@ -132,11 +112,11 @@ class state:
         elif (sigma == -1 and self.downconfig[site] == 1):
 
             n1 = 0
-            for i in range(site, self.N + 1):
+            for i in range(site, self.N):
                 n1 += self.upconfig[i]
 
             n2 = 0
-            for i in range(site, self.N + 1):
+            for i in range(site, self.N):
                 n2 += self.downconfig[i]
 
             self.phase *= pow(-1, n1 + n2 - 1)
@@ -151,6 +131,38 @@ class state:
             self.upconfig = [0 for i in range(self.N)]
             self.downconfig = [0 for i in range(self.N)]
             self.phase = 0
+
+    #Move a particle from site to site
+    def move(self, i, j, sigma):
+        """
+        Move a particle of spin sigma = +/- 1 from site i to site j
+        """
+        if (self.getoccupation(i, sigma) != 0):
+            self.destroy(i, sigma)
+            self.create(j, sigma)
+        else:
+            self.upconfig = [0 for i in range(self.N)]
+            self.downconfig = [0 for i in range(self.N)]
+            self.phase = 0
+
+
+    #Returns the total number of particles in the state
+    def getnumparticles(self):
+        n = 0
+        for i in self.upconfig:
+            n += i
+        for j in self.downconfig:
+            n += j
+        return n
+
+    #Returns the total spin of the state
+    def getSz(self):
+        s = 0
+        for i in self.upconfig:
+            s += i * 1/2
+        for j in self.downconfig:
+            s += j * (-1/2)
+        return s
 
     #Occupation number operator for a given site and sigma
     def getoccupation(self, site, sigma):
@@ -189,10 +201,12 @@ def createbasis(N, n_particles, S_z = 0):
     basis = []
 
     #make max sector
-    upsector = [0 for i in range(N)]
-    downsector = [0 for i in range(N)]
-    for i in range(1, n_particles+1):
-        downsector[-i] = 1
+    upsector = [1 for i in range(N)]
+    downsector = [1 for i in range(N)]
+#    for i in range(1, N+1):
+#        downsector[-i] = 1
+#    for i in range(1, N+1):
+#        upsector[-i] = 1
     maxstate = state(upsector, downsector)
     #print(maxstate.getstate())
     maxint = maxstate.intequiv()
@@ -201,8 +215,8 @@ def createbasis(N, n_particles, S_z = 0):
     #make min sector
     upsector = [0 for i in range(N)]
     downsector = [0 for i in range(N)]
-    for i in range(n_particles):
-        upsector[i] = 1
+#    for i in range(n_particles):
+#        upsector[i] = 1
     minstate = state(upsector, downsector)
     #print(minstate.getstate())
     minint = minstate.intequiv()
@@ -229,9 +243,7 @@ def getbasissize(N, n_particles, S_z = 0):
     for i in range(1, n_particles+1):
         downsector[-i] = 1
     maxstate = state(upsector, downsector)
-    #print(maxstate.getstate())
     maxint = maxstate.intequiv()
-    #print(maxint)
 
     #make min sector
     upsector = [0 for i in range(N)]
@@ -239,9 +251,7 @@ def getbasissize(N, n_particles, S_z = 0):
     for i in range(n_particles):
         upsector[i] = 1
     minstate = state(upsector, downsector)
-    #print(minstate.getstate())
     minint = minstate.intequiv()
-    #print(minint)
 
     #make all states and select the appropriate ones
     for i in range(minint, maxint + 1):
@@ -252,28 +262,31 @@ def getbasissize(N, n_particles, S_z = 0):
 
     return basis_size
 
+#Inner product of two states
+def innerproduct(a, b):
+    if (a.getstate() == b.getstate()):
+        return a.phase * b.phase
+    else:
+        return 0
+
+#Clone a state
+def clonestate(a):
+    upc = a.upconfig[:]
+    downc = a.downconfig[:]
+    return state(upc, downc, a.phase)
+
+##Set the U term
+#U = 0
+#def setinteraction(value):
+#    global U
+#    U = value
+
+##Action of the tightbinding Hamiltonian
+#def H(a):
+#
+#    for i in a.N:
+
+
+
+
 ###########################################################################
-
-#basis = createbasis(6, 4, 1)
-#
-#for b in basis:
-#    print(b.getstate(), b.getoccupation(0, 1), sep = '\t')
-
-
-a = state([1, 0, 1, 0], [0, 1, 1, 0])
-print(a.getstate())
-##print(a.binequiv())
-##print(a.intequiv())
-#
-a.destroy(0, 1)
-print(a.getstate())
-print(a.phase)
-a.create(0, 1)
-print(a.getstate())
-print(a.phase)
-a.destroy(2, 1)
-print(a.getstate())
-print(a.phase)
-a.create(2, 1)
-print(a.getstate())
-print(a.phase)
