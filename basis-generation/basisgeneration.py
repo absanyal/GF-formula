@@ -32,11 +32,11 @@ class state:
         p = ''
         for i in range(self.N):
             if (self.upconfig[i] == 1 and self.downconfig[i] == 0):
-                p += chr(8593)
+                p += " " + chr(8593) + " "
             if (self.upconfig[i] == 0 and self.downconfig[i] == 1):
-                p += chr(8595)
+                p += " " + chr(8595) + " "
             if (self.upconfig[i] == 1 and self.downconfig[i] == 1):
-                p += chr(8645)
+                p += " " + chr(8645) + " "
             if (self.upconfig[i] == 0 and self.downconfig[i] == 0):
                 p += ' _ '
         return p
