@@ -201,11 +201,11 @@ def createbasis(N, n_particles, S_z = 0):
     basis = []
 
     #make max sector
-    upsector = [1 for i in range(N)]
-    downsector = [1 for i in range(N)]
-#    for i in range(1, N+1):
-#        downsector[-i] = 1
-#    for i in range(1, N+1):
+    upsector = [0 for i in range(N)]
+    downsector = [0 for i in range(N)]
+    for i in range(1, n_particles+1):
+        downsector[-i] = 1
+#    for i in range(1, n_particles+1):
 #        upsector[-i] = 1
     maxstate = state(upsector, downsector)
     #print(maxstate.getstate())
@@ -215,8 +215,8 @@ def createbasis(N, n_particles, S_z = 0):
     #make min sector
     upsector = [0 for i in range(N)]
     downsector = [0 for i in range(N)]
-#    for i in range(n_particles):
-#        upsector[i] = 1
+    for i in range(n_particles):
+        upsector[i] = 1
     minstate = state(upsector, downsector)
     #print(minstate.getstate())
     minint = minstate.intequiv()

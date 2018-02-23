@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 N = 4
 n = 4
 
-p = 1
+p = 0
 
 U = 8
 
@@ -27,9 +27,14 @@ stoppoint = 20
 
 print("\033c", end = '')
 
-print("Calculating for", N, "sites with", n, "fermions and Sz =", spin)
+if (n == 1):
+    fs = "fermion"
+else:
+    fs = "fermions"
 
-print("Generating the basis...this may take a moment...")
+print("Calculating for", N, "sites with", n, fs, "and Sz =", spin)
+
+print("Generating the basis...this may take a while...")
 
 basis = bg.createbasis(N, n, spin )
 
@@ -38,11 +43,11 @@ eta = 0.1
 
 print("The basis has", len(basis), "states.")
 
-#i = 0
-#for s in basis:
-#    print(i, s.getstate())
-#    i += 1
-#"""
+i = 0
+for s in basis:
+    print(i, s.getstate())
+    i += 1
+
 H = []
 
 print("Generating the Hamiltonian...")
@@ -83,6 +88,7 @@ for i in range(len(basis)):
             H[i][i] += U
 
 #print(H)
+print('')
 
 def z(omega):
     return omega + I * eta
@@ -92,45 +98,56 @@ def G(omega):
     * np.eye(len(basis), dtype = np.complex) - H)
 
 
-w_list = np.linspace(startpoint, stoppoint, 5000)
+w_list = np.linspace(startpoint, stoppoint, 2000)
 
+#p = input("Enter the state number to calculate the spectral weight for: ")
+p = int(p)
+
+#print("\nThe eigenvalues of the Hamiltonian are:")
+#
+#ev = np.linalg.eigvalsh(H)
+#
+#for e in ev:
+#    print( round(e, 2), sep = '\t', end = ' ' )
+#
+#print('')
+
+#print("Generating local spectral weight function for state:\n", \
+#        basis[p].getstate() )
+#
 #A_list = []
+#i = 0
 #for w in w_list:
 #    A_list.append( -(1/np.pi) * np.imag( G(w)[p][p] ) )
+#    pb.progressbar(i, 0, len(w_list) - 1)
+#    i += 1
 #
 #plt.plot(w_list, A_list)
+#plt.title( "Local spectral weight function for the state " +\
+#             str(p) )
 #plt.show()
+#
+#print('')
 
-total_A = np.zeros(len(w_list))
-
-print("\nThe eigenvalues of the Hamiltonian are:")
-
-ev = np.linalg.eigvalsh(H)
-
-for e in ev:
-    print( round(e, 2), sep = '\t', end = ' ' )
-
-print("\nGenerating density of states...")
+print("Generating density of states...")
 
 i = 0
-for slabel in range(len(basis)):
-    Ap_list = []
-    for w in w_list:
-        Ap_list.append(\
-        (1/len(basis)) * (-1/np.pi) * np.imag( G(w)[slabel][slabel] ) )
-    Ap_list = np.array(Ap_list)
-    total_A += Ap_list
+Ap_list = []
+for w in w_list:
+    Ap_list.append( (1/len(basis)) * (-1/np.pi) * np.imag( np.trace(G(w)) ) )
 
-    pb.progressbar(i, 0, len(basis) - 1)
+    pb.progressbar(i, 0, len(w_list) - 1)
     i += 1
 
-plt.plot(w_list, total_A)
+plt.plot(w_list, Ap_list)
 plt.title(
         "DOS for " + str(N) + " sites with " + str(n) \
-            + " fermions, Sz = " + str(spin) + ", U = " + str(U)
+            + " " + fs + ", Sz = " + str(spin) + ", U = " + str(U)
         )
 
-plt.savefig(str(N) + "_" + str(n) + "_" + str(int(spin*10)) + str(U) + ".pdf")
+#plt.savefig(
+#            str(N) + "_" + str(n) + "_" + str(int(spin*10)) +\
+#            "_" + str(U) + ".pdf")
 plt.show()
 
 print('')
