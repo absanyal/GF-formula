@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 N = 4
-n = 4
+n = 2
 
 p = 0
 
@@ -48,7 +48,16 @@ waitmsg = np.random.choice(waitmessagelist)
 
 print("Generating the basis...", waitmsg, sep = '')
 
-basis = bg.createbasis(N, n, spin)
+uobasis = bg.createbasis(N, n, spin)
+
+basis = []
+
+i = 0
+for n_l in range(n+1):
+    spins = 0.5 * np.array(list(range(-n_l, n_l + 1)))
+    for Sz_l in spins:
+        tempbasis = bg.createsubbasis(uobasis, n_l, Sz_l)
+        basis += tempbasis
 
 I = complex(0, 1)
 
@@ -57,19 +66,27 @@ if (len(basis) == 1):
 else:
     statesm = "state."
 
-#print("The basis has", len(basis), statesm)
-#
+print("The basis has", len(basis), statesm)
+
 #i = 0
 #for s in basis:
 #    print(i, s.getstate())
 #    i += 1
 
-H = []
-
 print("Generating the Hamiltonian...")
 
-for s1 in basis:
-    for s2 in basis:
+#Alternative Hamiltonian construction without squaring
+basis1 = basis[:]
+basis2 = basis[:]
+
+H = np.zeros( (len(basis1), len(basis2)) )
+#H = []
+
+for bi in range(len(basis1)):
+    for bj in range(len(basis2)):
+
+        s1 = basis1[bi]
+        s2 = basis2[bj]
 
         ta = 0
         for sigma in [-1, +1]:
@@ -87,14 +104,11 @@ for s1 in basis:
 
         term = t * (ta + tb)
 
-        H.append(term)
+        #H.append(term)
+        H[bi][bj] = term
 
-        i = len(H)
-        pb.progressbar(i, 0, pow(len(basis),2))
-
-H = np.array(H, dtype = np.complex)
-
-H = np.reshape(H, ( len(basis), len(basis) ) )
+        Hprog = len(basis1) * (bi + 1) + bj + 1
+        pb.progressbar(Hprog, 0, len(basis1) * len(basis2))
 
 for i in range(len(basis)):
     a = basis[i]
@@ -116,12 +130,11 @@ def G(omega):
 #p = input("Enter the state number to calculate the spectral weight for: ")
 p = int(p)
 
-
 ev = np.linalg.eigvalsh(H)
 startpoint = np.floor(min(ev)) - 3
 stoppoint = np.ceil(max(ev)) + 3
 
-#print("\nThe eigenvalues of the Hamiltonian are:")
+#print("The eigenvalues of the Hamiltonian are:")
 #for e in ev:
 #    print( round(e, 2), sep = '\t', end = ' ' )
 #
@@ -139,6 +152,7 @@ w_list = np.linspace(startpoint, stoppoint, 2000)
 #    pb.progressbar(i, 0, len(w_list) - 1)
 #    i += 1
 #
+#plt.xlim(startpoint, stoppoint)
 #plt.plot(w_list, A_list)
 #plt.title( "Local spectral weight function for the state " +\
 #             str(p) )
@@ -156,6 +170,7 @@ for w in w_list:
     pb.progressbar(i, 0, len(w_list) - 1)
     i += 1
 
+plt.xlim(startpoint, stoppoint)
 plt.plot(w_list, Ap_list)
 plt.title(
         "DOS for " + str(N) + " sites with " + str(n) \

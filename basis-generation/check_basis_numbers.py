@@ -10,17 +10,17 @@ import progbar as pb
 import numpy as np
 import matplotlib.pyplot as plt
 
-N = 11
+N = 4
 n = 2
-#spin = (0.5 * n) % 1
-spin = 1
+spin = (0.5 * n) % 1
+#spin = 1
 
 us = [0 for i in range(N)]
 ds = [0 for i in range(N)]
 us[0] = 1
 us[-1] = 0
 ds[0] = 0
-ds[-1] = 0
+ds[-1] = 1
 ws = bg.state(us, ds)
 
 wsn = 0
