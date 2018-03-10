@@ -155,6 +155,20 @@ class state:
             n += j
         return n
 
+    #Get the number of particles on the left block
+    def getleftnum(self):
+        n = 0
+        for i in range(int(self.N / 2)):
+            n += self.upconfig[i] + self.downconfig[i]
+        return n
+
+    #Get the total Sz of particles on the left block
+    def getleftSz(self):
+        s = 0
+        for i in range(int(self.N / 2)):
+            s += 0.5 * self.upconfig[i] - 0.5 * self.downconfig[i]
+        return s
+
     #Returns the total spin of the state
     def getSz(self):
         s = 0
@@ -201,10 +215,10 @@ def createbasis(N, n_particles, S_z = 0):
     basis = []
 
     #make max sector
-    upsector = [0 for i in range(N)]
-    downsector = [0 for i in range(N)]
-    for i in range(1, n_particles+1):
-        downsector[-i] = 1
+    upsector = [1 for i in range(N)]
+    downsector = [1 for i in range(N)]
+#    for i in range(1, n_particles+1):
+#        downsector[N-i] = 1
 #    for i in range(1, n_particles+1):
 #        upsector[-i] = 1
     maxstate = state(upsector, downsector)
@@ -215,8 +229,8 @@ def createbasis(N, n_particles, S_z = 0):
     #make min sector
     upsector = [0 for i in range(N)]
     downsector = [0 for i in range(N)]
-    for i in range(n_particles):
-        upsector[i] = 1
+#    for i in range(n_particles):
+#        upsector[i] = 1
     minstate = state(upsector, downsector)
     #print(minstate.getstate())
     minint = minstate.intequiv()
@@ -230,6 +244,16 @@ def createbasis(N, n_particles, S_z = 0):
             basis.append(newbasis)
 
     return basis
+
+#Create a sub-basis from a given basis with left-sector specified
+def createsubbasis(basis, l_n, l_Sz = 0):
+    sbasis = []
+
+    for state in basis:
+        if (state.getleftnum() == l_n and state.getleftSz() == l_Sz):
+            sbasis.append(state)
+
+    return sbasis
 
 #Given the number of sites, number of particles and total spin,
 #returns the number of elements basis set.
