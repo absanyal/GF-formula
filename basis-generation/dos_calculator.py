@@ -10,22 +10,26 @@ import basisgeneration as bg
 import progbar as pb
 import numpy as np
 import matplotlib.pyplot as plt
+import time
+import gc
+
+gc.collect()
 
 N = 4
-n = 2
+n = 4
 
 p = 0
 
-U = 8
-
+U = 4
 eta = 0.1
 
 spin = (0.5 * n) % 1
 
 t = 1
+I = complex(0, 1)
 
-#startpoint = -6
-#stoppoint = 6
+#startpoint = 7.5
+#stoppoint = 9.5
 
 print("\033c", end = '')
 
@@ -48,25 +52,29 @@ waitmsg = np.random.choice(waitmessagelist)
 
 print("Generating the basis...", waitmsg, sep = '')
 
-uobasis = bg.createbasis(N, n, spin)
+t_basis_start = time.perf_counter()
 
-basis = []
+basis = bg.createbasis(N, n, spin)
 
-i = 0
-for n_l in range(n+1):
-    spins = 0.5 * np.array(list(range(-n_l, n_l + 1)))
-    for Sz_l in spins:
-        tempbasis = bg.createsubbasis(uobasis, n_l, Sz_l)
-        basis += tempbasis
+#basis = []
+#
+#i = 0
+#for n_l in range(n+1)[::-1]:
+#    spins = 0.5 * np.array(list(range(-n_l, n_l + 1)))
+#    for Sz_l in spins:
+#        tempbasis = bg.createsubbasis(uobasis, n_l, Sz_l)
+#        basis += tempbasis
 
-I = complex(0, 1)
+t_basis_stop = time.perf_counter()
 
 if (len(basis) == 1):
     statesm = "state."
 else:
-    statesm = "state."
+    statesm = "states."
 
 print("The basis has", len(basis), statesm)
+print("Basis generated in", \
+    round((t_basis_stop - t_basis_start), 5), 's.' )
 
 #i = 0
 #for s in basis:
@@ -76,6 +84,9 @@ print("The basis has", len(basis), statesm)
 print("Generating the Hamiltonian...")
 
 #Alternative Hamiltonian construction without squaring
+
+t_H_start = time.perf_counter()
+
 basis1 = basis[:]
 basis2 = basis[:]
 
@@ -88,37 +99,52 @@ for bi in range(len(basis1)):
         s1 = basis1[bi]
         s2 = basis2[bj]
 
-        ta = 0
-        for sigma in [-1, +1]:
-            for i in range(0, N-1):
-                s2a = bg.clonestate(s2)
-                s2a.move(i, i+1, sigma)
-                ta += bg.innerproduct(s1, s2a)
+        if (bi >= bj):
 
-        tb = 0
-        for sigma in [-1, +1]:
-            for i in range(0, N-1):
-                s2b = bg.clonestate(s2)
-                s2b.move(i+1, i, sigma)
-                ta += bg.innerproduct(s1, s2b)
+            ta = 0
+            for sigma in [-1, +1]:
+                for i in range(0, N-1):
+                    s2a = bg.clonestate(s2)
+                    s2a.move(i, i+1, sigma)
+                    ta += bg.innerproduct(s1, s2a)
 
-        term = t * (ta + tb)
+            tb = 0
+            for sigma in [-1, +1]:
+                for i in range(0, N-1):
+                    s2b = bg.clonestate(s2)
+                    s2b.move(i+1, i, sigma)
+                    ta += bg.innerproduct(s1, s2b)
 
-        #H.append(term)
+            term = t * (ta + tb)
+
         H[bi][bj] = term
+        H[bj][bi] = term
+
+        if (bi == bj):
+            a = basis[bi]
+            particles = np.array(a.upconfig) + np.array(a.downconfig)
+            for nump in particles:
+                if (nump == 2):
+                    H[bi][bj] += U
 
         Hprog = len(basis1) * (bi + 1) + bj + 1
         pb.progressbar(Hprog, 0, len(basis1) * len(basis2))
 
-for i in range(len(basis)):
-    a = basis[i]
-    particles = np.array(a.upconfig) + np.array(a.downconfig)
-    for nump in particles:
-        if (nump == 2):
-            H[i][i] += U
+t_H_stop = time.perf_counter()
 
-#print(H)
-print('')
+print("\nHamiltonian matrix generated in", \
+    round(t_H_stop - t_H_start, 5), 's.')
+
+gc.collect()
+
+#print('The Hamiltonian matrix is:')
+#for i in range(len(H)):
+#    for j in range(len(H)):
+#        if (H[i, j] >= 0):
+#            print(' ', H[i, j], end = ' ', sep = '')
+#        else:
+#            print(H[i, j], end = ' ', sep = '')
+#    print('')
 
 def z(omega):
     return omega + I * eta
@@ -131,8 +157,8 @@ def G(omega):
 p = int(p)
 
 ev = np.linalg.eigvalsh(H)
-startpoint = np.floor(min(ev)) - 3
-stoppoint = np.ceil(max(ev)) + 3
+startpoint = np.floor(min(ev)) - 2
+stoppoint = np.ceil(max(ev)) + 2
 
 #print("The eigenvalues of the Hamiltonian are:")
 #for e in ev:
@@ -142,6 +168,7 @@ stoppoint = np.ceil(max(ev)) + 3
 
 w_list = np.linspace(startpoint, stoppoint, 2000)
 
+#t_lsw_start = time.perf_counter()
 #print("Generating local spectral weight function for state:\n", \
 #        basis[p].getstate() )
 #
@@ -152,16 +179,20 @@ w_list = np.linspace(startpoint, stoppoint, 2000)
 #    pb.progressbar(i, 0, len(w_list) - 1)
 #    i += 1
 #
+#t_lsw_stop = time.perf_counter()
+#print("\nLocal spectral weight calculated in", \
+#    round(t_lsw_stop - t_lsw_start, 5), 's.')
 #plt.xlim(startpoint, stoppoint)
 #plt.plot(w_list, A_list)
 #plt.title( "Local spectral weight function for the state " +\
 #             str(p) )
 #plt.show()
-#
-#print('')
+
+gc.collect()
 
 print("Generating density of states...")
 
+t_DOS_start = time.perf_counter()
 i = 0
 Ap_list = []
 for w in w_list:
@@ -170,8 +201,14 @@ for w in w_list:
     pb.progressbar(i, 0, len(w_list) - 1)
     i += 1
 
+t_DOS_stop = time.perf_counter()
+
+print("\nDensity of states generated in", \
+    round(t_DOS_stop - t_DOS_start, 5), 's.')
+
 plt.xlim(startpoint, stoppoint)
 plt.plot(w_list, Ap_list)
+
 plt.title(
         "DOS for " + str(N) + " sites with " + str(n) \
             + " " + fs + ", Sz = " + str(spin) + ", U = " + str(U)
@@ -183,4 +220,4 @@ plt.savefig(
 
 plt.show()
 
-print('')
+gc.collect()

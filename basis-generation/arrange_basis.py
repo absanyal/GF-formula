@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 N = 4
-n = 4
+n = 2
 spin = (0.5 * n) % 1
 
 uobasis = bg.createbasis(N, n, spin)
@@ -26,20 +26,23 @@ uobasis = bg.createbasis(N, n, spin)
 basis = []
 
 i = 0
-for n_l in range(n+1):
+for n_l in range(n+1)[::-1]:
+    j = 0
     spins = 0.5 * np.array(list(range(-n_l, n_l + 1)))
     for Sz_l in spins:
         tempbasis = bg.createsubbasis(uobasis, n_l, Sz_l)
         basis += tempbasis
 
         for state in tempbasis:
-            print(i, '\t', state.getstate())
+            print(i, j, (n_l, Sz_l), state.getstate(),\
+            state.intequiv(), sep = '\t')
             i += 1
+            j += 1
 #        #print(n_l, '\t', Sz_l)
 #
-print("*" * 80)
+    print("*" * 80)
 
-i= 0
-for state in basis:
-    print(i, '\t', state.getstate())
-    i += 1
+#i= 0
+#for state in uobasis:
+#    print(i, state.getstate(), state.intequiv(), sep = '\t')
+#    i += 1

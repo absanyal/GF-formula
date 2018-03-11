@@ -214,23 +214,28 @@ def makestatefrombin(binrep):
 def createbasis(N, n_particles, S_z = 0):
     basis = []
 
+    filledlist = [0 for i in range(2 * N)]
+
+    for i in range(n_particles):
+        filledlist[i] = 1
+
+    filledlist.reverse()
+
     #make max sector
-    upsector = [1 for i in range(N)]
-    downsector = [1 for i in range(N)]
-#    for i in range(1, n_particles+1):
-#        downsector[N-i] = 1
-#    for i in range(1, n_particles+1):
-#        upsector[-i] = 1
+    upsector = filledlist[:n_particles]
+    downsector = filledlist[n_particles:]
+
     maxstate = state(upsector, downsector)
     #print(maxstate.getstate())
     maxint = maxstate.intequiv()
     #print(maxint)
 
     #make min sector
-    upsector = [0 for i in range(N)]
-    downsector = [0 for i in range(N)]
-#    for i in range(n_particles):
-#        upsector[i] = 1
+    filledlist.reverse()
+
+    upsector = filledlist[:n_particles]
+    downsector = filledlist[n_particles:]
+
     minstate = state(upsector, downsector)
     #print(minstate.getstate())
     minint = minstate.intequiv()
