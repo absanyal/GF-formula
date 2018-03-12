@@ -11,16 +11,17 @@ import progbar as pb
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-import gc
+#import gc
 
-gc.collect()
+#gc.collect()
 
-N = 4
+N = 10
 n = 4
 
 p = 0
 
-U = 4
+U = 8
+
 eta = 0.1
 
 spin = (0.5 * n) % 1
@@ -135,7 +136,7 @@ t_H_stop = time.perf_counter()
 print("\nHamiltonian matrix generated in", \
     round(t_H_stop - t_H_start, 5), 's.')
 
-gc.collect()
+#gc.collect()
 
 #print('The Hamiltonian matrix is:')
 #for i in range(len(H)):
@@ -188,7 +189,7 @@ w_list = np.linspace(startpoint, stoppoint, 2000)
 #             str(p) )
 #plt.show()
 
-gc.collect()
+#gc.collect()
 
 print("Generating density of states...")
 
@@ -220,4 +221,4 @@ plt.savefig(
 
 plt.show()
 
-gc.collect()
+#gc.collect()
