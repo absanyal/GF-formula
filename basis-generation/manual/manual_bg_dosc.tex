@@ -1,0 +1,112 @@
+\documentclass[]{book}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{physics}
+\usepackage{color}
+\usepackage{subcaption}
+\usepackage{lipsum}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand*\up{\fbox{$\mathord\upharpoonleft\phantom{\downharpoonright}$}}%
+\newcommand*\dwn{\fbox{$\mathord\downharpoonleft\phantom{\upharpoonright}$}}%
+\newcommand*\updwn{\fbox{$\upharpoonleft\downharpoonright$}}%
+\newcommand*\emp{\fbox{$\phantom{\downharpoonright}\phantom{\downharpoonright}$}}%
+\newcommand{\electron}[2]{{%
+		\setlength\tabcolsep{0pt}% remove extra horizontal space from tabular
+		%       \setlength\fboxrule{0.2pt}% uncomment for original line width
+		\begin{tabular}{c}
+			\fboxsep=0pt\fbox{\fboxsep=3pt#2}\\[2pt]
+			#1
+		\end{tabular}%
+}}
+
+\geometry{top = 2.5cm, bottom = 2.5cm, left = 1.5cm, right = 1.5cm}
+
+\setlength{\parindent}{0mm}
+
+% Title Page
+\title{Documentation for\\ \texttt{basisgeneration} package, \texttt{dos\_calculator} program\\
+	and other companion programs}
+\author{Amit Bikram Sanyal}
+\date{Updated on \today}
+
+\let\cleardoublepage=\clearpage
+
+\begin{document}
+\maketitle
+
+\frontmatter
+
+\section*{Reference Card for \texttt{basisgeneration} package}
+\addcontentsline{toc}{chapter}{Reference Card for \texttt{basisgeneration} package}
+
+\subsection*{Objects}
+
+\begin{enumerate}
+\item \texttt{state(\textit{upconfig}, \textit{downconfig}, \textit{phase} = 1)}
+\begin{enumerate}
+	\item \texttt{upconfig}
+	\item \texttt{downconfig}
+	\item \texttt{N}
+	\item \texttt{phase}
+\end{enumerate}
+\end{enumerate}
+
+\subsection*{Methods}
+
+\begin{enumerate}
+\item \texttt{getstate()}
+\item \texttt{binequiv()}
+\item \texttt{intequiv()}
+\item \texttt{create(\textit{site}, \textit{sigma})}
+\item \texttt{destroy(\textit{site}, \textit{sigma})}
+\item \texttt{move(\textit{i}, \textit{j}, \textit{sigma})}
+\item \texttt{getnumparticles()}
+\item \texttt{getleftnum()}
+\item \texttt{getleftSz()}
+\item \texttt{getSz()}
+\item \texttt{getoccupation(\textit{site}, \textit{sigma})}
+\end{enumerate}
+
+\subsection*{Functions}
+
+\begin{enumerate}
+\item \texttt{makestatefromint(\textit{N}, \textit{intrep})}
+\item \texttt{makestatefrombin(\textit{binrep})}
+\item \texttt{createbasis(\textit{N}, \textit{n\_particles}, \textit{S\_z} = 0)}
+\item \texttt{createsubbasis(\textit{basis}, \textit{l\_n}, \textit{l\_Sz} = 0)}
+\item \texttt{innerproduct(\textit{a}, \textit{b})}
+\item \texttt{clonestate(a)}
+\end{enumerate}
+
+\newpage
+\section*{Preface}
+\addcontentsline{toc}{chapter}{Preface}
+This document is divided into three chapters. The first chapter details the \texttt{basisgeneration} package, which deals with the creation of states and the basis for a given system with said states. The second chapters is about the \texttt{dos\_calculator} program, which generates the Hamiltonian from a given basis, and uses the Hamiltonian to calculate the Green's function, local spectral weight function and the density of states. The third chapter gives a brief description of the various companion programs that arrange the basis, check the position of a given state in a given state, etc.
+
+\tableofcontents
+
+\mainmatter
+
+\chapter{\texttt{basisgeneration} package}
+\section{Introduction}
+A state is uniquely identified by its electronic configuration, which, in turn, consists of the configuration of up- and down-spins in the state. A set of states is used to construct a basis which describes a crystal with $N$ sites, $n$ particles and a total spin of $S_z$. Given a state, we can create or destroy particles of a given spin at a given site, which allows us to operate the Hamiltonian on the state.
+
+\section{Objects}
+\subsection{\texttt{state(\textit{upconfig}, \textit{downconfig}, \textit{phase} = 1)}}
+The \texttt{state} is the only class in this package. The lists \texttt{upconfig} and \texttt{downconfig} store the positions of the up- and down-spins in the state. \texttt{\textit{phase}} is an optional argument which stores the coefficient of the state and is set to 1 by default. In addition, the state stores a value \texttt{N}, the number of sites in the crystal. This is obtained from the length of \texttt{upconfig}, which is assumed to be of the same length as \texttt{downconfig}.
+
+For example, \texttt{state([1, 0, 0, 0], [1, 1, 0, 0])} creates the state \electron{}{\updwn\dwn\emp\emp}.
+
+\section{Methods}
+A method is called directly on the state. It may return a value calculated from the state or may directly modify the state. Methods are invoked with the syntax \texttt{\textit{statename}.methodname(\textit{arguments})}.
+
+\subsection{getstate()}
+Returns a graphical representation of the \texttt{state}. Used for visual representation purposes only.
+\subsubsection*{Algorithm}
+
+
+\end{document}          
