@@ -10,10 +10,10 @@
 \usepackage{amssymb}
 \usepackage[hidelinks]{hyperref}
 
-\newcommand*\up{\fbox{$\mathord\upharpoonleft\phantom{\downharpoonright}$}}%
-\newcommand*\dwn{\fbox{$\mathord\downharpoonleft\phantom{\upharpoonright}$}}%
-\newcommand*\updwn{\fbox{$\upharpoonleft\downharpoonright$}}%
-\newcommand*\emp{\fbox{$\phantom{\downharpoonright}\phantom{\downharpoonright}$}}%
+\newcommand{\up}{\fbox{$\mathord\uparrow\phantom{\downarrow}$}}%
+\newcommand{\dwn}{\fbox{$\mathord\downarrow\phantom{\uparrow}$}}%
+\newcommand{\updwn}{\fbox{$\uparrow\downarrow$}}%
+\newcommand{\emp}{\fbox{$\phantom{\downarrow}\phantom{\downarrow}$}}%
 \newcommand{\electron}[2]{{%
 		\setlength\tabcolsep{0pt}% remove extra horizontal space from tabular
 		%       \setlength\fboxrule{0.2pt}% uncomment for original line width
@@ -28,8 +28,7 @@
 \setlength{\parindent}{0mm}
 
 % Title Page
-\title{Documentation for\\ \texttt{basisgeneration} package, \texttt{dos\_calculator} program\\
-	and other companion programs}
+\title{Documentation for \texttt{basisgeneration} package\\and\\\texttt{dos\_calculator} program}
 \author{Amit Bikram Sanyal}
 \date{Updated on \today}
 
@@ -85,28 +84,205 @@
 \newpage
 \section*{Preface}
 \addcontentsline{toc}{chapter}{Preface}
-This document is divided into three chapters. The first chapter details the \texttt{basisgeneration} package, which deals with the creation of states and the basis for a given system with said states. The second chapters is about the \texttt{dos\_calculator} program, which generates the Hamiltonian from a given basis, and uses the Hamiltonian to calculate the Green's function, local spectral weight function and the density of states. The third chapter gives a brief description of the various companion programs that arrange the basis, check the position of a given state in a given state, etc.
+This document is divided into three chapters. The first chapter details the \texttt{basisgeneration} package, which deals with the creation of states and the basis for a given system with said states. The second chapters is about the \texttt{dos\_calculator} program, which generates the Hamiltonian from a given basis, and uses the Hamiltonian to calculate the Green's function, local spectral weight function and the density of states.
+%The third chapter will be added later which will give a brief description of the various companion programs that arrange the basis, check the position of a given state in a given state, etc.
 
 \tableofcontents
 
 \mainmatter
 
 \chapter{\texttt{basisgeneration} package}
-\section{Introduction}
+%\section{Introduction}
 A state is uniquely identified by its electronic configuration, which, in turn, consists of the configuration of up- and down-spins in the state. A set of states is used to construct a basis which describes a crystal with $N$ sites, $n$ particles and a total spin of $S_z$. Given a state, we can create or destroy particles of a given spin at a given site, which allows us to operate the Hamiltonian on the state.
 
 \section{Objects}
 \subsection{\texttt{state(\textit{upconfig}, \textit{downconfig}, \textit{phase} = 1)}}
-The \texttt{state} is the only class in this package. The lists \texttt{upconfig} and \texttt{downconfig} store the positions of the up- and down-spins in the state. \texttt{\textit{phase}} is an optional argument which stores the coefficient of the state and is set to 1 by default. In addition, the state stores a value \texttt{N}, the number of sites in the crystal. This is obtained from the length of \texttt{upconfig}, which is assumed to be of the same length as \texttt{downconfig}.
+The \texttt{state} is the only class in this package. The lists \texttt{upconfig} and \texttt{downconfig} store the positions of the up- and down-spins in the state also specifies $N$, the number of sites in the state. \texttt{phase} is an optional argument which stores the coefficient of the state and is set to 1 by default. In addition, the state stores a value \texttt{N}, the number of sites in the crystal. This is obtained from the length of \texttt{upconfig}, which is assumed to be of the same length as \texttt{downconfig}.
 
-For example, \texttt{state([1, 0, 0, 0], [1, 1, 0, 0])} creates the state \electron{}{\updwn\dwn\emp\emp}.
+For example, \texttt{state([1, 0, 0, 0], [1, 1, 0, 0])} creates the state \electron{}{\updwn\dwn\emp\emp}. The sites in each sector are labelled starting from $0$ to $N-1$.
+
+This also shows us that each state has a unique binary representation and by extension, an integer representation. Thus, to store a set of states, it is enough to store the number of sites and the set of integers representing the states.
 
 \section{Methods}
 A method is called directly on the state. It may return a value calculated from the state or may directly modify the state. Methods are invoked with the syntax \texttt{\textit{statename}.methodname(\textit{arguments})}.
 
-\subsection{getstate()}
+\subsection{\texttt{getstate()}}
 Returns a graphical representation of the \texttt{state}. Used for visual representation purposes only.
 \subsubsection*{Algorithm}
+Look at the total number of particles in the $i$-th position of \texttt{upconfig} and \texttt{downconfig} and depending on the total number of particles, print an up, down or a pair of electrons.
+
+\subsection{\texttt{binequiv()}}
+Returns the binary equivalent of a state by concatenating the \texttt{upconfig} and the \texttt{downconfig}. By convention, the sequence is required to be read from \textbf{right to left}. For example,  \texttt{state([1, 0, 0, 0], [1, 1, 0, 0]).binequiv() = 00110001}. The leading zeroes must be preserved.
+
+\subsection{\texttt{intequiv()}}
+The integer equivalent of the the above binary sequence.
+
+\subsection{\texttt{create(\textit{site}, \textit{sigma})}}
+Creates a particle at \texttt{site} with spin \texttt{sigma}, while obeying Pauli exclusion principle.
+
+\subsubsection*{Algorithm}
+The convention of writing the creation-annihilation operators and calculating the phase has been adopted as given in Coleman.
+
+Provided the site at which we are to create is empty,
+\begin{enumerate}
+\item If \texttt{sigma = 1}, the creation operator needs to pass through the number of occupied sites lying before it, picking up one negative sign from each.
+
+\item If \texttt{sigma = -1}, the creation operator needs to pass through the creation operator (if present) for this site as well, picking up one extra negative sign as compared to the previous step.
+
+\item If the site is occupied, the state is 'destroyed' by setting its phase to zero.
+
+\end{enumerate}
+
+\subsection{\texttt{destroy(\textit{site}, \textit{sigma})}}
+Creates a particle at \texttt{site} with spin \texttt{sigma}. Destroying on an empty site destroys the state.
+
+\subsection*{Algorithm}
+Provided the site at which we are to create is empty,
+\begin{enumerate}
+\item If \texttt{sigma = 1}, the destruction operator needs to pass through the number of occupied sites lying before it, picking up one negative sign from each.
+	
+\item If \texttt{sigma = -1}, the destruction operator needs to pass through the destruction operator (if present) for this site as well, picking up one extra negative sign as compared to the previous step.
+	
+\item If the site is empty, the state is 'destroyed' by setting its phase to zero.
+
+\end{enumerate}
+
+\subsection{\texttt{move(\textit{i}, \textit{j}, \textit{sigma})}}
+Move a particle of spin \texttt{sigma} from site $i$ to site $j$.
+
+\subsection{\texttt{getnumparticles()}}
+Returns the total number of particles in the system.
+\subsubsection*{Algorithm}
+Counts the number of 1's in the binary representation of the state.
+
+\subsection{\texttt{getleftnum()}}
+Returns the number of particles on the left block of the crystal. In a crystal of $N$ sites, the number of sites in the left block is defined as
+\begin{align}
+N_L = \left\lfloor \frac{N}{2} \right\rfloor
+\end{align}
+
+\subsubsection{Algorithm}
+Sums the number of 1's in the first $\left\lfloor \frac{N}{2} \right\rfloor$ sites of \texttt{upconfig} and \texttt{downconfig}.
+
+\subsection{\texttt{getleftSz()}}
+Returns the total spin of the left block.
+\subsubsection*{Algorithm}
+Let $n_{L_{\uparrow}}$ and $n_{L_{\downarrow}}$ be the number of particles in the left blocks of \texttt{upconfig} and \texttt{downconfig} respectively. Then, the spin of the left block is given as
+\begin{align}
+S_{z_{L}} = \frac{1}{2}  \left( n_{L_{\uparrow}} - n_{L_{\downarrow}} \right) 
+\end{align}
+
+\subsection{\texttt{getSz()}}
+Returns the total spin of the left block.
+\subsubsection*{Algorithm}
+Let $n_{{\uparrow}}$ and $n_{{\downarrow}}$ be the number of particles in \texttt{upconfig} and \texttt{downconfig} respectively. Then, the total spin of the system is given as
+\begin{align}
+S_{z} = \frac{1}{2}  \left( n_{{\uparrow}} - n_{{\downarrow}} \right) 
+\end{align}
+
+\subsection{\texttt{getoccupation(\textit{site}, \textit{sigma})}}
+Returns a value of 0 or 1 indicating the number of fermions of spin \texttt{sigma} at \texttt{site}.
+
+\subsubsection*{Algorithm}
+Calls \texttt{create(\textit{site}, \textit{sigma})} and \texttt{destroy(\textit{site}, \textit{sigma})} and returns the \texttt{phase}.
+
+\section{Functions}
+\subsection{\texttt{makestatefromint(\textit{N}, \textit{intrep})}}
+Given an integer representation and the number of sites in the system, the state is constructed.
+
+\subsubsection*{Algorithm}
+The integer is constructed into a binary number and reversed so that it can be read from right to left. If required, 0's are added to the end of this sequence so that the number of digits in the sequence is equal to twice the number of sites. A state is now created and returned where the first $N$ digits of the sequence form the \texttt{upconfig} and the next $N$ digits form the \texttt{downconfig}.
+
+\subsection{\texttt{makestatefrombin(\textit{binrep})}}
+Converts a binary sequence of length $2N$ to a state with $N$ sites.
+
+\subsubsection*{Algorithm}
+Given a sequence of length $2N$, a state is created and returned where the first $N$ digits of the sequence form the \texttt{upconfig} and the next $N$ digits form the \texttt{downconfig}.
+
+\subsection{\texttt{createbasis(\textit{N}, \textit{n\_particles}, \textit{S\_z} = 0)}}
+Given the number of sites \texttt{N}, number of particles \texttt{n\_particles} and the total spin of the system, the basis set is returned.
+
+\subsubsection{Algorithm}
+\begin{enumerate}
+\item The binary representation of any state will have $2N$ digits, out of which $n$ = \texttt{n\_particles} will be 1 and the rest will be zero. Knowing this, we construct two binary representations: let $minstate$ be the minimum binary number which can be formed from these digits and $maxstate$ be the largest number. Note that the binary numbers are to be read from right to left.
+
+\item  We claim, without proof, that the set $S = \{ minstate, minstate + 1, \ldots, maxstate - 1, maxstate \} $ contains all the necessary states.
+
+\item Examining the states, we see that some states have $n$ particles and total spin $S_z$ = \texttt{S\_z}, while some have different number of particles and/or total spin. We select only the states which have $n$ particles and total spin $S_z$  and claim that this forms our complete basis, $B$.
+
+\end{enumerate}
+\subsubsection*{Example}
+Let us create a basis with $N=2$, $n=1$ and $S_z = \frac{1}{2}$.
+
+Then, $ minstate = 1000 $ and $ maxstate = 0001 $.
+
+$\therefore S = \{ 1000, 01000, 1100, 0010, 1010, 0110, 1110, 0001 \}$.
+
+Selecting the required states with $n=1$ and $S_z=\frac{1}{2}$, we get $B = \{ 1000, 0100 \}$, which corresponds to\\
+$B= \left\{\, \mathrm{\electron{}{\up \emp}\, , \,\electron{}{\emp \up }}\, \right\}$.
+
+\subsection{\texttt{createsubbasis(\textit{basis}, \textit{l\_n}, \textit{l\_Sz} = 0)}}
+Given a \texttt{basis}, selects and returns a set containing the states whose left block contains \texttt{l\_n} particles and total spin of the left block is \texttt{l\_Sz}.
+
+\subsection{\texttt{innerproduct(\textit{a}, \textit{b})}}
+Given two states, \texttt{a} = $ \ket{\phi_1} $ and \texttt{b} = $ \ket{\phi_2} $, returns $ \ip{\phi_1}{\phi_2} $.
+
+\subsubsection{Algorithm}
+Compares \texttt{a} and \texttt{b}. If they are identical, returns the product \texttt{a.phase * b.phase}, otherwise returns 0.
+
+\chapter{\texttt{dos\_calculator} program}
+This program utilizes the \texttt{basisgeneration} program to calculate the Hamiltonian of a given system, and then plots its local spectral weight function for a given state, and the density of states.
+
+\section{Generation of the basis}
+We provide the number of sites, number of particles and total spin of the system. Using the \texttt{createbasis} we generate an $m$-dimensional \textbf{unordered} basis
+\begin{align}
+B_u = \left\{ \ket{\phi_j} \mid j \in \left\{1,2,\ldots,m\right\} \right\}
+\end{align}
+The basis is now ordered in groups such that each group has $n_L = \left\{ n, n-1, \ldots, 1, 0 \right\}$ particles in the left block, giving us an ordered basis
+\begin{align}
+B = \left\{ \ket{\phi_i} \mid i = 1,2,\ldots,m \right\}
+\end{align}
+
+\section{Generating the Hamiltonian}
+The Hamiltonian is given by
+\begin{align}
+\hat{H} = -t \sum_{i, \sigma} \left[ \hat{c}^{\dagger}_{i, \sigma} \hat{c}_{i+1, \sigma} + \hat{c}^{\dagger}_{i+1, \sigma} \hat{c}_{i, \sigma} \right] + U \sum_{i} \hat{n_{i, \uparrow}} \hat{n_{i, \downarrow}}
+\end{align}
+
+We have defined methods equivalent to each of these operators in \texttt{basisgeneration}, for example,
+\begin{align}
+\hat{c}^{\dagger}_{i, \sigma} \hat{c}_{i+1, \sigma} \ket{\phi_a} &\equiv \texttt{a.move(i+1, i)}\\
+\hat{n_{i, \uparrow}} \ket{\phi_a}  &\equiv \texttt{a.getoccupation(i, 1)}
+\end{align}
+
+
+Let $ \ket{\phi_a} $ = \texttt{a}, $ \ket{\phi_b} $ = \texttt{b}; the pseudo-code for generating the first term of $ \mel{\phi_a}{\hat{H}}{\phi_b} $ can be written as:
+\begin{verbatim}
+term1 = 0
+for i = 0 to m-1, step 1
+    for sigma = -0.5 to 0.5, step 1
+        b.move(i+1, i, sigma)
+        term1 = term1 + t * innerproduct(a, b)
+\end{verbatim}
+Similarly, the rest of the Hamiltonian can be calculated. In the end, we obtain an $m \times m$ matrix.
+
+\section{Green's Function}
+After the Hamiltoni9an is calculated in matrix form, we can simply calculate
+\begin{align}
+\hat{G} \left( \omega \right) = \left[ \omega + \mathrm{i}\eta - \hat{H} \right]^{-1}
+\end{align}
+
+\section{Local Spectral Weight Function}
+The local spectral weight function for a state $ \ket{\phi_i} $ is defined as
+\begin{align}
+A_i \left( \omega \right) = - \frac{1}{\pi} \Im{\mel{\phi_i}{\hat{G} \left( \omega \right) }{\phi_i}}
+\end{align}
+
+\section{Density of states}
+The density of states is defined as
+\begin{align}
+A \left( \omega \right) = - \frac{1}{\pi} \Im{\sum_{i = 0}^{m-1}\mel{\phi_i}{\hat{G} \left( \omega \right) }{\phi_i}}
+\end{align}
 
 
 \end{document}          

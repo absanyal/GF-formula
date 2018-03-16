@@ -16,7 +16,7 @@ os.system('cls')
 os.system('clear')
 
 N = 10
-n = 4
+n = 3
 
 p = 10
 
@@ -24,8 +24,8 @@ U = 8
 
 eta = 0.1
 
-spin = (0.5 * n) % 1
-#spin = 1
+#spin = (0.5 * n) % 1
+spin = 0.5
 
 t = 1
 I = complex(0, 1)
