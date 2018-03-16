@@ -8,17 +8,20 @@ Created on Mon Nov  6 15:46:02 2017
 import numpy as np
 import matplotlib.pyplot as plt
 
-N = 100 #No of sites to be evaluated
+N = 500 #No of sites to be evaluated
 
 eta = 0.05
 epsilon = np.zeros(N)
 t = 1
 
-#for i in range(N):
-#    if ((i % 50) == 0 and i>0):
-#        epsilon[i] = 10
+p = 6
 
-epsilon[5] = 0.5
+#for i in range(N):
+#    if ((i % 3) == 0 and i>0):
+#        epsilon[i] = i/100
+
+epsilon[5] = 0
+epsilon[10] = 0
 
 def z(omega):
     return complex(omega, eta)
@@ -35,7 +38,7 @@ omega_list = np.linspace(-4, 4, num = 1000)
 A_list = []
 
 for omega in omega_list:
-    A_list.append( (-1/np.pi) * np.imag( Gcpp(0, omega) ) )
+    A_list.append( (-1/np.pi) * np.imag( Gcpp(p, omega) ) )
 
 
 

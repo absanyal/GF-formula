@@ -11,28 +11,29 @@ import progbar as pb
 import numpy as np
 import matplotlib.pyplot as plt
 import time
-#import gc
-
-#gc.collect()
+import os
+os.system('cls')
+os.system('clear')
 
 N = 10
 n = 4
 
-p = 0
+p = 10
 
 U = 8
 
 eta = 0.1
 
 spin = (0.5 * n) % 1
+#spin = 1
 
 t = 1
 I = complex(0, 1)
 
-#startpoint = 7.5
-#stoppoint = 9.5
+#startpoint = 7.9
+#stoppoint = 8.2
 
-print("\033c", end = '')
+#print("\033c", end = '')
 
 if (n == 1):
     fs = "fermion"
@@ -55,16 +56,16 @@ print("Generating the basis...", waitmsg, sep = '')
 
 t_basis_start = time.perf_counter()
 
-basis = bg.createbasis(N, n, spin)
+uobasis = bg.createbasis(N, n, spin)
 
-#basis = []
-#
-#i = 0
-#for n_l in range(n+1)[::-1]:
-#    spins = 0.5 * np.array(list(range(-n_l, n_l + 1)))
-#    for Sz_l in spins:
-#        tempbasis = bg.createsubbasis(uobasis, n_l, Sz_l)
-#        basis += tempbasis
+basis = []
+
+i = 0
+for n_l in range(n+1)[::-1]:
+    spins = 0.5 * np.array(list(range(-n_l, n_l + 1)))
+    for Sz_l in spins:
+        tempbasis = bg.createsubbasis(uobasis, n_l, Sz_l)
+        basis += tempbasis
 
 t_basis_stop = time.perf_counter()
 
@@ -74,7 +75,7 @@ else:
     statesm = "states."
 
 print("The basis has", len(basis), statesm)
-print("Basis generated in", \
+print("Basis generated and arranged in", \
     round((t_basis_stop - t_basis_start), 5), 's.' )
 
 #i = 0
@@ -92,31 +93,28 @@ basis1 = basis[:]
 basis2 = basis[:]
 
 H = np.zeros( (len(basis1), len(basis2)) )
-#H = []
 
 for bi in range(len(basis1)):
-    for bj in range(len(basis2)):
+    for bj in range(bi, len(basis2)):
 
         s1 = basis1[bi]
         s2 = basis2[bj]
 
-        if (bi >= bj):
+        ta = 0
+        for sigma in [-1, +1]:
+            for i in range(0, N-1):
+                s2a = bg.clonestate(s2)
+                s2a.move(i, i+1, sigma)
+                ta += bg.innerproduct(s1, s2a)
 
-            ta = 0
-            for sigma in [-1, +1]:
-                for i in range(0, N-1):
-                    s2a = bg.clonestate(s2)
-                    s2a.move(i, i+1, sigma)
-                    ta += bg.innerproduct(s1, s2a)
+        tb = 0
+        for sigma in [-1, +1]:
+            for i in range(0, N-1):
+                s2b = bg.clonestate(s2)
+                s2b.move(i+1, i, sigma)
+                ta += bg.innerproduct(s1, s2b)
 
-            tb = 0
-            for sigma in [-1, +1]:
-                for i in range(0, N-1):
-                    s2b = bg.clonestate(s2)
-                    s2b.move(i+1, i, sigma)
-                    ta += bg.innerproduct(s1, s2b)
-
-            term = t * (ta + tb)
+        term = t * (ta + tb)
 
         H[bi][bj] = term
         H[bj][bi] = term
@@ -135,8 +133,6 @@ t_H_stop = time.perf_counter()
 
 print("\nHamiltonian matrix generated in", \
     round(t_H_stop - t_H_start, 5), 's.')
-
-#gc.collect()
 
 #print('The Hamiltonian matrix is:')
 #for i in range(len(H)):
@@ -189,8 +185,6 @@ w_list = np.linspace(startpoint, stoppoint, 2000)
 #             str(p) )
 #plt.show()
 
-#gc.collect()
-
 print("Generating density of states...")
 
 t_DOS_start = time.perf_counter()
@@ -220,5 +214,3 @@ plt.savefig(
             "_" + str(U) + ".pdf")
 
 plt.show()
-
-#gc.collect()

@@ -4,6 +4,7 @@ Created on Sat Feb  3 17:10:25 2018
 
 @author: AB Sanyal
 """
+#import itertools
 
 #Reverse a binary and convert to decimal integer
 def makeint(binnum):
@@ -211,6 +212,26 @@ def makestatefrombin(binrep):
 #Given the number of sites, number of particles and total spin,
 #returns the complete basis set.
 
+#def createbasis(N, n_particles, S_z = 0): #[unstable]
+#    nu = int(S_z + 0.5 * n_particles)
+#    nd = int(n_particles - nu)
+#
+#    us = [1 for i in range(nu)] + [0 for i in range(N-nu)]
+#    ds = [1 for i in range(nd)] + [0 for i in range(N-nd)]
+#
+#    us_list = list(set(list(itertools.permutations(us))))
+#    ds_list = list(set(list(itertools.permutations(ds))))
+#
+#    basis = []
+#
+#    for us_i in us_list:
+#        for ds_i in ds_list:
+#            us_i = list(us_i)
+#            ds_i = list(ds_i)
+#            basis.append(state(us_i, ds_i))
+#
+#    return basis
+
 def createbasis(N, n_particles, S_z = 0):
     basis = []
 
@@ -260,37 +281,6 @@ def createsubbasis(basis, l_n, l_Sz = 0):
 
     return sbasis
 
-#Given the number of sites, number of particles and total spin,
-#returns the number of elements basis set.
-
-def getbasissize(N, n_particles, S_z = 0):
-    basis_size = 0
-
-    #make max sector
-    upsector = [0 for i in range(N)]
-    downsector = [0 for i in range(N)]
-    for i in range(1, n_particles+1):
-        downsector[-i] = 1
-    maxstate = state(upsector, downsector)
-    maxint = maxstate.intequiv()
-
-    #make min sector
-    upsector = [0 for i in range(N)]
-    downsector = [0 for i in range(N)]
-    for i in range(n_particles):
-        upsector[i] = 1
-    minstate = state(upsector, downsector)
-    minint = minstate.intequiv()
-
-    #make all states and select the appropriate ones
-    for i in range(minint, maxint + 1):
-        newbasis = makestatefromint(N, i)
-        if (newbasis.getSz() == S_z and \
-        newbasis.getnumparticles() == n_particles):
-            basis_size += 1
-
-    return basis_size
-
 #Inner product of two states
 def innerproduct(a, b):
     if (a.getstate() == b.getstate()):
@@ -303,19 +293,5 @@ def clonestate(a):
     upc = a.upconfig[:]
     downc = a.downconfig[:]
     return state(upc, downc, a.phase)
-
-##Set the U term
-#U = 0
-#def setinteraction(value):
-#    global U
-#    U = value
-
-##Action of the tightbinding Hamiltonian
-#def H(a):
-#
-#    for i in a.N:
-
-
-
 
 ###########################################################################
