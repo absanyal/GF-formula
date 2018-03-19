@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 N = 4
-n = 2
+n = 3
 spin = (0.5 * n) % 1
 
 uobasis = bg.createbasis(N, n, spin)

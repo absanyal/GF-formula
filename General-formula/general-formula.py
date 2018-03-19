@@ -14,7 +14,7 @@ eta = 0.05
 epsilon = np.zeros(N)
 t = 1
 
-p = 6
+p = 0
 
 #for i in range(N):
 #    if ((i % 3) == 0 and i>0):
