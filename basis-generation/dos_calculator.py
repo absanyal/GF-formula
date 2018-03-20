@@ -15,19 +15,20 @@ import os
 os.system('cls')
 os.system('clear')
 
-N = 6
-n = 6
+N = 4
+n = 4
 
 p = 10
 
 U = 8
 
-eta = 0.1
+eta = 0.05
 
 spin = (0.5 * n) % 1
 #spin = 0.5
 
 t = -1
+tprime = t
 I = complex(0, 1)
 
 #startpoint = 7.9
@@ -95,31 +96,75 @@ basis2 = basis[:]
 
 H = np.zeros( (len(basis1), len(basis2)) )
 
+# for bi in range(len(basis1)):
+#     for bj in range(bi, len(basis2)):
+
+#         s1 = basis1[bi]
+#         s2 = basis2[bj]
+
+#         ta = 0
+#         for sigma in [-1, +1]:
+#            for i in range(0, N-1):
+#                s2a = bg.clonestate(s2)
+#                s2a.move(i, i+1, sigma)
+#                ta += t * bg.innerproduct(s1, s2a)
+
+#         tb = 0
+#         for sigma in [-1, +1]:
+#             for i in range(0, N-1):
+#                 s2b = bg.clonestate(s2)
+#                 s2b.move(i+1, i, sigma)
+#                 tb += t * bg.innerproduct(s1, s2b)
+
+
+#         term = (ta + tb)
+
+#         H[bi][bj] = term
+#         H[bj][bi] = term
+
+#         if (bi == bj):
+#             a = basis[bi]
+#             particles = np.array(a.upconfig) + np.array(a.downconfig)
+#             for nump in particles:
+#                 if (nump == 2):
+#                     H[bi][bj] += U
+
+#         Hprog = len(basis1) * (bi + 1) + bj + 1
+#         pb.progressbar(Hprog, 0, len(basis1) * len(basis2))
+
+def mel(state1, state2):
+
+    #calculate the hopping to right
+    term = 0
+    for sigma in [-1, 1]:
+        for i in range(N):
+            for j in range(N):
+                if (i != j and abs(i-j) == 1):
+                    s2 = bg.clonestate(state2)
+                    s2.move(i, j, sigma)
+                    termtemp = bg.innerproduct(state1, s2)
+                    #print(termtemp)
+                    term += termtemp
+#                    print((i, j, sigma), state1.getstate(), state2.getstate(),
+#                          s2.getstate(), termtemp, sep = '\t')
+#        print("*" * 80)
+
+    return term
+
+
 for bi in range(len(basis1)):
-    for bj in range(bi, len(basis2)):
+    for bj in range(len(basis2)):
 
-        s1 = basis1[bi]
-        s2 = basis2[bj]
+        state1 = basis1[bi]
+        state2 = basis2[bj]
 
-        ta = 0
-        for sigma in [-1, +1]:
-           for i in range(0, N-1):
-               s2a = bg.clonestate(s2)
-               s2a.move(i, i+1, sigma)
-               ta += t * bg.innerproduct(s1, s2a)
-
-        tb = 0
-        for sigma in [-1, +1]:
-            for i in range(0, N-1):
-                s2b = bg.clonestate(s2)
-                s2b.move(i+1, i, sigma)
-                tb += t * bg.innerproduct(s1, s2b)
-
-
-        term = (ta + tb)
-
-        H[bi][bj] = term
-        H[bj][bi] = term
+        if (bi <= bj):
+            if (state1.getleftnum() == state2.getleftnum()):
+                H[bi][bj] = t * mel(state1, state2)
+                H[bj][bi] = H[bi][bj]
+            if (state1.getleftnum() != state2.getleftnum()):
+                H[bi][bj] = tprime * mel(state1, state2)
+                H[bj][bi] = H[bi][bj]
 
         if (bi == bj):
             a = basis[bi]
@@ -127,9 +172,6 @@ for bi in range(len(basis1)):
             for nump in particles:
                 if (nump == 2):
                     H[bi][bj] += U
-
-        Hprog = len(basis1) * (bi + 1) + bj + 1
-        pb.progressbar(Hprog, 0, len(basis1) * len(basis2))
 
 t_H_stop = time.perf_counter()
 
