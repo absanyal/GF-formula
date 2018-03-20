@@ -15,8 +15,8 @@ import os
 os.system('cls')
 os.system('clear')
 
-N = 4
-n = 2
+N = 6
+n = 6
 
 p = 10
 
@@ -78,10 +78,11 @@ print("The basis has", len(basis), statesm)
 print("Basis generated and arranged in", \
     round((t_basis_stop - t_basis_start), 5), 's.' )
 
-i = 0
-for s in basis:
-    print(i, s.getstate())
-    i += 1
+#Print the basis states set
+# i = 0
+# for s in basis:
+#     print(i, s.getstate())
+#     i += 1
 
 print("Generating the Hamiltonian...")
 
@@ -101,44 +102,18 @@ for bi in range(len(basis1)):
         s2 = basis2[bj]
 
         ta = 0
-#        for sigma in [-1, +1]:
-#            for i in range(0, N-1):
-#                s2a = bg.clonestate(s2)
-#                s2a.move(i, i+1, sigma)
-#                if (i == N/2 - 1):
-#                    tprime = t
-#                else:
-#                    tprime = -2
-#                ta += tprime * bg.innerproduct(s1, s2a)
+        for sigma in [-1, +1]:
+           for i in range(0, N-1):
+               s2a = bg.clonestate(s2)
+               s2a.move(i, i+1, sigma)
+               ta += t * bg.innerproduct(s1, s2a)
 
         tb = 0
         for sigma in [-1, +1]:
             for i in range(0, N-1):
                 s2b = bg.clonestate(s2)
                 s2b.move(i+1, i, sigma)
-                if (i == N/2):
-                    tprime = t
-                else:
-                    tprime = -2
-                tb += tprime * bg.innerproduct(s1, s2b)
-
-#        ta = 0
-#        for sigma in [-1, +1]:
-#            for i in range(0, N):
-#                for j in range(0, N):
-#                    s2a = bg.clonestate(s2)
-#                    if (i != N/2 - 1 and j != N/2 ):
-#                        s2a.move(i, j, sigma)
-#                ta += t * bg.innerproduct(s1, s2a)
-#
-#        tb = 0
-#        for sigma in [-1, +1]:
-#            for i in range(0, N):
-#                for j in range(0, N):
-#                    s2b = bg.clonestate(s2)
-#                    if ( i != N/2 and j != N/2 - 1):
-#                        s2b.move(j, i, sigma)
-#                tb += t * bg.innerproduct(s1, s2b)
+                tb += t * bg.innerproduct(s1, s2b)
 
 
         term = (ta + tb)
@@ -161,14 +136,14 @@ t_H_stop = time.perf_counter()
 print("\nHamiltonian matrix generated in", \
     round(t_H_stop - t_H_start, 5), 's.')
 
-print('The Hamiltonian matrix is:')
-for i in range(len(H)):
-    for j in range(len(H)):
-        if (H[i, j] >= 0):
-            print(' ', H[i, j], end = ' ', sep = '')
-        else:
-            print(H[i, j], end = ' ', sep = '')
-    print('')
+# print('The Hamiltonian matrix is:')
+# for i in range(len(H)):
+#     for j in range(len(H)):
+#         if (H[i, j] >= 0):
+#             print(' ', H[i, j], end = ' ', sep = '')
+#         else:
+#             print(H[i, j], end = ' ', sep = '')
+#     print('')
 
 def z(omega):
     return omega + I * eta
@@ -212,32 +187,32 @@ w_list = np.linspace(startpoint, stoppoint, 2000)
 #             str(p) )
 #plt.show()
 
-#print("Generating density of states...")
-#
-#t_DOS_start = time.perf_counter()
-#i = 0
-#Ap_list = []
-#for w in w_list:
-#    Ap_list.append( (1/len(basis)) * (-1/np.pi) * np.imag( np.trace(G(w)) ) )
-#
-#    pb.progressbar(i, 0, len(w_list) - 1)
-#    i += 1
-#
-#t_DOS_stop = time.perf_counter()
-#
-#print("\nDensity of states generated in", \
-#    round(t_DOS_stop - t_DOS_start, 5), 's.')
-#
-#plt.xlim(startpoint, stoppoint)
-#plt.plot(w_list, Ap_list)
-#
-#plt.title(
-#        "DOS for " + str(N) + " sites with " + str(n) \
-#            + " " + fs + ", Sz = " + str(spin) + ", U = " + str(U)
-#        )
-#
-#plt.savefig(
-#            str(N) + "_" + str(n) + "_" + str(int(spin*10)) +\
-#            "_" + str(U) + ".pdf")
-#
-#plt.show()
+print("Generating density of states...")
+
+t_DOS_start = time.perf_counter()
+i = 0
+Ap_list = []
+for w in w_list:
+   Ap_list.append( (1/len(basis)) * (-1/np.pi) * np.imag( np.trace(G(w)) ) )
+
+   pb.progressbar(i, 0, len(w_list) - 1)
+   i += 1
+
+t_DOS_stop = time.perf_counter()
+
+print("\nDensity of states generated in", \
+   round(t_DOS_stop - t_DOS_start, 5), 's.')
+
+plt.xlim(startpoint, stoppoint)
+plt.plot(w_list, Ap_list)
+
+plt.title(
+       "DOS for " + str(N) + " sites with " + str(n) \
+           + " " + fs + ", Sz = " + str(spin) + ", U = " + str(U)
+       )
+
+plt.savefig(
+           str(N) + "_" + str(n) + "_" + str(int(spin*10)) +\
+           "_" + str(U) + ".pdf")
+
+plt.show()
