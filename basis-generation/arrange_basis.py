@@ -10,8 +10,8 @@ import progbar as pb
 import numpy as np
 import matplotlib.pyplot as plt
 
-N = 4
-n = 3
+N = 8
+n = 8
 spin = (0.5 * n) % 1
 
 uobasis = bg.createbasis(N, n, spin)
