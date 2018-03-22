@@ -173,6 +173,9 @@ for bi in range(len(basis1)):
                 if (nump == 2):
                     H[bi][bj] += U
 
+        Hprog = len(basis1) * (bi + 1) + bj + 1
+        pb.progressbar(Hprog, 0, len(basis1) * len(basis2))
+
 t_H_stop = time.perf_counter()
 
 print("\nHamiltonian matrix generated in", \
