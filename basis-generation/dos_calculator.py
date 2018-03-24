@@ -96,42 +96,6 @@ basis2 = basis[:]
 
 H = np.zeros( (len(basis1), len(basis2)) )
 
-# for bi in range(len(basis1)):
-#     for bj in range(bi, len(basis2)):
-
-#         s1 = basis1[bi]
-#         s2 = basis2[bj]
-
-#         ta = 0
-#         for sigma in [-1, +1]:
-#            for i in range(0, N-1):
-#                s2a = bg.clonestate(s2)
-#                s2a.move(i, i+1, sigma)
-#                ta += t * bg.innerproduct(s1, s2a)
-
-#         tb = 0
-#         for sigma in [-1, +1]:
-#             for i in range(0, N-1):
-#                 s2b = bg.clonestate(s2)
-#                 s2b.move(i+1, i, sigma)
-#                 tb += t * bg.innerproduct(s1, s2b)
-
-
-#         term = (ta + tb)
-
-#         H[bi][bj] = term
-#         H[bj][bi] = term
-
-#         if (bi == bj):
-#             a = basis[bi]
-#             particles = np.array(a.upconfig) + np.array(a.downconfig)
-#             for nump in particles:
-#                 if (nump == 2):
-#                     H[bi][bj] += U
-
-#         Hprog = len(basis1) * (bi + 1) + bj + 1
-#         pb.progressbar(Hprog, 0, len(basis1) * len(basis2))
-
 def mel(state1, state2):
 
     #calculate the hopping to right
