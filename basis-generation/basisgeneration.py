@@ -209,29 +209,6 @@ def makestatefrombin(binrep):
     downsector = [int(binrep[i]) for i in range(N,(2*N))]
     return state(upsector, downsector)
 
-#Given the number of sites, number of particles and total spin,
-#returns the complete basis set.
-
-#def createbasis(N, n_particles, S_z = 0): #[unstable]
-#    nu = int(S_z + 0.5 * n_particles)
-#    nd = int(n_particles - nu)
-#
-#    us = [1 for i in range(nu)] + [0 for i in range(N-nu)]
-#    ds = [1 for i in range(nd)] + [0 for i in range(N-nd)]
-#
-#    us_list = list(set(list(itertools.permutations(us))))
-#    ds_list = list(set(list(itertools.permutations(ds))))
-#
-#    basis = []
-#
-#    for us_i in us_list:
-#        for ds_i in ds_list:
-#            us_i = list(us_i)
-#            ds_i = list(ds_i)
-#            basis.append(state(us_i, ds_i))
-#
-#    return basis
-
 def createbasis(N, n_particles, S_z = 0):
     basis = []
 
