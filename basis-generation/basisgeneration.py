@@ -311,7 +311,7 @@ def createlbsbasis(N, n_particles, S_z, l_n, l_Sz):
 def createlfsbasis(N, n_particles, S_z, l_n):
     import numpy as np
     basis = []
-    spins = list(0.5 * np.array(range(-int(l_n), int(l_n))))
+    spins = list(0.5 * np.array(range(-int(l_n), int(l_n)+1)))
     for s in spins:
         tempbasis = createlbsbasis(N, n_particles, S_z, l_n, s)
         basis += tempbasis
