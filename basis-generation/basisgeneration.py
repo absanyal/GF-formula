@@ -305,6 +305,18 @@ def createlbsbasis(N, n_particles, S_z, l_n, l_Sz):
 
     return basis
 
+#create a Fock Space basis with a specified left block parameters
+#lfs = Left Fock Space
+
+def createlfsbasis(N, n_particles, S_z, l_n):
+    basis = []
+    spins = list(0.5 * range(-l_n, l_n))
+    for s in spins:
+        tempbasis = createlbsbasis(N, n_particles, S_z, l_n, s)
+        basis += tempbasis
+    
+    return basis
+
 #Inner product of two states
 def innerproduct(a, b):
     if (a.getstate() == b.getstate()):
