@@ -309,8 +309,9 @@ def createlbsbasis(N, n_particles, S_z, l_n, l_Sz):
 #lfs = Left Fock Space
 
 def createlfsbasis(N, n_particles, S_z, l_n):
+    import numpy as np
     basis = []
-    spins = list(0.5 * range(-int(l_n), int(l_n)))
+    spins = list(0.5 * np.array(range(-int(l_n), int(l_n))))
     for s in spins:
         tempbasis = createlbsbasis(N, n_particles, S_z, l_n, s)
         basis += tempbasis
