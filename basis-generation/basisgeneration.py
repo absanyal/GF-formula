@@ -248,6 +248,7 @@ def createbasis(N, n_particles, S_z = 0):
 
     return basis
 
+
 #Create a sub-basis from a given basis with left-sector specified
 def createsubbasis(basis, l_n, l_Sz = 0):
     sbasis = []
@@ -257,6 +258,52 @@ def createsubbasis(basis, l_n, l_Sz = 0):
             sbasis.append(state)
 
     return sbasis
+
+#Create a basis with specified parameters and left block parameters
+#lbsbasis = Left Block Specified Basis
+def createlbsbasis(N, n_particles, S_z, l_n, l_Sz):
+
+    basis = []
+
+    filledlist = [0 for i in range(2 * N)]
+
+    for i in range(n_particles):
+        filledlist[i] = 1
+
+    filledlist.reverse()
+
+    #make max sector
+    upsector = filledlist[:n_particles]
+    downsector = filledlist[n_particles:]
+
+    maxstate = state(upsector, downsector)
+    #print(maxstate.getstate())
+    maxint = maxstate.intequiv()
+    #print(maxint)
+
+    #make min sector
+    filledlist.reverse()
+
+    upsector = filledlist[:n_particles]
+    downsector = filledlist[n_particles:]
+
+    minstate = state(upsector, downsector)
+    #print(minstate.getstate())
+    minint = minstate.intequiv()
+    #print(minint)
+
+    #make all states and select the appropriate ones
+    for i in range(minint, maxint + 1):
+        newbasis = makestatefromint(N, i)
+        if (
+            newbasis.getSz() == S_z and \
+            newbasis.getnumparticles() == n_particles and \
+            newbasis.getleftnum() == l_n and \
+            newbasis.getleftSz() == l_Sz
+        ):
+            basis.append(newbasis)
+
+    return basis
 
 #Inner product of two states
 def innerproduct(a, b):
