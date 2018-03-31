@@ -5,14 +5,16 @@ import progbar as pb
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
-
 import time
+import os
+os.system('cls')
+os.system('clear')
 
 N = 6
 n = 6
 Sz = (0.5 * n) % 1
 
-l_n = 3
+l_n = 4
 
 b = bg.createlfsbasis(N, n, Sz, l_n)
 
