@@ -13,7 +13,7 @@ N = 4
 n = 4
 Sz = (0.5 * n) % 1
 
-l_n1 = 1
+l_n1 = 2
 l_n2 = 2
 
 t = 1
@@ -37,15 +37,13 @@ def mel(state1, state2):
                     termtemp = bg.innerproduct(state1, s2)
                     #print(termtemp)
                     term += termtemp
-#                    print((i, j, sigma), state1.getstate(), state2.getstate(),
-#                          s2.getstate(), termtemp, sep = '\t')
-#        print("*" * 80)
 
     return term
 
 
 H = np.zeros((len(basis1), len(basis2)), dtype=np.float)
 
+H_counter = 0
 for bi in range(len(basis1)):
     for bj in range(len(basis2)):
 
@@ -66,8 +64,8 @@ for bi in range(len(basis1)):
                 if (nump == 2):
                     H[bi][bj] += U
 
-        # Hprog = len(basis1) * (bi + 1) + bj + 1
-        # pb.progressbar(Hprog, 0, len(basis1) * len(basis2))
+        H_counter += 1
+        pb.progressbar(H_counter, 0, len(basis1) * len(basis2))
 
 print('\nThe Hamiltonian matrix is:')
 for i in range(len(basis1)):
