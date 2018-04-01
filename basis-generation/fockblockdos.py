@@ -14,7 +14,7 @@ n = 4
 
 reqblocknum = 2
 
-U = 100
+U = 8
 
 eta = 0.1
 
