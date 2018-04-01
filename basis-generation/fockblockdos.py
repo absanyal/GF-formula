@@ -12,9 +12,9 @@ os.system('clear')
 N = 4
 n = 4
 
-reqblocknum = 1
+reqblocknum = 2
 
-U = 8
+U = 100
 
 eta = 0.1
 
@@ -175,7 +175,7 @@ stoppoint = np.ceil(max(ev)) + 2
 w_list = np.linspace(startpoint, stoppoint, 2000)
 
 t_lsw_start = time.perf_counter()
-print("Generating local spectral weight function for block", \
+print("Generating density of states for block", \
        str(reqblocknum) )
 
 A_list = []
@@ -191,10 +191,10 @@ for w in w_list:
 
 t_lsw_stop = time.perf_counter()
 
-print("\nLocal spectral weight calculated in", \
+print("\nDensity of states calculated in", \
    round(t_lsw_stop - t_lsw_start, 5), 's.')
 plt.xlim(startpoint, stoppoint)
 plt.plot(w_list, A_list)
-plt.title( "Local spectral weight function for the block " +\
+plt.title( "Density of states for the block " +\
             str(reqblocknum) )
 plt.show()
