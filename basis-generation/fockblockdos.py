@@ -28,8 +28,6 @@ I = complex(0, 1)
 #startpoint = 7.9
 #stoppoint = 8.2
 
-#print("\033c", end = '')
-
 if (n == 1):
     fs = "fermion"
 else:
@@ -81,7 +79,7 @@ print("Basis generated and arranged in",
 
 print("Generating the Hamiltonian...")
 
-#Alternative Hamiltonian construction without squaring
+#Full Hamiltonian construction
 
 t_H_start = time.perf_counter()
 
@@ -102,11 +100,7 @@ def mel(state1, state2):
                     s2 = bg.clonestate(state2)
                     s2.move(i, j, sigma)
                     termtemp = bg.innerproduct(state1, s2)
-                    #print(termtemp)
                     term += termtemp
-#                    print((i, j, sigma), state1.getstate(), state2.getstate(),
-#                          s2.getstate(), termtemp, sep = '\t')
-#        print("*" * 80)
 
     return term
 
@@ -149,7 +143,6 @@ print("\nHamiltonian matrix generated in",
 #             print(H[i, j], end = ' ', sep = '')
 #     print('')
 
-
 def z(omega):
     return omega + I * eta
 
@@ -157,10 +150,6 @@ def z(omega):
 def G(omega):
     return np.linalg.inv(z(omega)
                          * np.eye(len(basis), dtype=np.complex) - H)
-
-
-#p = input("Enter the state number to calculate the spectral weight for: ")
-#p = int(p)
 
 ev = np.linalg.eigvalsh(H)
 startpoint = np.floor(min(ev)) - 2
