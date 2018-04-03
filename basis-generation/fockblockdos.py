@@ -77,17 +77,6 @@ print("Basis generated and arranged in",
 #     print(i, s.getstate())
 #     i += 1
 
-print("Generating the Hamiltonian...")
-
-#Full Hamiltonian construction
-
-t_H_start = time.perf_counter()
-
-basis1 = basis[:]
-basis2 = basis[:]
-
-H = np.zeros((len(basis1), len(basis2)))
-
 
 def mel(state1, state2):
 
@@ -104,6 +93,16 @@ def mel(state1, state2):
 
     return term
 
+print("Generating the Hamiltonian...")
+
+#Full Hamiltonian construction
+
+t_H_start = time.perf_counter()
+
+basis1 = basis[:]
+basis2 = basis[:]
+
+H = np.zeros((len(basis1), len(basis2)))
 
 for bi in range(len(basis1)):
     for bj in range(len(basis2)):
