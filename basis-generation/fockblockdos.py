@@ -12,7 +12,10 @@ os.system('clear')
 N = 4
 n = 4
 
-reqblocknum = 2
+reqblocknums = [2, 2]
+reqblocknums = set(reqblocknums)
+reqblocknums = list(reqblocknums)
+reqblocknums.sort(reverse = True)
 
 U = 8
 
@@ -77,6 +80,18 @@ print("Basis generated and arranged in",
 #     print(i, s.getstate())
 #     i += 1
 
+#Select the indices with required block numbers
+print("Selecting indices of the matching block...")
+req_indices = []
+j = 0
+for blocknum in reqblocknums:
+    for i in range(len(basis)):
+        if (basis[i].getleftnum() == blocknum):
+            req_indices.append(i)
+        j += 1
+        pb.progressbar(j, 0, len(basis) - 1)
+
+print('')
 
 def mel(state1, state2):
 
@@ -162,17 +177,20 @@ stoppoint = np.ceil(max(ev)) + 2
 
 w_list = np.linspace(startpoint, stoppoint, 2000)
 
+blocktext = ''
+for a in reqblocknums:
+    blocktext += str(a) + ' '
+
 t_lsw_start = time.perf_counter()
 print("Generating density of states for block", \
-       str(reqblocknum) )
+       blocktext )
 
 A_list = []
 i = 0
 for w in w_list:
     bdos = 0
-    for snum in range(len(basis)):
-        if basis[snum].getleftnum() == reqblocknum:
-            bdos += -(1/np.pi) * np.imag( G(w)[snum][snum] )
+    for snum in req_indices:
+        bdos += -(1/np.pi) * np.imag( G(w)[snum][snum] / len(req_indices) )
     A_list.append( bdos  )
     pb.progressbar(i, 0, len(w_list) - 1)
     i += 1
@@ -184,5 +202,5 @@ print("\nDensity of states calculated in", \
 plt.xlim(startpoint, stoppoint)
 plt.plot(w_list, A_list)
 plt.title( "Density of states for the block " +\
-            str(reqblocknum) )
+            blocktext )
 plt.show()
