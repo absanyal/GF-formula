@@ -1,4 +1,4 @@
-###### Sun Apr 1 18:19:47 IST 2018
+# Sun Apr 1 18:19:47 IST 2018
 
 import basisgeneration as bg
 import progbar as pb
@@ -15,7 +15,7 @@ n = 4
 reqblocknums = [2, 2]
 reqblocknums = set(reqblocknums)
 reqblocknums = list(reqblocknums)
-reqblocknums.sort(reverse = True)
+reqblocknums.sort(reverse=True)
 
 U = 8
 
@@ -74,13 +74,13 @@ print("The basis has", len(basis), statesm)
 print("Basis generated and arranged in",
       round((t_basis_stop - t_basis_start), 5), 's.')
 
-#Print the basis states set
+# Print the basis states set
 # i = 0
 # for s in basis:
 #     print(i, s.getstate())
 #     i += 1
 
-#Select the indices with required block numbers
+# Select the indices with required block numbers
 print("Selecting indices of the matching block...")
 req_indices = []
 j = 0
@@ -93,9 +93,10 @@ for blocknum in reqblocknums:
 
 print('')
 
+
 def mel(state1, state2):
 
-    #calculate the hopping to right
+    # calculate the hopping to right
     term = 0
     for sigma in [-1, 1]:
         for i in range(N):
@@ -108,9 +109,10 @@ def mel(state1, state2):
 
     return term
 
+
 print("Generating the Hamiltonian...")
 
-#Full Hamiltonian construction
+# Full Hamiltonian construction
 
 t_H_start = time.perf_counter()
 
@@ -157,6 +159,7 @@ print("\nHamiltonian matrix generated in",
 #             print(H[i, j], end = ' ', sep = '')
 #     print('')
 
+
 def z(omega):
     return omega + I * eta
 
@@ -165,15 +168,16 @@ def G(omega):
     return np.linalg.inv(z(omega)
                          * np.eye(len(basis), dtype=np.complex) - H)
 
+
 ev = np.linalg.eigvalsh(H)
 startpoint = np.floor(min(ev)) - 2
 stoppoint = np.ceil(max(ev)) + 2
 
 #print("The eigenvalues of the Hamiltonian are:")
-#for e in ev:
+# for e in ev:
 #    print( round(e, 2), sep = '\t', end = ' ' )
 #
-#print('')
+# print('')
 
 w_list = np.linspace(startpoint, stoppoint, 2000)
 
@@ -182,25 +186,25 @@ for a in reqblocknums:
     blocktext += str(a) + ' '
 
 t_lsw_start = time.perf_counter()
-print("Generating density of states for block", \
-       blocktext )
+print("Generating density of states for block",
+      blocktext)
 
 A_list = []
 i = 0
 for w in w_list:
     bdos = 0
     for snum in req_indices:
-        bdos += -(1/np.pi) * np.imag( G(w)[snum][snum] / len(req_indices) )
-    A_list.append( bdos  )
+        bdos += -(1 / np.pi) * np.imag(G(w)[snum][snum] / len(req_indices))
+    A_list.append(bdos)
     pb.progressbar(i, 0, len(w_list) - 1)
     i += 1
 
 t_lsw_stop = time.perf_counter()
 
-print("\nDensity of states calculated in", \
-   round(t_lsw_stop - t_lsw_start, 5), 's.')
+print("\nDensity of states calculated in",
+      round(t_lsw_stop - t_lsw_start, 5), 's.')
 plt.xlim(startpoint, stoppoint)
 plt.plot(w_list, A_list)
-plt.title( "Density of states for the block " +\
-            blocktext )
+plt.title("Density of states for the block " +
+          blocktext)
 plt.show()
