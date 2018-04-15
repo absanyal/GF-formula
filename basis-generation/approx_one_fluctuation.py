@@ -13,12 +13,12 @@ os.system('cls')
 os.system('clear')
 
 N = 4
-n = 2
+n = 4
 Sz = (0.5 * n) % 1
 
 t = 1
 tprime = 1
-U = 10
+U = 100
 
 eta = 0.1
 
@@ -86,10 +86,10 @@ tau_n_p = np.transpose(tau_p_n)
 #     print(c, i.getstate())
 #     c += 1
 
-# print(tau_n_m)
+# print(H_n_n)
 
 
-omega_list = np.linspace(-5, 5, 2000)
+omega_list = np.linspace(-5, 20, 2000)
 # omega_list = [0]
 wc = 0
 A_list = []
@@ -98,9 +98,12 @@ for omega in omega_list:
     Gi_p = omega + complex(0, 1) * eta - H_p_p
     Gi_m = omega + complex(0, 1) * eta - H_m_m
 
+    # print(Gi_n)
+
     G = np.linalg.inv(
-        Gi_n - np.dot(tau_n_m, np.dot(np.linalg.inv(Gi_m), tau_m_n))
-             - np.dot(tau_n_p, np.dot(np.linalg.inv(Gi_p), tau_p_n))
+        Gi_n
+        - np.dot(tau_n_m, np.dot(np.linalg.inv(Gi_m), tau_m_n))
+        - np.dot(tau_n_p, np.dot(np.linalg.inv(Gi_p), tau_p_n))
     )
 
     A = (-1 / np.pi) * np.imag(np.trace(G)) / len(G)
@@ -110,7 +113,6 @@ for omega in omega_list:
     pb.progressbar(wc, 0, len(omega_list))
 
 print('')
-print(np.trace(G))
 
 plt.plot(omega_list, A_list)
 plt.show()
