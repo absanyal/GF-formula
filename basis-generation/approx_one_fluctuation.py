@@ -12,15 +12,19 @@ import progbar as pb
 os.system('cls')
 os.system('clear')
 
-N = 4
-n = 4
+N = 6
+n = 6
 Sz = (0.5 * n) % 1
+
+startpoint = -4
+stoppoint = 28
+
 
 t = -1
 tprime = t
-U = 4
+U = 8
 
-eta = 0.1
+eta = 0.05
 
 
 def mel(state1, state2):
@@ -86,10 +90,10 @@ tau_n_p = np.transpose(tau_p_n)
 #     print(c, i.getstate())
 #     c += 1
 
-print(H_n_n)
+# print(H_n_n)
 
 
-omega_list = np.linspace(-5, 20, 2000)
+omega_list = np.linspace(startpoint, stoppoint, 2000)
 # omega_list = [0]
 wc = 0
 A_list = []
