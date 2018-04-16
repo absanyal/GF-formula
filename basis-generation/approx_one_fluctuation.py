@@ -16,9 +16,9 @@ N = 4
 n = 4
 Sz = (0.5 * n) % 1
 
-t = 1
-tprime = 1
-U = 100
+t = -1
+tprime = t
+U = 4
 
 eta = 0.1
 
@@ -41,7 +41,7 @@ def mel(state1, state2):
 
 
 def overlap(basis1, basis2):
-    H = np.zeros((len(basis1), len(basis2)), dtype=np.float)
+    H = np.zeros((len(basis1), len(basis2)))
 
     for bi in range(len(basis1)):
         for bj in range(len(basis2)):
@@ -51,10 +51,10 @@ def overlap(basis1, basis2):
 
             if (state1.getleftnum() == state2.getleftnum()):
                 H[bi][bj] = t * mel(state1, state2)
-                #H[bj][bi] = H[bi][bj]
+                # H[bj][bi] = H[bi][bj]
             if (state1.getleftnum() != state2.getleftnum()):
                 H[bi][bj] = tprime * mel(state1, state2)
-                #H[bj][bi] = H[bi][bj]
+                # H[bj][bi] = H[bi][bj]
 
             if (basis1 == basis2 and bi == bj):
                 a = basis1[bi]
@@ -86,7 +86,7 @@ tau_n_p = np.transpose(tau_p_n)
 #     print(c, i.getstate())
 #     c += 1
 
-# print(H_n_n)
+print(H_n_n)
 
 
 omega_list = np.linspace(-5, 20, 2000)
@@ -94,11 +94,10 @@ omega_list = np.linspace(-5, 20, 2000)
 wc = 0
 A_list = []
 for omega in omega_list:
-    Gi_n = omega + complex(0, 1) * eta - H_n_n
-    Gi_p = omega + complex(0, 1) * eta - H_p_p
-    Gi_m = omega + complex(0, 1) * eta - H_m_m
-
-    # print(Gi_n)
+    z = omega + complex(0, 1 * eta)
+    Gi_n = z * np.eye(len(H_n_n)) - H_n_n
+    Gi_p = z * np.eye(len(H_p_p)) - H_p_p
+    Gi_m = z * np.eye(len(H_m_m)) - H_m_m
 
     G = np.linalg.inv(
         Gi_n
