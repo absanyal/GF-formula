@@ -26,6 +26,11 @@ U = 8
 
 eta = 0.05
 
+print(
+    "Calculating for", N, "sites with", n, "particles with total spin", Sz,
+    " for the left block", int(n / 2), "with one-particle fluctuations."
+)
+
 
 def mel(state1, state2):
 
@@ -71,19 +76,33 @@ def overlap(basis1, basis2):
     return H
 
 
-basisp = bg.createlfsbasis(N, n, Sz, n / 2 + 1)
+print("Generating basis for block", int(n / 2))
 basisn = bg.createlfsbasis(N, n, Sz, n / 2)
-basism = bg.createlfsbasis(N, n, Sz, n / 2 - 1)
 
+p = int(n / 2 + 1)
+print("Generating basis for block", p)
+basisp = bg.createlfsbasis(N, n, Sz, p)
+
+m = int(n / 2 - 1)
+print("Generating basis for block", m)
+basism = bg.createlfsbasis(N, n, Sz, m)
+
+print("Generating Hamiltonian for block", n)
 H_n_n = overlap(basisn, basisn)
+
+print("Generating Hamiltonian for block", p)
 H_p_p = overlap(basisp, basisp)
+
+print("Generating Hamiltonian for block", m)
 H_m_m = overlap(basism, basism)
 
-tau_m_n = overlap(basism, basisn)
-tau_n_m = np.transpose(tau_m_n)
-
+print("Generating overlap between blocks", p, "and", n)
 tau_p_n = overlap(basisp, basisn)
 tau_n_p = np.transpose(tau_p_n)
+
+print("Generating overlap between blocks", m, "and", n)
+tau_m_n = overlap(basism, basisn)
+tau_n_m = np.transpose(tau_m_n)
 
 # c = 0
 # for i in basisn:
@@ -92,7 +111,7 @@ tau_n_p = np.transpose(tau_p_n)
 
 # print(H_n_n)
 
-
+print("Generating DOS for block", int(n / 2))
 omega_list = np.linspace(startpoint, stoppoint, 2000)
 # omega_list = [0]
 wc = 0
