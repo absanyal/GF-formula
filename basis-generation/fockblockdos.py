@@ -1,18 +1,21 @@
 # Sun Apr 1 18:19:47 IST 2018
 
+import os
+import time
+
+import matplotlib.pyplot as plt
+import numpy as np
+
 import basisgeneration as bg
 import progbar as pb
-import numpy as np
-import matplotlib.pyplot as plt
-import time
-import os
+
 os.system('cls')
 os.system('clear')
 
 N = 4
 n = 4
 
-reqblocknums = [2, 2]
+reqblocknums = [int(n / 2)]
 reqblocknums = set(reqblocknums)
 reqblocknums = list(reqblocknums)
 reqblocknums.sort(reverse=True)
@@ -208,3 +211,4 @@ plt.plot(w_list, A_list)
 plt.title("Density of states for the block " +
           blocktext)
 plt.show()
+print(startpoint, stoppoint)
