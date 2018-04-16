@@ -12,8 +12,8 @@ import progbar as pb
 os.system('cls')
 os.system('clear')
 
-N = 6
-n = 6
+N = 8
+n = 8
 Sz = (0.5 * n) % 1
 
 startpoint = -4
@@ -87,7 +87,7 @@ m = int(n / 2 - 1)
 print("Generating basis for block", m)
 basism = bg.createlfsbasis(N, n, Sz, m)
 
-print("Generating Hamiltonian for block", n)
+print("Generating Hamiltonian for block", int(n / 2))
 H_n_n = overlap(basisn, basisn)
 
 print("Generating Hamiltonian for block", p)
