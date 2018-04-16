@@ -9,16 +9,21 @@ import numpy as np
 import basisgeneration as bg
 import progbar as pb
 
+import multiprocessing
+
 os.system('cls')
 os.system('clear')
 
-N = 8
-n = 8
-Sz = (0.5 * n) % 1
+N = 6
+total_n = 6
+Sz = (0.5 * total_n) % 1
 
 startpoint = -4
 stoppoint = 28
 
+n = int(total_n / 2)
+p = n + 1
+m = n - 1
 
 t = -1
 tprime = t
@@ -27,8 +32,8 @@ U = 8
 eta = 0.05
 
 print(
-    "Calculating for", N, "sites with", n, "particles with total spin", Sz,
-    " for the left block", int(n / 2), "with one-particle fluctuations."
+    "Calculating for", N, "sites with", total_n, "particles with total spin", Sz,
+    " for the left block", int(total_n / 2), "with one-particle fluctuations."
 )
 
 
@@ -76,33 +81,42 @@ def overlap(basis1, basis2):
     return H
 
 
-print("Generating basis for block", int(n / 2))
-basisn = bg.createlfsbasis(N, n, Sz, n / 2)
+print("Generating the necessary bases...")
+t1 = time.perf_counter()
+largs = [n, p, m]
+args = [(N, total_n, Sz, i) for i in largs]
+pool = multiprocessing.Pool()
+listofbasis = pool.starmap(bg.createlfsbasis, args)
 
-p = int(n / 2 + 1)
-print("Generating basis for block", p)
-basisp = bg.createlfsbasis(N, n, Sz, p)
+basisn = listofbasis[0]
+basisp = listofbasis[1]
+basism = listofbasis[2]
 
-m = int(n / 2 - 1)
-print("Generating basis for block", m)
-basism = bg.createlfsbasis(N, n, Sz, m)
+t2 = time.perf_counter()
+print("Bases generated in", t2 - t1, "seconds.")
 
-print("Generating Hamiltonian for block", int(n / 2))
-H_n_n = overlap(basisn, basisn)
+print("Generating the necessary matrices...")
+t1 = time.perf_counter()
+args = [
+    (basisn, basisn), (basisp, basisp), (basism, basism),
+    (basisp, basisn), (basism, basisn)
+]
 
-print("Generating Hamiltonian for block", p)
-H_p_p = overlap(basisp, basisp)
+pool = multiprocessing.Pool()
+listofoverlaps = pool.starmap(overlap, args)
 
-print("Generating Hamiltonian for block", m)
-H_m_m = overlap(basism, basism)
+H_n_n = listofoverlaps[0]
+H_p_p = listofoverlaps[1]
+H_m_m = listofoverlaps[2]
 
-print("Generating overlap between blocks", p, "and", n)
-tau_p_n = overlap(basisp, basisn)
+tau_p_n = listofoverlaps[3]
 tau_n_p = np.transpose(tau_p_n)
 
-print("Generating overlap between blocks", m, "and", n)
-tau_m_n = overlap(basism, basisn)
+tau_m_n = listofoverlaps[4]
 tau_n_m = np.transpose(tau_m_n)
+
+t2 = time.perf_counter()
+print("Matrices generated in", t2 - t1, "seconds.")
 
 # c = 0
 # for i in basisn:
@@ -111,7 +125,7 @@ tau_n_m = np.transpose(tau_m_n)
 
 # print(H_n_n)
 
-print("Generating DOS for block", int(n / 2))
+print("Generating DOS for block", n)
 omega_list = np.linspace(startpoint, stoppoint, 2000)
 # omega_list = [0]
 wc = 0
