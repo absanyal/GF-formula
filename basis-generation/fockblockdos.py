@@ -12,8 +12,8 @@ import progbar as pb
 os.system('cls')
 os.system('clear')
 
-N = 4
-n = 4
+N = 6
+n = 6
 
 reqblocknums = [int(n / 2)]
 reqblocknums = set(reqblocknums)
@@ -22,17 +22,17 @@ reqblocknums.sort(reverse=True)
 
 U = 8
 
-eta = 0.1
+eta = 0.05
 
 spin = (0.5 * n) % 1
-#spin = 0.5
+# spin = 0.5
 
 t = -1
 tprime = t
 I = complex(0, 1)
 
-#startpoint = 7.9
-#stoppoint = 8.2
+# startpoint = 7.9
+# stoppoint = 8.2
 
 if (n == 1):
     fs = "fermion"
@@ -95,6 +95,12 @@ for blocknum in reqblocknums:
         pb.progressbar(j, 0, len(basis) - 1)
 
 print('')
+print(len(req_indices), "indices selected.")
+minindex = min(req_indices)
+maxindex = max(req_indices)
+# print(req_indices)
+# req_indices = np.array(req_indices)
+# print(req_indices[1:] - req_indices[:-1])
 
 
 def mel(state1, state2):
@@ -175,8 +181,9 @@ def G(omega):
 ev = np.linalg.eigvalsh(H)
 startpoint = np.floor(min(ev)) - 2
 stoppoint = np.ceil(max(ev)) + 2
+print("Range of plotting is from", startpoint, "to", stoppoint)
 
-#print("The eigenvalues of the Hamiltonian are:")
+# print("The eigenvalues of the Hamiltonian are:")
 # for e in ev:
 #    print( round(e, 2), sep = '\t', end = ' ' )
 #
@@ -192,12 +199,15 @@ t_lsw_start = time.perf_counter()
 print("Generating density of states for block",
       blocktext)
 
+# print(len(G(0)))
+# Gb = G(0)[minindex:maxindex + 1, minindex:maxindex + 1]
+# print(len(Gb))
+
 A_list = []
 i = 0
 for w in w_list:
-    bdos = 0
-    for snum in req_indices:
-        bdos += -(1 / np.pi) * np.imag(G(w)[snum][snum] / len(req_indices))
+    Gb = G(w)[minindex:maxindex + 1, minindex:maxindex + 1]
+    bdos = (-1 / np.pi) * np.imag(np.trace(Gb)) / len(Gb)
     A_list.append(bdos)
     pb.progressbar(i, 0, len(w_list) - 1)
     i += 1
@@ -211,4 +221,3 @@ plt.plot(w_list, A_list)
 plt.title("Density of states for the block " +
           blocktext)
 plt.show()
-print(startpoint, stoppoint)
