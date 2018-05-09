@@ -29,11 +29,11 @@ t = -1
 tprime = t
 U = 8
 
-eta = 0.05
+eta = 0.1
 
 print(
     "Calculating for", N, "sites with", total_n, "particles with total spin", Sz,
-    " for the left block", int(total_n / 2), "with one-particle fluctuations."
+    "for the left block", int(total_n / 2), "with one-particle fluctuations."
 )
 
 
