@@ -10,15 +10,15 @@ import progbar as pb
 import numpy as np
 import matplotlib.pyplot as plt
 
-N = 6
-n = 6
+N = 4
+n = 4
 spin = (0.5 * n) % 1
 #spin = 1
 
 us = [1 for i in range(int(N / 2))] + [0 for i in range(int(N / 2), N)]
 ds = [0 for i in range(int(N / 2))] + [1 for i in range(int(N / 2), N)]
-us = [1, 1, 0, 1, 0, 0]
-ds = [0, 0, 1, 0, 1, 1]
+us = [1, 0, 0, 1]
+ds = [0, 1, 1, 0]
 # us[0] = 1
 # us[-1] = 0
 # ds[0] = 0
@@ -30,7 +30,7 @@ wsn = 0
 uobasis = bg.createbasis(N, n, spin)
 
 #i = 0
-#for state in uobasis:
+# for state in uobasis:
 #    print(i, '\t', state.getstate())
 #    i += 1
 #
@@ -57,7 +57,7 @@ for n_l in range(n + 1)[::-1]:
 
 i = 0
 for state in basis:
-    print(i, state.getstate())
+    #print(i, state.getstate())
     if (state.getstate() == ws.getstate()):
         wsn = i
     i += 1
@@ -69,6 +69,6 @@ print("Required state", '\n', ws.getstate(), '\n',  "is at", wsn)
 #sb = bg.createsubbasis(basis, 1, 0.5)
 #
 #i = 0
-#for state in sb:
+# for state in sb:
 #    print(i, state.getstate())
 #    i += 1
