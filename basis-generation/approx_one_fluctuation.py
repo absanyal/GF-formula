@@ -1,5 +1,6 @@
 # Mon Apr 16 00:01:29 IST 2018
 
+import multiprocessing
 import os
 import time
 
@@ -8,8 +9,6 @@ import numpy as np
 
 import basisgeneration as bg
 import progbar as pb
-
-import multiprocessing
 
 os.system('cls')
 os.system('clear')
