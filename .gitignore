@@ -1,3 +1,4 @@
 !.gitignore
 /reading-material
 basis-generation/testing.py
+settings.json
