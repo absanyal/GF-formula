@@ -5,17 +5,17 @@ program sp_rgf
     10 format ("(", f8.4, ",", x,  f8.4, ")" )
 
     ! declarations
-    integer, parameter :: n = 20                    ! number of sites
+    integer, parameter :: n = 20                        ! number of sites
     
     complex, parameter :: i = (0, 1)                    ! imaginary i
     real, parameter :: pi = 4 * atan(1.0)
     
     real, parameter :: epsilon0 = 1                     ! on-site energy
-    real, parameter :: eta = 0.1                       ! regulator
+    real, parameter :: eta = 0.1                        ! regulator
     real, parameter :: t = 1.0                          ! hopping constant
-    integer, parameter :: numpts = 10000                 !number of points
-    real, parameter :: minw = -3.0 * t + epsilon0                 !lower bound of energy
-    real, parameter :: maxw = 3.0 * t + epsilon0                  !upper bound of energy
+    integer, parameter :: numpts = 10000                !number of points
+    real, parameter :: minw = -3.0 * t + epsilon0       !lower bound of energy
+    real, parameter :: maxw = 3.0 * t + epsilon0        !upper bound of energy
     real, parameter :: dw = (maxw - minw) / numpts      !interval length
                
     complex, dimension(:), allocatable :: LGF           ! left connected GF
@@ -46,7 +46,8 @@ program sp_rgf
     enddo
 
     open(1, file = 'fgf.dat')
-    
+    open(2, file = 'dos.dat')
+
     !main loop
     do j = 1, numpts
         w = w_list(j)
@@ -58,7 +59,7 @@ program sp_rgf
 
         RGF(n) = 1 / ( w + i * eta - onsite(n) )
         do iterr = n-1, 1, -1
-            RGF(iterr) = 1/( w - onsite(iterr) - t * LGF(iterr+1) * t )
+            RGF(iterr) = 1/( w - onsite(iterr) - t * RGF(iterr+1) * t )
         enddo
 
         do iterf = 1, n
@@ -76,7 +77,8 @@ program sp_rgf
             end if
         enddo
 
-        write (1, *) w, sum(aimag(FGF)) * (-1/pi) / float(n)
+        write (1, *) w, aimag(FGF) * (-1/pi)
+        write (2, *) w, sum(aimag(FGF)) * (-1/pi) / float(n)
 
     enddo
 
