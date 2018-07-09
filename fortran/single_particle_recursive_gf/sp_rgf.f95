@@ -5,13 +5,14 @@ program sp_rgf
     10 format ("(", f8.4, ",", x,  f8.4, ")" )
 
     ! declarations
-    integer, parameter :: n = 20                        ! number of sites
+    integer, parameter :: n = 100                       ! number of sites
     
     complex, parameter :: i = (0, 1)                    ! imaginary i
     real, parameter :: pi = 4 * atan(1.0)
     
     real, parameter :: epsilon0 = 1                     ! on-site energy
     real, parameter :: eta = 0.1                        ! regulator
+    real, parameter :: eta1 = eta * 1
     real, parameter :: t = 1.0                          ! hopping constant
     integer, parameter :: numpts = 10000                !number of points
     real, parameter :: minw = -3.0 * t + epsilon0       !lower bound of energy
@@ -54,12 +55,12 @@ program sp_rgf
         
         LGF(1) = 1 / ( w + i * eta - onsite(1) )
         do iterl = 2, n
-            LGF(iterl) = 1/( w - onsite(iterl) - t * LGF(iterl-1) * t )
+            LGF(iterl) = 1/( w + i*eta1 - onsite(iterl) - t * LGF(iterl-1) * t )
         enddo
 
         RGF(n) = 1 / ( w + i * eta - onsite(n) )
         do iterr = n-1, 1, -1
-            RGF(iterr) = 1/( w - onsite(iterr) - t * RGF(iterr+1) * t )
+            RGF(iterr) = 1/( w + i*eta1 - onsite(iterr) - t * RGF(iterr+1) * t )
         enddo
 
         do iterf = 1, n
