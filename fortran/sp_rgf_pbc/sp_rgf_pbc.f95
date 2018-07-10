@@ -3,7 +3,7 @@ program sp_rgf_pbc
     implicit none
 
     integer, parameter :: n = 100
-    real, parameter :: eta1 = eta * 0
+    real, parameter :: eta1 = eta * 1
 
     complex, dimension(:), allocatable :: GF
     real, dimension(:), allocatable :: onsite
@@ -11,6 +11,7 @@ program sp_rgf_pbc
 
     integer :: j, iter ! counter variable
     real :: w
+    complex :: tempGF
 
     allocate(GF(n))
     allocate(w_list(numpts))
@@ -35,7 +36,7 @@ program sp_rgf_pbc
 
         GF(1) = 1 / ( w + i * eta - onsite(1) )
 
-        !sweep left once
+        !sweep right once
         do iter = 2, n
             GF(iter) = 1/( w + i * eta1 - onsite(iter) - t * GF(iter-1) * t )
         enddo
@@ -45,7 +46,8 @@ program sp_rgf_pbc
 
         !sweep again through the remaining sites to get full GF of each site
         do iter = 2, n
-            GF(iter) = 1/( w + i * eta1 - onsite(iter) - t * GF(iter-1) * t )
+            tempGF = 1/( (1/GF(iter)) - t * GF(iter-1) * t )
+            GF(iter) = tempGF
         enddo
 
         write (1, *) w, aimag(GF) * (-1/pi)
