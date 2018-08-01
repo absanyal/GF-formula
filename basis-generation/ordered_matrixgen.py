@@ -7,6 +7,9 @@ import time
 import matplotlib.pyplot as plt
 import numpy as np
 
+from numpy import dot, around
+from numpy.linalg import inv
+
 import basisgeneration as bg
 import progbar as pb
 
@@ -21,19 +24,22 @@ U = 0
 tprime = 1
 t = 1
 
+w = 0
+eta = 0.1
+
 l_n = 2
 l_Sz = (0.5 * l_n) % 1
 
 b = bg.createlbsbasis(N, n, Sz, l_n, l_Sz)
 
-i = 0
-for s in b:
+# i = 0
+# for s in b:
 
-    print(i, s.getstate())
+#     print(i, s.getstate())
 
-    i += 1
+#     i += 1
 
-print("*" * 20)
+# print("*" * 20)
 
 
 def gethalfsector1(state):
@@ -58,7 +64,14 @@ for state in b:
     p = gethalfsector1(state)
     leftsectorset.add(p)
 
-leftsectorset = sorted(leftsectorset)
+leftsectorsetold = sorted(leftsectorset)
+
+leftsectorset = [0, 0, 0, 0]
+
+leftsectorset[0] = leftsectorsetold[3]
+leftsectorset[1] = leftsectorsetold[0]
+leftsectorset[2] = leftsectorsetold[1]
+leftsectorset[3] = leftsectorsetold[2]
 
 i = 0
 for s in leftsectorset:
@@ -73,17 +86,17 @@ for ls in leftsectorset:
     tempb = []
     for s in b:
         if (gethalfsector1(s) == ls):
-            print(s.getstate())
+            # print(s.getstate())
             tempb.append(s)
-    print('-' * 20)
+    # print('-' * 20)
     ordb += tempb
 
-print("*" * 20)
-i = 0
-for s in ordb:
-    print(i, s.getstate(), sep='\t')
-    i += 1
-print('*' * 20)
+# print("*" * 20)
+# i = 0
+# for s in ordb:
+#     print(i, s.getstate(), sep='\t')
+#     i += 1
+# print('*' * 20)
 
 
 def mel(state1, state2):
@@ -106,37 +119,94 @@ def mel(state1, state2):
     return term
 
 
-H = np.zeros((len(ordb), len(ordb)), dtype=np.float)
+def overlap(basis1, basis2):
+    H = np.zeros((len(basis1), len(basis2)))
 
-for bi in range(len(ordb)):
-    for bj in range(len(ordb)):
+    for bi in range(len(basis1)):
+        for bj in range(len(basis2)):
 
-        state1 = ordb[bi]
-        state2 = ordb[bj]
+            state1 = basis1[bi]
+            state2 = basis2[bj]
 
-        if (bi <= bj):
             if (state1.getleftnum() == state2.getleftnum()):
                 H[bi][bj] = t * mel(state1, state2)
-                H[bj][bi] = H[bi][bj]
+                # H[bj][bi] = H[bi][bj]
             if (state1.getleftnum() != state2.getleftnum()):
                 H[bi][bj] = tprime * mel(state1, state2)
-                H[bj][bi] = H[bi][bj]
+                # H[bj][bi] = H[bi][bj]
 
-        if (bi == bj):
-            a = ordb[bi]
-            particles = np.array(a.upconfig) + np.array(a.downconfig)
-            for nump in particles:
-                if (nump == 2):
-                    H[bi][bj] += U
+            if (basis1 == basis2 and bi == bj):
+                a = basis1[bi]
+                particles = np.array(a.upconfig) + np.array(a.downconfig)
+                for nump in particles:
+                    if (nump == 2):
+                        H[bi][bj] += U
 
-        Hprog = len(ordb) * (bi + 1) + bj + 1
-        pb.progressbar(Hprog, 0, len(ordb) * len(ordb))
+    H = np.array(H)
+    return H
 
-print('\nThe Hamiltonian matrix is:')
-for i in range(len(H)):
-    for j in range(len(H)):
-        if (H[i, j] >= 0):
-            print(' ', H[i, j], end=' ', sep='')
-        else:
-            print(H[i, j], end=' ', sep='')
-    print('')
+
+H = overlap(ordb, ordb)
+
+
+def hamilprint(H):
+    # print('\nThe Hamiltonian matrix is:')
+    for i in range(len(H)):
+        for j in range(len(H)):
+            if (H[i, j] >= 0):
+                print(' ', H[i, j], end='\t', sep='')
+            else:
+                print(H[i, j], end='\t', sep='')
+        print('')
+
+
+np.savetxt('matrixfixed.txt', H, fmt='%4.1f')
+# hamilprint(H)
+# print('*'*20)
+
+
+def z(w):
+    return w + complex(0, 1) * eta
+
+
+def G(H, w):
+    return np.linalg.inv(z(w) * np.eye(len(H)) - H)
+
+
+def tmm(a, b, c):
+    return dot(a, dot(b, c))
+
+
+invGF = G(H, w)
+np.savetxt('fullyinverted.txt', invGF, fmt='%5.2f')
+
+# hamilprint(around(invGF, 3))
+# print('*'*20)
+
+
+#############################################################################
+H1 = H[0:8, 0:8]
+H2 = H[8:16, 8:16]
+tau12 = H[0:8, 8:16]
+tau21 = H[8:16, 0:8]
+
+g1 = G(H1, w)
+g2 = G(H2, w)
+
+lG11 = G(H1, w)
+rG11 = inv(inv(g1) - tmm(tau12, g2, tau21))
+
+lG22 = inv(inv(g2) - tmm(tau21, g1, tau12))
+rG22 = G(H2, w)
+
+fG11 = inv(inv(g1) - tmm(tau12, rG22, tau21))
+fG22 = inv(inv(g2) - tmm(tau21, lG11, tau12))
+
+fG12 = tmm(lG11, tau12, fG22)
+fG21 = tmm(rG22, tau21, fG11)
+
+fGF = np.block([[fG11, fG12], [fG21, fG22]])
+
+np.savetxt('rgf.txt', fGF, fmt='%5.2f')
+
+print(around(invGF, 3) == around(fGF, 3))
