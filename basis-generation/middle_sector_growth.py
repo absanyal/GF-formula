@@ -14,7 +14,7 @@ os.system('clear')
 N_list = []
 len_list = []
 
-for N in range(2, 12):
+for N in range(2, 13):
     n = N
     Sz = (0.5 * n) % 1
     l_n = int(n / 2)
@@ -27,5 +27,11 @@ for N in range(2, 12):
     N_list.append(N)
     len_list.append(len(b))
 
+fig = plt.figure()
+ax = fig.add_subplot(111)
 plt.plot(N_list, len_list)
-plt.show()
+for i, j in zip(N_list, len_list):
+    ax.annotate(str(j), xy=(i, j + 0.5))
+plt.grid()
+#plt.show()
+plt.savefig('middle.pdf')
