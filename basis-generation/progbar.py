@@ -47,6 +47,6 @@ def progressbar(v, v_min, v_max):
     sys.stdout.write('\r' + message)
 
     if (v >= v_max):
-        done = "Progress: Done!"
+        done = "Progress: Done!\n"
         sys.stdout.write('\r' + " " * len(message))
         sys.stdout.write('\r' + done)
