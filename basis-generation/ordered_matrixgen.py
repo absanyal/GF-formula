@@ -209,4 +209,14 @@ fGF = np.block([[fG11, fG12], [fG21, fG22]])
 
 np.savetxt('rgf.txt', fGF, fmt='%5.2f')
 
-print(around(invGF, 3) == around(fGF, 3))
+truth = around(invGF, 3) == around(fGF, 3)
+
+# print(truth)
+
+i = 0
+for a in truth:
+    for b in a:
+        if (b == True):
+            i += 1
+
+print(i, 'matches out of', pow(len(invGF), 2))
