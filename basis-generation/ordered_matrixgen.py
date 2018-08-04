@@ -16,6 +16,9 @@ import progbar as pb
 os.system('cls')
 os.system('clear')
 
+if not os.path.isdir('ordmatplots'):
+    os.makedirs('ordmatplots')
+
 N = 4
 n = 4
 Sz = (0.5 * n) % 1
@@ -27,10 +30,11 @@ t = 1
 w = 0
 eta = 0.1
 
-l_n = 2
+l_n = 3
 l_Sz = (0.5 * l_n) % 1
 
-b = bg.createlbsbasis(N, n, Sz, l_n, l_Sz)
+b = bg.createlfsbasis(N, n, Sz, l_n)
+# b = bg.createlbsbasis(N, n, Sz, l_n, l_Sz)
 
 # i = 0
 # for s in b:
@@ -66,12 +70,14 @@ for state in b:
 
 leftsectorsetold = sorted(leftsectorset)
 
-leftsectorset = [0, 0, 0, 0]
+leftsectorset = leftsectorsetold
 
-leftsectorset[0] = leftsectorsetold[3]
-leftsectorset[1] = leftsectorsetold[0]
-leftsectorset[2] = leftsectorsetold[1]
-leftsectorset[3] = leftsectorsetold[2]
+# leftsectorset = [0, 0, 0, 0]
+
+# leftsectorset[0] = leftsectorsetold[3]
+# leftsectorset[1] = leftsectorsetold[0]
+# leftsectorset[2] = leftsectorsetold[1]
+# leftsectorset[3] = leftsectorsetold[2]
 
 i = 0
 for s in leftsectorset:
@@ -91,12 +97,12 @@ for ls in leftsectorset:
     # print('-' * 20)
     ordb += tempb
 
-# print("*" * 20)
-# i = 0
-# for s in ordb:
-#     print(i, s.getstate(), sep='\t')
-#     i += 1
-# print('*' * 20)
+print("*" * 20)
+i = 0
+for s in ordb:
+    print(i, s.getstate(), sep=' ')
+    i += 1
+print('*' * 20)
 
 
 def mel(state1, state2):
@@ -160,9 +166,13 @@ def hamilprint(H):
         print('')
 
 
-np.savetxt('matrixfixed.txt', H, fmt='%4.1f')
+# np.savetxt('matrixfixed.txt', H, fmt='%4.1f')
 # hamilprint(H)
-# print('*'*20)
+# print('*' * 20)
+
+eig = np.linalg.eigvalsh(H)
+eig = around(sorted(eig), 3)
+print(eig)
 
 
 def z(w):
@@ -177,46 +187,74 @@ def tmm(a, b, c):
     return dot(a, dot(b, c))
 
 
-invGF = G(H, w)
-np.savetxt('fullyinverted.txt', invGF, fmt='%5.2f')
+# invGF = G(H, w)
+# np.savetxt('fullyinverted.txt', invGF, fmt='%5.2f')
 
-# hamilprint(around(invGF, 3))
-# print('*'*20)
+# # hamilprint(around(invGF, 3))
+# # print('*'*20)
 
 
-#############################################################################
-H1 = H[0:8, 0:8]
-H2 = H[8:16, 8:16]
-tau12 = H[0:8, 8:16]
-tau21 = H[8:16, 0:8]
+# #############################################################################
+d = len(ordb)
 
-g1 = G(H1, w)
-g2 = G(H2, w)
+H1 = H[0:d, 0:d]
+H2 = H[d:2 * d, d:2 * d]
+tau12 = H[0:d, d:2 * d]
+tau21 = H[d:2 * d, 0:d]
 
-lG11 = G(H1, w)
-rG11 = inv(inv(g1) - tmm(tau12, g2, tau21))
+w_min = min(eig) - 2
+w_max = max(eig) + 2
 
-lG22 = inv(inv(g2) - tmm(tau21, g1, tau12))
-rG22 = G(H2, w)
+w_list = np.linspace(w_min * t, w_max * t, 2000)
+A = []
+# for w in w_list:
+#     invGF = G(H, w)
+#     A.append((-1 / np.pi) * np.imag(np.trace(invGF)))
+#     pb.progressbar(w, w_list[0], w_list[-1])
 
-fG11 = inv(inv(g1) - tmm(tau12, rG22, tau21))
-fG22 = inv(inv(g2) - tmm(tau21, lG11, tau12))
+# plt.plot(w_list, A)
+# plt.show()
 
-fG12 = tmm(lG11, tau12, fG22)
-fG21 = tmm(rG22, tau21, fG11)
 
-fGF = np.block([[fG11, fG12], [fG21, fG22]])
+print('Calculating DOS...')
+for w in w_list:
 
-np.savetxt('rgf.txt', fGF, fmt='%5.2f')
+    g1 = G(H1, w)
+    g2 = G(H2, w)
 
-truth = around(invGF, 3) == around(fGF, 3)
+    lG11 = G(H1, w)
+    rG11 = inv(inv(g1) - tmm(tau12, g2, tau21))
 
-# print(truth)
+    lG22 = inv(inv(g2) - tmm(tau21, g1, tau12))
+    rG22 = G(H2, w)
 
-i = 0
-for a in truth:
-    for b in a:
-        if (b == True):
-            i += 1
+    fG11 = inv(inv(g1) - tmm(tau12, rG22, tau21))
+    fG22 = inv(inv(g2) - tmm(tau21, lG11, tau12))
 
-print(i, 'matches out of', pow(len(invGF), 2))
+    fG12 = tmm(lG11, tau12, fG22)
+    fG21 = tmm(rG22, tau21, fG11)
+
+    fGF = np.block([[fG11, fG12], [fG21, fG22]])
+
+    A.append((-1 / np.pi) * np.imag(np.trace(fGF)))
+    pb.progressbar(w, w_list[0], w_list[-1])
+
+plt.plot(w_list, A)
+
+plt.title('Formula inversion, U = ' + str(U))
+# plt.savefig('ordmatplots/formula_inversion_U4.pdf')
+plt.show()
+
+# np.savetxt('rgf.txt', fGF, fmt='%5.2f')
+
+# truth = around(invGF, 3) == around(fGF, 3)
+
+# # print(truth)
+
+# i = 0
+# for a in truth:
+#     for b in a:
+#         if (b == True):
+#             i += 1
+
+# print(i, 'matches out of', pow(len(invGF), 2))
