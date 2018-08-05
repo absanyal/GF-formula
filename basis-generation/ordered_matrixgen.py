@@ -30,11 +30,15 @@ t = 1
 w = 0
 eta = 0.1
 
-l_n = 3
-l_Sz = (0.5 * l_n) % 1
+l_n = 0
 
-b = bg.createlfsbasis(N, n, Sz, l_n)
-# b = bg.createlbsbasis(N, n, Sz, l_n, l_Sz)
+filename = 'U' + str(U) + 'N' + str(N) + 'ln' + str(l_n) + '.dat'
+
+if (l_n == int(n / 2)):
+    l_Sz = (0.5 * l_n) % 1
+    b = bg.createlbsbasis(N, n, Sz, l_n, l_Sz)
+else:
+    b = bg.createlfsbasis(N, n, Sz, l_n)
 
 # i = 0
 # for s in b:
@@ -72,12 +76,17 @@ leftsectorsetold = sorted(leftsectorset)
 
 leftsectorset = leftsectorsetold
 
-# leftsectorset = [0, 0, 0, 0]
 
-# leftsectorset[0] = leftsectorsetold[3]
-# leftsectorset[1] = leftsectorsetold[0]
-# leftsectorset[2] = leftsectorsetold[1]
-# leftsectorset[3] = leftsectorsetold[2]
+if (l_n == 2):
+    leftsectorset = [0, 0, 0, 0]
+    leftsectorset[0] = leftsectorsetold[3]
+    leftsectorset[1] = leftsectorsetold[0]
+    leftsectorset[2] = leftsectorsetold[1]
+    leftsectorset[3] = leftsectorsetold[2]
+
+# # No arrangement needed for 1-3, keep the default sorting
+
+# # This is for 3-1
 
 i = 0
 for s in leftsectorset:
@@ -166,7 +175,7 @@ def hamilprint(H):
         print('')
 
 
-# np.savetxt('matrixfixed.txt', H, fmt='%4.1f')
+np.savetxt('matrix' + str(filename) + '.txt', H, fmt='%4.1f')
 # hamilprint(H)
 # print('*' * 20)
 
@@ -241,9 +250,17 @@ for w in w_list:
 
 plt.plot(w_list, A)
 
-plt.title('Formula inversion, U = ' + str(U))
+plt.title('Formula inversion, U = ' + str(U) + ', l_n = ' + str(l_n))
 # plt.savefig('ordmatplots/formula_inversion_U4.pdf')
 plt.show()
+
+f = open(filename, 'w')
+
+for i in range(len(w_list)):
+    f.write(str(w_list[i]) + '\t' + str(A[i]) + '\n')
+
+f.close()
+
 
 # np.savetxt('rgf.txt', fGF, fmt='%5.2f')
 
