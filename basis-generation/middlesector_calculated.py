@@ -21,6 +21,13 @@ def C(N, ln, pu):
     )
 
 
+def C_f(N, n, Sz):
+    pu = n / 2 + Sz
+    pd = n / 2 - Sz
+    return pow(factorial(N), 2) / \
+        (factorial(pu) * factorial(pd) * factorial(N - pu) * factorial(N - pd))
+
+
 sa = []
 N_range = range(2, N_max + 1, 2)
 for N in N_range:
@@ -31,7 +38,7 @@ for N in N_range:
         size += C(N, ln, pu)
     sa.append(np.log(size))
 
-plt.plot(N_range, sa)
+plt.plot(N_range, sa, label='Equally divided particles')
 
 sa = []
 N_range = range(2, N_max + 1, 2)
@@ -43,6 +50,14 @@ for N in N_range:
         size += C(N, ln, pu)
     sa.append(np.log(size))
 
-plt.plot(N_range, sa)
+plt.plot(N_range, sa, label='One-particle fluctuations')
 
+sa = []
+for N in N_range:
+    size = C_f(N, N, 0)
+    sa.append(np.log(size))
+
+plt.plot(N_range, sa, label='Full basis')
+
+plt.legend(framealpha=0.5, loc='best')
 plt.show()
