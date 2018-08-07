@@ -13,7 +13,6 @@ from numpy.linalg import inv
 import basisgeneration as bg
 import progbar as pb
 
-os.system('cls')
 os.system('clear')
 
 if not os.path.isdir('ordmatplots'):
@@ -89,6 +88,7 @@ def overlap(basis1, basis2):
     H = np.array(H)
     return H
 
+
 def hamilprint(H):
     # print('\nThe Hamiltonian matrix is:')
     for i in range(len(H)):
@@ -98,6 +98,7 @@ def hamilprint(H):
             else:
                 print(H[i, j], end='\t', sep='')
         print('')
+
 
 def z(w):
     return w + complex(0, 1) * eta
@@ -114,6 +115,7 @@ def tmm(a, b, c):
 #############################################################################
 
 # Generate the 2-2 l_Sz = 0 basis
+
 
 l_n = 2
 l_Sz = 0
@@ -304,12 +306,40 @@ H_13 = overlap(ordb_13, ordb_13)
 
 ##############################################################################
 
-# d = len(ordb_22_p)
+# Full 2-2 block
 
-# H1 = H_22_p[0:d, 0:d]
-# H2 = H_22_p[d:2 * d, d:2 * d]
-# tau12 = H_22_p[0:d, d:2 * d]
-# tau21 = H_22_p[d:2 * d, 0:d]
+ordb_22_full = ordb_22_10 + ordb_22_00 + ordb_22_01
+
+# i = 0
+# for s in ordb_22_full:
+#     print(i, s.getstate())
+#     i += 1
+
+H_22 = overlap(ordb_22_full, ordb_22_full)
+
+##############################################################################
+
+# Fock space hopping connections, written as tau_from_to
+
+tau_13_22 = overlap(ordb_13, ordb_22_full)
+tau_22_13 = overlap(ordb_22_full, ordb_13)
+
+##############################################################################
+##############################################################################
+
+# Separation of the Hamiltonian block by block
+
+# 2-2, 0
+
+d = len(ordb_22_00)
+
+H1 = H_22_00[0:d, 0:d]
+H2 = H_22_00[d:2 * d, d:2 * d]
+tau12 = H_22_00[0:d, d:2 * d]
+tau21 = H_22_00[d:2 * d, 0:d]
+
+##############################################################################
+##############################################################################
 
 # w_min = min(eig) - 2
 # w_max = max(eig) + 2
