@@ -13,6 +13,8 @@ from numpy.linalg import inv
 import basisgeneration as bg
 import progbar as pb
 
+from scipy.linalg import block_diag as bd
+
 os.system('clear')
 
 if not os.path.isdir('ordmatplots'):
@@ -157,6 +159,7 @@ for ls in leftsectorset:
     ordb_22_00 += tempb
 
 H_22_00 = overlap(ordb_22_00, ordb_22_00)
+# hamilprint(H_22_00)
 
 ##############################################################################
 
@@ -295,7 +298,7 @@ ordb_13 = []
 
 for ls in leftsectorset:
     tempb = []
-    for s in b_31:
+    for s in b_13:
         if (gethalfsector1(s) == ls):
             # print(s.getstate())
             tempb.append(s)
@@ -306,80 +309,232 @@ H_13 = overlap(ordb_13, ordb_13)
 
 ##############################################################################
 
-# Full 2-2 block
+l_n = 4
 
-ordb_22_full = ordb_22_10 + ordb_22_00 + ordb_22_01
+b_40 = bg.createlfsbasis(N, n, Sz, l_n)
+
+leftsectorset = set([])
+
+for state in b_40:
+    p = gethalfsector1(state)
+    leftsectorset.add(p)
+
+leftsectorsetold = sorted(leftsectorset)
+
+leftsectorset = leftsectorsetold
+
+i = 0
+for s in leftsectorset:
+    print(i, s)
+    i += 1
+
+print("*" * 20)
+
+ordb_40 = []
+
+for ls in leftsectorset:
+    tempb = []
+    for s in b_40:
+        if (gethalfsector1(s) == ls):
+            # print(s.getstate())
+            tempb.append(s)
+    # print('-' * 20)
+    ordb_40 += tempb
+
+H_40 = overlap(ordb_40, ordb_40)
+
+##############################################################################
+
+l_n = 0
+
+b_04 = bg.createlfsbasis(N, n, Sz, l_n)
+
+leftsectorset = set([])
+
+for state in b_04:
+    p = gethalfsector1(state)
+    leftsectorset.add(p)
+
+leftsectorsetold = sorted(leftsectorset)
+
+leftsectorset = leftsectorsetold
+
+i = 0
+for s in leftsectorset:
+    print(i, s)
+    i += 1
+
+print("*" * 20)
+
+ordb_04 = []
+
+for ls in leftsectorset:
+    tempb = []
+    for s in b_04:
+        if (gethalfsector1(s) == ls):
+            # print(s.getstate())
+            tempb.append(s)
+    # print('-' * 20)
+    ordb_04 += tempb
+
+H_04 = overlap(ordb_04, ordb_04)
+
+
+##############################################################################
+
+# Full 2-2 block basis to calculate overlaps
+
+ordb_22 = ordb_22_10 + ordb_22_00 + ordb_22_01
 
 # i = 0
-# for s in ordb_22_full:
+# for s in ordb_22:
 #     print(i, s.getstate())
 #     i += 1
 
-H_22 = overlap(ordb_22_full, ordb_22_full)
+H_22 = overlap(ordb_22, ordb_22)
 
 ##############################################################################
 
 # Fock space hopping connections, written as tau_from_to
 
-tau_13_22 = overlap(ordb_13, ordb_22_full)
-tau_22_13 = overlap(ordb_22_full, ordb_13)
+tau_40_31 = overlap(ordb_40, ordb_31)
+tau_31_40 = overlap(ordb_31, ordb_40)
+
+tau_31_22 = overlap(ordb_31, ordb_22)
+tau_22_31 = overlap(ordb_22, ordb_31)
+
+tau_13_22 = overlap(ordb_13, ordb_22)
+tau_22_13 = overlap(ordb_22, ordb_13)
+
+tau_13_04 = overlap(ordb_13, ordb_04)
+tau_04_13 = overlap(ordb_04, ordb_13)
 
 ##############################################################################
 ##############################################################################
 
-# Separation of the Hamiltonian block by block
+eig = around(np.real(np.linalg.eigvals(H_22_00)), 3)
+# print(eig)
 
-# 2-2, 0
+w_min = min(eig) - 2
+w_max = max(eig) + 2
+w_list = np.linspace(w_min, w_max, 2000)
+A = []
+B = []
 
-d = len(ordb_22_00)
+print('Calculating DOS...')
+for w in w_list:
 
-H1 = H_22_00[0:d, 0:d]
-H2 = H_22_00[d:2 * d, d:2 * d]
-tau12 = H_22_00[0:d, d:2 * d]
-tau21 = H_22_00[d:2 * d, 0:d]
+    #########################################################################
 
-##############################################################################
-##############################################################################
+    # 2-2_00 block
 
-# w_min = min(eig) - 2
-# w_max = max(eig) + 2
+    d = len(ordb_22_00)
 
-# w_list = np.linspace(w_min * t, w_max * t, 2000)
-# A = []
-# # for w in w_list:
-# #     invGF = G(H, w)
-# #     A.append((-1 / np.pi) * np.imag(np.trace(invGF)))
-# #     pb.progressbar(w, w_list[0], w_list[-1])
+    H1 = H_22_00[0:d, 0:d]
+    H2 = H_22_00[d:2 * d, d:2 * d]
+    tau12 = H_22_00[0:d, d:2 * d]
+    tau21 = H_22_00[d:2 * d, 0:d]
 
-# # plt.plot(w_list, A)
-# # plt.show()
+    g1 = G(H1, w)
+    g2 = G(H2, w)
 
+    lG11 = G(H1, w)
+    rG11 = inv(inv(g1) - tmm(tau12, g2, tau21))
 
-# print('Calculating DOS...')
-# for w in w_list:
+    lG22 = inv(inv(g2) - tmm(tau21, g1, tau12))
+    rG22 = G(H2, w)
 
-#     g1 = G(H1, w)
-#     g2 = G(H2, w)
+    fG11 = inv(inv(g1) - tmm(tau12, rG22, tau21))
+    fG22 = inv(inv(g2) - tmm(tau21, lG11, tau12))
 
-#     lG11 = G(H1, w)
-#     rG11 = inv(inv(g1) - tmm(tau12, g2, tau21))
+    fG12 = tmm(lG11, tau12, fG22)
+    fG21 = tmm(rG22, tau21, fG11)
 
-#     lG22 = inv(inv(g2) - tmm(tau21, g1, tau12))
-#     rG22 = G(H2, w)
+    fG_22_00 = np.block([[fG11, fG12], [fG21, fG22]])
 
-#     fG11 = inv(inv(g1) - tmm(tau12, rG22, tau21))
-#     fG22 = inv(inv(g2) - tmm(tau21, lG11, tau12))
+    ##########################################################################
+    # Calculate spin-fluctuations of 2-2 and add the GFs block diagonally
 
-#     fG12 = tmm(lG11, tau12, fG22)
-#     fG21 = tmm(rG22, tau21, fG11)
+    fG_22_10 = G(H_22_10, w)
+    fG_22_01 = G(H_22_01, w)
 
-#     fGF = np.block([[fG11, fG12], [fG21, fG22]])
+    fG_22 = bd(fG_22_10, fG_22_00, fG_22_10)
 
-#     A.append((-1 / np.pi) * np.imag(np.trace(fGF)))
-#     pb.progressbar(w, w_list[0], w_list[-1])
+    ##########################################################################
+    # 1-3 block
 
-# plt.plot(w_list, A)
+    d = len(ordb_13)
+
+    H1 = H_13[0:d, 0:d]
+    H2 = H_13[d:2 * d, d:2 * d]
+    tau12 = H_13[0:d, d:2 * d]
+    tau21 = H_13[d:2 * d, 0:d]
+
+    g1 = G(H1, w)
+    g2 = G(H2, w)
+
+    lG11 = G(H1, w)
+    rG11 = inv(inv(g1) - tmm(tau12, g2, tau21))
+
+    lG22 = inv(inv(g2) - tmm(tau21, g1, tau12))
+    rG22 = G(H2, w)
+
+    fG11 = inv(inv(g1) - tmm(tau12, rG22, tau21))
+    fG22 = inv(inv(g2) - tmm(tau21, lG11, tau12))
+
+    fG12 = tmm(lG11, tau12, fG22)
+    fG21 = tmm(rG22, tau21, fG11)
+
+    fG_13 = np.block([[fG11, fG12], [fG21, fG22]])
+
+    ##########################################################################
+    # 3-1 block
+
+    d = len(ordb_31)
+
+    H1 = H_31[0:d, 0:d]
+    H2 = H_31[d:2 * d, d:2 * d]
+    tau12 = H_31[0:d, d:2 * d]
+    tau21 = H_31[d:2 * d, 0:d]
+
+    g1 = G(H1, w)
+    g2 = G(H2, w)
+
+    lG11 = G(H1, w)
+    rG11 = inv(inv(g1) - tmm(tau12, g2, tau21))
+
+    lG22 = inv(inv(g2) - tmm(tau21, g1, tau12))
+    rG22 = G(H2, w)
+
+    fG11 = inv(inv(g1) - tmm(tau12, rG22, tau21))
+    fG22 = inv(inv(g2) - tmm(tau21, lG11, tau12))
+
+    fG12 = tmm(lG11, tau12, fG22)
+    fG21 = tmm(rG22, tau21, fG11)
+
+    fG_31 = np.block([[fG11, fG12], [fG21, fG22]])
+
+    ##########################################################################
+
+    fG_40 = G(H_40, w)
+    fG_04 = G(H_04, w)
+
+    ##########################################################################
+
+    ##########################################################################
+    A.append((-1 / np.pi) * np.imag(np.trace(fG_22)))
+    B.append((-1 / np.pi) * np.imag(np.trace(fG_22_00)))
+    pb.progressbar(w, w_list[0], w_list[-1])
+
+plt.plot(w_list, A)
+plt.plot(w_list, B)
 
 # plt.title('Formula inversion, U = ' + str(U) + ', l_n = ' + str(l_n))
-# # plt.savefig('ordmatplots/formula_inversion_U4.pdf')
-# plt.show()
+# plt.savefig('ordmatplots/formula_inversion_U4.pdf')
+plt.show()
+
+# print("Basis test")
+# i = 0
+# for s in ordb_22:
+#     print(i, s.getstate())
+#     i += 1
