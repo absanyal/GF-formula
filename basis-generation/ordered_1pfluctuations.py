@@ -24,9 +24,9 @@ N = 4
 n = 4
 Sz = (0.5 * n) % 1
 
-U = 0
-tprime = 1
-t = 1
+U = 4
+t = -1
+tprime = t
 
 w = 0
 eta = 0.1
@@ -391,7 +391,7 @@ ordb_22 = ordb_22_10 + ordb_22_00 + ordb_22_01
 #     print(i, s.getstate())
 #     i += 1
 
-H_22 = overlap(ordb_22, ordb_22)
+# H_22 = overlap(ordb_22, ordb_22)
 
 ##############################################################################
 
@@ -458,7 +458,7 @@ for w in w_list:
     fG_22_10 = G(H_22_10, w)
     fG_22_01 = G(H_22_01, w)
 
-    fG_22 = bd(fG_22_10, fG_22_00, fG_22_10)
+    fG_22 = bd(fG_22_10, fG_22_00, fG_22_01)
 
     ##########################################################################
     # 1-3 block
@@ -521,20 +521,52 @@ for w in w_list:
 
     ##########################################################################
 
+    lG04 = fG_04
+    lG13 = inv(inv(fG_13) - tmm(tau_13_04, lG04, tau_04_13))
+    lG22 = inv(inv(fG_22) - tmm(tau_22_13, lG13, tau_13_22))
+    lG31 = inv(inv(fG_31) - tmm(tau_31_22, lG22, tau_22_31))
+    lG40 = inv(inv(fG_40) - tmm(tau_40_31, lG31, tau_31_40))
+
+    rG40 = fG_40
+    rG31 = inv(inv(fG_31) - tmm(tau_31_40, rG40, tau_40_31))
+    rG22 = inv(inv(fG_22) - tmm(tau_22_31, rG31, tau_31_22))
+    rG13 = inv(inv(fG_13) - tmm(tau_13_22, rG22, tau_22_13))
+    rG04 = inv(inv(fG_04) - tmm(tau_04_13, rG13, tau_13_04))
+
+    cG04 = inv(inv(fG_04) - tmm(tau_04_13, rG13, tau_13_04))
+    cG13 = inv(inv(fG_13) - tmm(tau_13_04, lG04, tau_04_13)
+                          - tmm(tau_13_22, rG22, tau_22_13))
+    cG22 = inv(inv(fG_22) - tmm(tau_22_13, lG13, tau_13_22)
+                          - tmm(tau_22_31, rG31, tau_31_22))
+    cG31 = inv(inv(fG_31) - tmm(tau_31_22, lG22, tau_22_31)
+                          - tmm(tau_31_40, rG40, tau_40_31))
+    cG40 = inv(inv(fG_40) - tmm(tau_40_31, lG31, tau_31_40))
+
+    density = bd(cG04, cG13, cG22, cG31, cG40)
+
     ##########################################################################
-    A.append((-1 / np.pi) * np.imag(np.trace(fG_22)))
-    B.append((-1 / np.pi) * np.imag(np.trace(fG_22_00)))
+    A.append((-1 / np.pi) * np.imag((1/(len(density)))*np.trace(density)))
+    # B.append((-1 / np.pi) * np.imag(np.trace(fG_13)))
     pb.progressbar(w, w_list[0], w_list[-1])
 
 plt.plot(w_list, A)
-plt.plot(w_list, B)
+# plt.plot(w_list, B)
 
 # plt.title('Formula inversion, U = ' + str(U) + ', l_n = ' + str(l_n))
 # plt.savefig('ordmatplots/formula_inversion_U4.pdf')
-plt.show()
+# plt.show()
+
+f = open('ordered1pdos.dat', 'w')
+
+for i in range(len(w_list)):
+    f.write(str(w_list[i]) + '\t' + str(A[i]) + '\n')
+
+f.close()
 
 # print("Basis test")
 # i = 0
-# for s in ordb_22:
+# for s in ordb_13:
 #     print(i, s.getstate())
 #     i += 1
+
+# print(overlap(ordb_04, ordb_13))
