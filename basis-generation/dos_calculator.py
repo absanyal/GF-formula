@@ -15,12 +15,12 @@ import os
 os.system('cls')
 os.system('clear')
 
-N = 6
-n = 6
+N = 4
+n = 4
 
 p = 10
 
-U = 8
+U = 4
 
 eta = 0.1
 
@@ -138,8 +138,8 @@ for bi in range(len(basis1)):
                 if (nump == 2):
                     H[bi][bj] += U
 
-        Hprog = len(basis1) * (bi + 1) + bj + 1
-        pb.progressbar(Hprog, 0, len(basis1) * len(basis2))
+    Hprog = len(basis1) * (bi + 1) + bj + 1
+    pb.progressbar(Hprog, 0, len(basis1) * len(basis2))
 
 t_H_stop = time.perf_counter()
 
@@ -172,11 +172,11 @@ ev = np.linalg.eigvalsh(H)
 startpoint = np.floor(min(ev)) - 2
 stoppoint = np.ceil(max(ev)) + 2
 
-#print("The eigenvalues of the Hamiltonian are:")
-# for e in ev:
-#    print( round(e, 2), sep = '\t', end = ' ' )
-#
-# print('')
+print("The eigenvalues of the Hamiltonian are:")
+for e in ev:
+    print(round(e, 2), sep='\t', end=' ')
+
+print('')
 
 w_list = np.linspace(startpoint, stoppoint, 2000)
 
@@ -229,3 +229,8 @@ plt.savefig(
     "_" + str(U) + ".pdf")
 
 plt.show()
+
+f = open('dos.dat', 'w')
+for i in range(len(w_list)):
+    f.write(str(w_list[i]) + '\t' + str(Ap_list[i]) + '\n')
+f.close()
