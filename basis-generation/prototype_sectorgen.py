@@ -2,14 +2,13 @@
 
 import os
 import time
+from math import factorial
 
 import matplotlib.pyplot as plt
 import numpy as np
 
 import basisgeneration as bg
 import progbar as pb
-
-from math import factorial
 
 os.system('cls')
 os.system('clear')
@@ -65,13 +64,13 @@ while (len(finalbasis) <= expectedbasissize and len(oldb) > 0):
             # newb.append(state)
             finalbasis.append(state)
             if (dm == 1):
-                print("Padding with ones and adding to final", state)
+                print("Padding with 0's and adding to final", state)
         elif (no_of_p_unassigned == 0 and no_of_sites_unassigned > 0):
             state += [0] * int(no_of_sites_unassigned)
             # newb.append(state)
             finalbasis.append(state)
             if (dm == 1):
-                print("Padding with zeros and adding to final", state)
+                print("Padding with 1's and adding to final", state)
         else:
             temps0 = state + [0]
             temps1 = state + [1]
