@@ -16,8 +16,8 @@ os.system('clear')
 
 seed = [[0], [1]]
 
-N = 10
-n = 5
+N = 20
+n = 10
 
 oldb = seed[:]
 newb = []
@@ -68,6 +68,9 @@ while (len(finalbasis) <= expectedbasissize and len(oldb) > 0):
     # print("#" * 50)
     # time.sleep(1)
     # print(oldb)
+    if (oldb != []):
+        p = len(oldb[0])
+    pb.progressbar(p, 0, N)
 
 # print("Final length:", len(finalbasis))
 
