@@ -1,4 +1,4 @@
-# Fri Mar 30 23:52:24 IST 2018
+# Wed Aug 22 14:26:23 IST 2018
 
 import os
 import time
@@ -16,8 +16,8 @@ os.system('clear')
 
 seed = [[0], [1]]
 
-N = 16
-n = 8
+N = 10
+n = 5
 
 oldb = seed[:]
 newb = []
@@ -59,7 +59,7 @@ while (len(finalbasis) <= expectedbasissize and len(oldb) > 0):
             newb.append(temps0)
             newb.append(temps1)
             # print("Branching", state)
-        # print("Temp basis is now at\n", newb)
+        # print("Temp basis is now at\n", oldb)
         # print('-' * 50)
         # time.sleep(1)
         counter += 1
@@ -69,14 +69,15 @@ while (len(finalbasis) <= expectedbasissize and len(oldb) > 0):
     # time.sleep(1)
     # print(oldb)
 
-print("Final length:", len(finalbasis))
+# print("Final length:", len(finalbasis))
 
-if (len(finalbasis) == expectedbasissize):
-    print("SIZE MATCH")
-else:
-    print("SIZE MISMATCH")
+# if (len(finalbasis) == expectedbasissize):
+#     print("SIZE MATCH")
+# else:
+#     print("SIZE MISMATCH")
 
 print("Total number of steps required:", counter, "to generate",
-      expectedbasissize, "elements.")
+      expectedbasissize, "elements, efficiency = ",
+      round(expectedbasissize / counter, 3))
 
 # print("Final basis is\n", finalbasis)
