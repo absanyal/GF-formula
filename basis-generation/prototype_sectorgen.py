@@ -1,5 +1,6 @@
 # Wed Aug 22 14:26:23 IST 2018
 
+import itertools
 import os
 import time
 from math import factorial
@@ -17,8 +18,8 @@ dm = 0
 
 seed = [[0], [1]]
 
-N = 16
-n = 8
+N = 10
+n = N / 2
 
 oldb = seed[:]
 newb = []
@@ -107,11 +108,21 @@ fullbasis = []
 
 t1 = time.perf_counter()
 i = 0
-for s1 in finalbasis:
-    for s2 in finalbasis:
-        s = bg.state(s1, s2)
-        # print(i, s.getstate())
-        i += 1
-t2 = time.perf_counter()
+# for s1 in finalbasis:
+#     for s2 in finalbasis:
+#         s = bg.state(s1, s2)
+#         fullbasis.append(s)
+#         # s = np.array2string(np.array(s1 + s2))
+#         # print(i, s)
+#         # print(i, s.getstate())
+#         i += 1
 
+fullbasis = [bg.state(s[0], s[1]) for s in
+             itertools.product(finalbasis, finalbasis)]
+
+t2 = time.perf_counter()
+i = 0
+# for s in fullbasis:
+#     print(i, s.getstate())
+#     i += 1
 print("Full basis generated in", round(t2 - t1, 3), "seconds.")
