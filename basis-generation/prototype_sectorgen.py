@@ -105,9 +105,13 @@ print("Total number of steps required:", counter, "to generate",
 
 fullbasis = []
 
+t1 = time.perf_counter()
 i = 0
 for s1 in finalbasis:
     for s2 in finalbasis:
         s = bg.state(s1, s2)
-        print(i, s.getstate())
+        # print(i, s.getstate())
         i += 1
+t2 = time.perf_counter()
+
+print("Full basis generated in", round(t2 - t1, 3), "seconds.")
