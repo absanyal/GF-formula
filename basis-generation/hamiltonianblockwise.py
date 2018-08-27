@@ -1,4 +1,4 @@
-###### Sat Mar 31 03:35:13 IST 2018
+# Sat Mar 31 03:35:13 IST 2018
 
 import basisgeneration as bg
 import progbar as pb
@@ -13,11 +13,11 @@ N = 4
 n = 4
 Sz = (0.5 * n) % 1
 
-l_n1 = 2
+l_n1 = 1
 l_n2 = 2
 
 t = 1
-tprime = 2
+tprime = 1
 U = 4
 
 basis1 = bg.createlfsbasis(N, n, Sz, l_n1)
@@ -26,7 +26,7 @@ basis2 = bg.createlfsbasis(N, n, Sz, l_n2)
 
 def mel(state1, state2):
 
-    #calculate the hopping to right
+    # calculate the hopping to right
     term = 0
     for sigma in [-1, 1]:
         for i in range(N):
@@ -35,13 +35,26 @@ def mel(state1, state2):
                     s2 = bg.clonestate(state2)
                     s2.move(i, j, sigma)
                     termtemp = bg.innerproduct(state1, s2)
-                    #print(termtemp)
+                    # print(termtemp)
                     term += termtemp
 
     return term
 
 
+print("The basis lengths are", len(basis1), "and", len(basis2))
 H = np.zeros((len(basis1), len(basis2)), dtype=np.float)
+
+i = 0
+for s in basis1:
+    print(i, s.getstate())
+    i += 1
+
+print("*" * 50)
+
+i = 0
+for s in basis2:
+    print(i, s.getstate())
+    i += 1
 
 H_counter = 0
 for bi in range(len(basis1)):
@@ -57,7 +70,7 @@ for bi in range(len(basis1)):
             H[bi][bj] = tprime * mel(state1, state2)
             #H[bj][bi] = H[bi][bj]
 
-        if ( l_n1 == l_n2 and bi == bj):
+        if (l_n1 == l_n2 and bi == bj):
             a = basis1[bi]
             particles = np.array(a.upconfig) + np.array(a.downconfig)
             for nump in particles:
@@ -67,11 +80,15 @@ for bi in range(len(basis1)):
         H_counter += 1
         pb.progressbar(H_counter, 0, len(basis1) * len(basis2))
 
-print('\nThe Hamiltonian matrix is:')
-for i in range(len(basis1)):
-    for j in range(len(basis2)):
-        if (H[i, j] >= 0):
-            print(' ', H[i, j], end=' ', sep='')
-        else:
-            print(H[i, j], end=' ', sep='')
-    print('')
+# print('\nThe Hamiltonian matrix is:')
+# for i in range(len(basis1)):
+#     for j in range(len(basis2)):
+#         if (H[i, j] >= 0):
+#             print(' ', H[i, j], end=' ', sep='')
+#         else:
+#             print(H[i, j], end=' ', sep='')
+#     print('')
+
+filename = 'tau_' + str(N) + '_' + str(n) + '_' + \
+    str(l_n1) + '_' + str(l_n2) + '.txt'
+np.savetxt(filename, H, fmt='%4.1f', delimiter='\t')
