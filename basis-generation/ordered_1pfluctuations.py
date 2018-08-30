@@ -409,6 +409,59 @@ tau_22_13 = overlap(ordb_22, ordb_13)
 tau_13_04 = overlap(ordb_13, ordb_04)
 tau_04_13 = overlap(ordb_04, ordb_13)
 
+# print matrices to files
+np.savetxt('ordmatplots/tau_40_31.txt', tau_40_31,
+           fmt='%4.1f', delimiter='\t')
+np.savetxt('ordmatplots/tau_31_22.txt', tau_31_22,
+           fmt='%4.1f', delimiter='\t')
+np.savetxt('ordmatplots/tau_22_13.txt', tau_22_13,
+           fmt='%4.1f', delimiter='\t')
+np.savetxt('ordmatplots/tau_13_04.txt', tau_13_04,
+           fmt='%4.1f', delimiter='\t')
+
+##############################################################################
+
+# print the bases
+print('/'*20)
+print('/'*20)
+
+j = 0
+
+i = 0
+for s in ordb_40:
+    print(j, i, s.getstate(), sep='\t')
+    i += 1
+    j += 1
+print('-'*20)
+
+i = 0
+for s in ordb_31:
+    print(j, i, s.getstate(), sep='\t')
+    i += 1
+    j += 1
+print('-'*20)
+
+i = 0
+for s in ordb_22:
+    print(j, i, s.getstate(), sep='\t')
+    i += 1
+    j += 1
+print('-'*20)
+
+i = 0
+for s in ordb_13:
+    print(j, i, s.getstate(), sep='\t')
+    i += 1
+    j += 1
+print('-'*20)
+
+i = 0
+for s in ordb_04:
+    print(j, i, s.getstate(), sep='\t')
+    i += 1
+    j += 1
+print('-'*20)
+
 ##############################################################################
 ##############################################################################
 
@@ -556,7 +609,7 @@ plt.plot(w_list, A)
 # plt.savefig('ordmatplots/formula_inversion_U4.pdf')
 # plt.show()
 
-f = open('ordered1pdos.dat', 'w')
+f = open('ordmatplots/ordered1pdos.dat', 'w')
 
 for i in range(len(w_list)):
     f.write(str(w_list[i]) + '\t' + str(A[i]) + '\n')
