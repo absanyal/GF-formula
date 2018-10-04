@@ -11,6 +11,9 @@ program spinless_fermions
     integer :: sigma, ns1, ns2, alpha1, alpha2, beta1, beta2
 
     type (state) :: s1
+    type (state) :: s2
+    type (state) :: s3
+    type (state) :: s4
     type (state) :: ss1
     type (state) :: ss2
     type (state) :: ss3
@@ -19,13 +22,21 @@ program spinless_fermions
 
     ns = num_particles
 
-     call setstate(s1, 3, 2, 0, 0)
-     print *, getstate(s1)
-     ss1 = relegate0(s1)
-     print *, getstate(ss1)
-     ss2 = relegate1(s1)
-     print *, getstate(ss2)
-     ss3 = relegate0(ss1)
-     print *, getstate(ss3)
+    call setstate(s1, 3, 2, 0, 0)
+    call setstate(s2, 3, 2, 1, 0)
+    call setstate(s3, 3, 1, 0, 1)
+    call setstate(s4, 3, 1, 1, 1)
+    ! print *, getlstate(s1)
+    ! print *, getlstate(s2)
+    ! ss1 = relegate0(s1)
+    ! print *, getlstate(ss1)
+    ! ss2 = relegate1(s1)
+    ! print *, getlstate(ss2)
+    ! ss3 = relegate0(ss1)
+    ! print *, getlstate(ss3)
+
+    ! print *, checkvalidity(s1)
+
+    call findmels(s3, s3)
 
 end program spinless_fermions

@@ -49,9 +49,9 @@ contains
         type(state), intent(inout) :: s1
         type(state), intent(inout) :: s2
 
-        real :: Hu, Hl, Hs, Hsp1, Hsm1
+        integer :: Hu, Hl, Hs, Hsp1, Hsm1
 
-        real :: mel
+        integer :: mel
 
         integer :: vns1, valphas1, vbetas1
         integer :: vns2, valphas2, vbetas2
@@ -103,15 +103,17 @@ contains
 
     function checkvalidity(s1)
         type(state), intent(inout) :: s1
-        logical :: checkvalidity
+        integer :: checkvalidity
+        checkvalidity = 1
+        if (s1%s .lt. 2 .or. s1%n_s .lt. 0) then
+            checkvalidity = 0
+        end if
         if (s1%s .eq. 0 .and. s1%n_s .eq. 0 .and. &
             s1%alpha_s .eq. 0 .and. s1%beta_s .eq. 0) then
-            checkvalidity = .false.
+            checkvalidity = 0
         end if
-        if (s1%s .ge. 2 .and. s1%n_s .ge. 0) then
-            checkvalidity = .true.
-        else
-            checkvalidity = .false.
+        if (s1%s .le. s1%n_s - s1%alpha_s) then
+            checkvalidity = 0
         end if
     end function
 
@@ -121,26 +123,103 @@ contains
 
         if (s1%s - 1 .gt. s1%n_s - (0+s1%alpha_s)) then
             call setstate(relegate0, &
-                (s1%s)-1, s1%n_s - (0+s1%alpha_s), 0, s1%alpha_s)
+                (s1%s)-1, s1%n_s - (1+s1%alpha_s), 0, s1%alpha_s)
         end if
     end function
 
     function relegate1(s1)
         type(state), intent(inout) :: s1
         type(state) :: relegate1
-        if (s1%s .ge. s1%n_s - (1+s1%alpha_s)) then
+        if (s1%s .gt. s1%n_s - (s1%alpha_s)) then
             call setstate(relegate1, &
-                (s1%s)-1, s1%n_s - (1+s1%alpha_s), 1, s1%alpha_s)
+                (s1%s)-1, s1%n_s - (s1%alpha_s), 1, s1%alpha_s)
         end if
     
     end function
 
-    ! subroutine findmels
-    !     type(state), intent(inout) :: s1
-    !     type(state), intent(inout) :: s2
+    function getlstate(s1)
+        type(state), intent(inout) :: s1
+        character(len=10) :: getlstate
+        character(len=2) :: the_s
+        character(len=2) :: k
+        character(len=2) :: the_ns
+
+        write(the_s, "(A2)") s1%s
+        write(the_ns, "(A2)") s1%n_s
+
+        if (s1%alpha_s .eq. 0 .and. s1%beta_s .eq. 0) then
+            write(k, "(A)") " a"
+        end if
+
+        if (s1%alpha_s .eq. 0 .and. s1%beta_s .eq. 1) then
+            write(k, "(A)") " b"
+        end if
+
+        if (s1%alpha_s .eq. 1 .and. s1%beta_s .eq. 0) then
+            write(k, "(A)") " c"
+        end if
+
+        if (s1%alpha_s .eq. 1 .and. s1%beta_s .eq. 1) then
+            write(k, "(A)") " d"
+        end if
+
+        write(getlstate, "(I2, A2, I2)") s1%s, k, s1%n_s
+    
+    end function
 
 
-        
-    ! end subroutine findmels
+    recursive subroutine findmels(s1, s2)
+        type(state), intent(inout) :: s1
+        type(state), intent(inout) :: s2
+
+        type(state) :: s1s0
+        type(state) :: s1s1
+        type(state) :: s2s0
+        type(state) :: s2s1
+
+        integer :: meltest = 0
+
+        character(len=100) :: fmt
+
+        fmt = "(4A, I2)"
+
+        meltest = mel(s1, s2)
+
+        if (checkvalidity(s1) .eq. 1 .and. &
+        checkvalidity(s2) .eq. 1) then
+            write (*,fmt) getlstate(s1) , char(9), getlstate(s2),&
+             char(9), meltest
+        end if
+
+        s1s0 = relegate0(s1)
+        s1s1 = relegate1(s1)
+        s2s0 = relegate0(s2)
+        s2s1 = relegate1(s2)
+
+        if (meltest .ne. 0) then
+
+            if (checkvalidity(s1s0) .eq. 1 .and. &
+            checkvalidity(s2s0) .eq. 1) then
+                call findmels(s1s0, s2s0)
+            end if
+
+            if (checkvalidity(s1s0) .eq. 1 .and. &
+            checkvalidity(s2s1) .eq. 1) then
+                call findmels(s1s0, s2s1)
+            end if
+
+            if (checkvalidity(s1s1) .eq. 1 .and. &
+            checkvalidity(s2s0) .eq. 1) then
+                call findmels(s1s1, s2s0)
+            end if
+
+            if (checkvalidity(s1s1) .eq. 1 .and. &
+            checkvalidity(s2s1) .eq. 1) then
+                call findmels(s1s1, s2s1)
+            end if
+
+        end if
+
+    end subroutine findmels
 
 end module statemanip
