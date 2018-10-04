@@ -105,7 +105,7 @@ contains
         type(state), intent(inout) :: s1
         logical :: checkvalidity
         if (s1%s .eq. 0 .and. s1%n_s .eq. 0 .and. &
-            s1%alpha_s .eq. 0 .and. s1%beta .eq. 0) then
+            s1%alpha_s .eq. 0 .and. s1%beta_s .eq. 0) then
             checkvalidity = .false.
         end if
         if (s1%s .ge. 2 .and. s1%n_s .ge. 0) then
@@ -119,7 +119,7 @@ contains
         type(state), intent(inout) :: s1
         type(state) :: relegate0
 
-        if (s1%n_s - (0+s1%alpha_s) .ge. 0) then
+        if (s1%s - 1 .gt. s1%n_s - (0+s1%alpha_s)) then
             call setstate(relegate0, &
                 (s1%s)-1, s1%n_s - (0+s1%alpha_s), 0, s1%alpha_s)
         end if
@@ -128,7 +128,7 @@ contains
     function relegate1(s1)
         type(state), intent(inout) :: s1
         type(state) :: relegate1
-        if (s1%n_s - (1+s1%alpha_s) .ge. 1) then
+        if (s1%s .ge. s1%n_s - (1+s1%alpha_s)) then
             call setstate(relegate1, &
                 (s1%s)-1, s1%n_s - (1+s1%alpha_s), 1, s1%alpha_s)
         end if

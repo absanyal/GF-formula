@@ -19,7 +19,7 @@ program spinless_fermions
 
     ns = num_particles
 
-     call setstate(s1, 3, 2, 1, 0)
+     call setstate(s1, 3, 2, 0, 0)
      print *, getstate(s1)
      ss1 = relegate0(s1)
      print *, getstate(ss1)
