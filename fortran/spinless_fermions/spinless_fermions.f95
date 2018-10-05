@@ -3,8 +3,9 @@ program spinless_fermions
     use statemanip
     implicit none
 
-    integer :: num_sites = 4
-    integer :: num_particles = 2
+    integer :: num_sites = 6
+    integer :: num_particles = 3
+    integer :: level = 3
 
     integer :: smax
     integer :: ns
@@ -33,19 +34,43 @@ program spinless_fermions
 
     ! print *, checkvalidity(s1)
 
-    call findmels(s1, s1)
+    ! call splitstates(s1)
+    ! write (*,*) "**************************"
+    ! call splitstates(s2)
+    ! write (*,*) "**************************"
+    ! call splitstates(s3)
+    ! write (*,*) "**************************"
+    ! call splitstates(s4)
+    ! write (*,*) "**************************"
+
+    ! call findmels(s1, s1)
+    ! write (*,*) "**************************"
+    ! call findmels(s1, s2)
+    ! write (*,*) "**************************"
+    ! call findmels(s2, s2)
+    ! write (*,*) "**************************"
+    ! call findmels(s2, s3)
+    ! write (*,*) "**************************"
+    ! call findmels(s3, s3)
+    ! write (*,*) "**************************"
+    ! call findmels(s3, s4)
+    ! write (*,*) "**************************"
+    ! call findmels(s4, s4)
+    ! write (*,*) "**************************"
+
+    call findmelsatlevel(s1, s1, level)
     write (*,*) "**************************"
-    call findmels(s1, s2)
+    call findmelsatlevel(s1, s2, level)
     write (*,*) "**************************"
-    call findmels(s2, s2)
+    call findmelsatlevel(s2, s2, level)
     write (*,*) "**************************"
-    call findmels(s2, s3)
+    call findmelsatlevel(s2, s3, level)
     write (*,*) "**************************"
-    call findmels(s3, s3)
+    call findmelsatlevel(s3, s3, level)
     write (*,*) "**************************"
-    call findmels(s3, s4)
+    call findmelsatlevel(s3, s4, level)
     write (*,*) "**************************"
-    call findmels(s4, s4)
+    call findmelsatlevel(s4, s4, level)
     write (*,*) "**************************"
 
 end program spinless_fermions
