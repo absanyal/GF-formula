@@ -37,6 +37,6 @@ program spinless_fermions
 
     ! print *, checkvalidity(s1)
 
-    call findmels(s3, s3)
+    call findmels(s2, s3)
 
 end program spinless_fermions

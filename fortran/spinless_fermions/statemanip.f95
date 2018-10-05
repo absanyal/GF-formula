@@ -4,9 +4,9 @@ implicit none
 
     type state
         integer :: s = 0
-        integer :: n_s = 0
-        integer :: alpha_s = 0
-        integer :: beta_s = 0
+        integer :: ns = 0
+        integer :: alphas = 0
+        integer :: betas = 0
     end type state
 
 contains
@@ -29,18 +29,18 @@ contains
         integer, intent(in) :: valpha_s
         integer, intent(in) :: vbeta_s
         astate%s = vs
-        astate%n_s = vn_s
-        astate%alpha_s = valpha_s
-        astate%beta_s = vbeta_s
+        astate%ns = vn_s
+        astate%alphas = valpha_s
+        astate%betas = vbeta_s
     end subroutine setstate
 
     function getstate(astate)
         type(state), intent(inout) :: astate
         integer, dimension(4) :: getstate
         getstate(1) = astate%s
-        getstate(2) = astate%n_s
-        getstate(3) = astate%alpha_s
-        getstate(4) = astate%beta_s
+        getstate(2) = astate%ns
+        getstate(3) = astate%alphas
+        getstate(4) = astate%betas
     end function getstate
 
     function mel(s1, s2)
@@ -56,13 +56,13 @@ contains
         integer :: vns1, valphas1, vbetas1
         integer :: vns2, valphas2, vbetas2
 
-        vns1 = s1%n_s
-        valphas1 = s1%alpha_s
-        vbetas1 = s1%beta_s
+        vns1 = s1%ns
+        valphas1 = s1%alphas
+        vbetas1 = s1%betas
 
-        vns2 = s2%n_s
-        valphas2 = s2%alpha_s
-        vbetas2 = s2%beta_s
+        vns2 = s2%ns
+        valphas2 = s2%alphas
+        vbetas2 = s2%betas
 
         if (s1%s .eq. s2%s) then
             if (vns1 .ne. vns2 .or. &
@@ -105,14 +105,17 @@ contains
         type(state), intent(inout) :: s1
         integer :: checkvalidity
         checkvalidity = 1
-        if (s1%s .lt. 2 .or. s1%n_s .lt. 0) then
+        if (s1%s .lt. 2 .or. s1%ns .lt. 0) then
             checkvalidity = 0
         end if
-        if (s1%s .eq. 0 .and. s1%n_s .eq. 0 .and. &
-            s1%alpha_s .eq. 0 .and. s1%beta_s .eq. 0) then
+        if (s1%s .eq. 0 .and. s1%ns .eq. 0 .and. &
+            s1%alphas .eq. 0 .and. s1%betas .eq. 0) then
             checkvalidity = 0
         end if
-        if (s1%s .le. s1%n_s - s1%alpha_s) then
+        if (s1%s - 1 .lt. s1%ns - s1%alphas) then
+            checkvalidity = 0
+        end if
+        if (s1%alphas .gt. s1%ns) then
             checkvalidity = 0
         end if
     end function
@@ -120,21 +123,31 @@ contains
     function relegate0(s1)
         type(state), intent(inout) :: s1
         type(state) :: relegate0
-
-        if (s1%s - 1 .gt. s1%n_s - (0+s1%alpha_s)) then
-            call setstate(relegate0, &
-                (s1%s)-1, s1%n_s - (1+s1%alpha_s), 0, s1%alpha_s)
-        end if
+        integer :: sm1, nsm1, alphasm1, betasm1
+        ! if (s1%s - 1 .gt. s1%ns - (0+s1%alphas)) then
+        !     call setstate(relegate0, &
+        !         (s1%s)-1, s1%ns - (1+s1%alphas), 0, s1%alphas)
+        ! end if
+        sm1 = s1%s - 1
+        betasm1 = s1%alphas
+        alphasm1 = 0
+        nsm1 = s1%ns - betasm1
+        call setstate(relegate0, sm1, nsm1, alphasm1, betasm1)
     end function
 
     function relegate1(s1)
         type(state), intent(inout) :: s1
         type(state) :: relegate1
-        if (s1%s .gt. s1%n_s - (s1%alpha_s)) then
-            call setstate(relegate1, &
-                (s1%s)-1, s1%n_s - (s1%alpha_s), 1, s1%alpha_s)
-        end if
-    
+        integer :: sm1, nsm1, alphasm1, betasm1
+        ! if (s1%s .gt. s1%ns - (s1%alphas)) then
+        !     call setstate(relegate1, &
+        !         (s1%s)-1, s1%ns - (s1%alphas), 1, s1%alphas)
+        ! end if
+        sm1 = s1%s - 1
+        betasm1 = s1%alphas
+        alphasm1 = 1
+        nsm1 = s1%ns - betasm1
+        call setstate(relegate1, sm1, nsm1, alphasm1, betasm1)
     end function
 
     function getlstate(s1)
@@ -145,25 +158,25 @@ contains
         character(len=2) :: the_ns
 
         write(the_s, "(A2)") s1%s
-        write(the_ns, "(A2)") s1%n_s
+        write(the_ns, "(A2)") s1%ns
 
-        if (s1%alpha_s .eq. 0 .and. s1%beta_s .eq. 0) then
+        if (s1%alphas .eq. 0 .and. s1%betas .eq. 0) then
             write(k, "(A)") " a"
         end if
 
-        if (s1%alpha_s .eq. 0 .and. s1%beta_s .eq. 1) then
+        if (s1%alphas .eq. 0 .and. s1%betas .eq. 1) then
             write(k, "(A)") " b"
         end if
 
-        if (s1%alpha_s .eq. 1 .and. s1%beta_s .eq. 0) then
+        if (s1%alphas .eq. 1 .and. s1%betas .eq. 0) then
             write(k, "(A)") " c"
         end if
 
-        if (s1%alpha_s .eq. 1 .and. s1%beta_s .eq. 1) then
+        if (s1%alphas .eq. 1 .and. s1%betas .eq. 1) then
             write(k, "(A)") " d"
         end if
 
-        write(getlstate, "(I2, A2, I2)") s1%s, k, s1%n_s
+        write(getlstate, "(I2, A2, I2)") s1%s, k, s1%ns
     
     end function
 
