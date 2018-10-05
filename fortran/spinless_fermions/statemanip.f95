@@ -210,7 +210,6 @@ contains
         s2s1 = relegate1(s2)
 
         if (meltest .ne. 0) then
-
             if (checkvalidity(s1s0) .eq. 1 .and. &
             checkvalidity(s2s0) .eq. 1) then
                 call findmels(s1s0, s2s0)
