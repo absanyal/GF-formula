@@ -11,16 +11,27 @@ implicit none
 
 contains
 
-    integer function kdelta(x, y) result(output)
+    function kdelta(x, y)
         integer, intent(in) :: x
         integer, intent(in) :: y
+        integer :: kdelta
         if (x .eq. y) then
-            output = 1
+            kdelta = 1
         else
-            output = 0
+            kdelta = 0
         end if
         return
     end function kdelta
+
+    function factorial(n)
+        integer, intent(in) :: n
+        integer :: factorial
+        integer :: i = 1
+        factorial = 1
+        do i = 2, n, 1
+            factorial = factorial * i
+        end do
+    end function factorial
 
     subroutine setstate(astate, vs, vn_s, valpha_s, vbeta_s)
         type(state), intent(inout) :: astate
@@ -42,6 +53,54 @@ contains
         getstate(3) = astate%alphas
         getstate(4) = astate%betas
     end function getstate
+
+    function checkvalidity(s1)
+        type(state), intent(inout) :: s1
+        integer :: checkvalidity
+        checkvalidity = 1
+        if (s1%s .lt. 2 .or. s1%ns .lt. 0) then
+            checkvalidity = 0
+        end if
+        if (s1%s .eq. 0 .and. s1%ns .eq. 0 .and. &
+            s1%alphas .eq. 0 .and. s1%betas .eq. 0) then
+            checkvalidity = 0
+        end if
+        if (s1%s - 1 .lt. s1%ns - s1%alphas) then
+            checkvalidity = 0
+        end if
+        if (s1%alphas .gt. s1%ns) then
+            checkvalidity = 0
+        end if
+    end function
+
+    function getstatesize(s1)
+        type(state), intent(inout) :: s1
+        integer :: getstatesize
+        integer :: vs, vns, va, vb
+        vs = s1%s
+        vns = s1%ns
+        va = s1%alphas
+        vb = s1%betas
+        getstatesize = 0
+        if (checkvalidity(s1) .eq. 1) then
+            if (va .eq. 0 .and. vb .eq. 0) then
+                getstatesize = &
+                factorial(vs-1)/(factorial(vns)*factorial(vs-1-vns))
+            end if
+            if (va .eq. 0 .and. vb .eq. 1) then
+                getstatesize = &
+                factorial(vs-1)/(factorial(vns)*factorial(vs-1-vns))
+            end if
+            if (va .eq. 1 .and. vb .eq. 0) then
+                getstatesize = &
+                factorial(vs-1)/(factorial(vns-1)*factorial(vs-vns))
+            end if
+            if (va .eq. 1 .and. vb .eq. 1) then
+                getstatesize = &
+                factorial(vs-1)/(factorial(vns-1)*factorial(vs-vns))
+            end if
+        end if
+    end function
 
     function mel(s1, s2)
         implicit none
@@ -101,33 +160,10 @@ contains
 
     end function mel
 
-    function checkvalidity(s1)
-        type(state), intent(inout) :: s1
-        integer :: checkvalidity
-        checkvalidity = 1
-        if (s1%s .lt. 2 .or. s1%ns .lt. 0) then
-            checkvalidity = 0
-        end if
-        if (s1%s .eq. 0 .and. s1%ns .eq. 0 .and. &
-            s1%alphas .eq. 0 .and. s1%betas .eq. 0) then
-            checkvalidity = 0
-        end if
-        if (s1%s - 1 .lt. s1%ns - s1%alphas) then
-            checkvalidity = 0
-        end if
-        if (s1%alphas .gt. s1%ns) then
-            checkvalidity = 0
-        end if
-    end function
-
     function relegate0(s1)
         type(state), intent(inout) :: s1
         type(state) :: relegate0
         integer :: sm1, nsm1, alphasm1, betasm1
-        ! if (s1%s - 1 .gt. s1%ns - (0+s1%alphas)) then
-        !     call setstate(relegate0, &
-        !         (s1%s)-1, s1%ns - (1+s1%alphas), 0, s1%alphas)
-        ! end if
         sm1 = s1%s - 1
         betasm1 = s1%alphas
         alphasm1 = 0
@@ -139,10 +175,6 @@ contains
         type(state), intent(inout) :: s1
         type(state) :: relegate1
         integer :: sm1, nsm1, alphasm1, betasm1
-        ! if (s1%s .gt. s1%ns - (s1%alphas)) then
-        !     call setstate(relegate1, &
-        !         (s1%s)-1, s1%ns - (s1%alphas), 1, s1%alphas)
-        ! end if
         sm1 = s1%s - 1
         betasm1 = s1%alphas
         alphasm1 = 1
@@ -194,14 +226,14 @@ contains
 
         character(len=100) :: fmt
 
-        fmt = "(4A, I2)"
+        fmt = "(4A, I2, A, I2)"
 
 
         if (checkvalidity(s1) .eq. 1 .and. &
         checkvalidity(s2) .eq. 1) then
             meltest = mel(s1, s2)
             write (*,fmt) getlstate(s1) , char(9), getlstate(s2),&
-             char(9), meltest
+             char(9), meltest, char(9), getstatesize(s1) * getstatesize(s2)
         end if
 
         s1s0 = relegate0(s1)
@@ -249,15 +281,14 @@ contains
 
         character(len=100) :: fmt
 
-        fmt = "(4A, I2)"
-
+        fmt = "(4A, I2, A, I2)"
 
         if (checkvalidity(s1) .eq. 1 .and. &
         checkvalidity(s2) .eq. 1) then
             meltest = mel(s1, s2)
             if (s1%s .eq. level) then
                 write (*,fmt) getlstate(s1) , char(9), getlstate(s2),&
-                char(9), meltest
+                char(9), meltest, char(9), getstatesize(s1) * getstatesize(s2)
             end if
             if (s1%s .le. level) then
                 meltest = 0
@@ -299,11 +330,29 @@ contains
         type(state) :: s1s0
         type(state) :: s1s1
         if (checkvalidity(s1) .eq. 1) then
-            write (*,*) getlstate(s1)
+            write (*,*) getlstate(s1), char(9), getstatesize(s1)
             s1s0 = relegate0(s1)
             call splitstates(s1s0)
             s1s1 = relegate1(s1)
             call splitstates(s1s1)
+        end if
+    end subroutine
+
+    recursive subroutine splitstatesatlevel(s1, level)
+        type(state), intent(inout) :: s1
+        integer, intent(in) :: level
+        type(state) :: s1s0
+        type(state) :: s1s1
+        if (checkvalidity(s1) .eq. 1) then
+            if (s1%s .eq. level) then
+                write (*,*) getlstate(s1), char(9), getstatesize(s1)
+            end if
+            if (s1%s .gt. level) then
+                s1s0 = relegate0(s1)
+                call splitstatesatlevel(s1s0, level)
+                s1s1 = relegate1(s1)
+                call splitstatesatlevel(s1s1, level)
+            end if
         end if
     end subroutine
 
