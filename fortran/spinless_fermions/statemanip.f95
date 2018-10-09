@@ -226,14 +226,14 @@ contains
 
         character(len=100) :: fmt
 
-        fmt = "(4A, I2, A, I2)"
+        fmt = "(4A, I2, A, 2I2)"
 
 
         if (checkvalidity(s1) .eq. 1 .and. &
         checkvalidity(s2) .eq. 1) then
             meltest = mel(s1, s2)
             write (*,fmt) getlstate(s1) , char(9), getlstate(s2),&
-             char(9), meltest, char(9), getstatesize(s1) * getstatesize(s2)
+             char(9), meltest, char(9), getstatesize(s1), getstatesize(s2)
         end if
 
         s1s0 = relegate0(s1)
@@ -281,14 +281,14 @@ contains
 
         character(len=100) :: fmt
 
-        fmt = "(4A, I2, A, I2)"
+        fmt = "(4A, I2, A, 2I2)"
 
         if (checkvalidity(s1) .eq. 1 .and. &
         checkvalidity(s2) .eq. 1) then
             meltest = mel(s1, s2)
             if (s1%s .eq. level) then
                 write (*,fmt) getlstate(s1) , char(9), getlstate(s2),&
-                char(9), meltest, char(9), getstatesize(s1) * getstatesize(s2)
+                char(9), meltest, char(9), getstatesize(s1), getstatesize(s2)
             end if
             if (s1%s .le. level) then
                 meltest = 0
