@@ -5,15 +5,26 @@ program spinless_fermions
 
     integer :: num_sites = 6
     integer :: num_particles = 3
-    integer :: level = 4
+    integer :: level = 2
 
     integer :: smax
     integer :: ns
+
+    integer :: nlines
+    ! integer, allocatable :: rawdata(:, :)
+    integer, allocatable :: sizedata(:)
+    integer, allocatable :: ordinatedata(:)
+    ! integer :: sizedata
 
     type (state) :: s1
     type (state) :: s2
     type (state) :: s3
     type (state) :: s4
+
+    integer :: i
+    integer :: junk
+
+    character(len = 100) :: fname
 
     smax = num_sites - 1
 
@@ -26,52 +37,102 @@ program spinless_fermions
 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    ! call splitstates(s1)
-    ! write (*,*) "********************************************"
-    ! call splitstates(s2)
-    ! write (*,*) "********************************************"
-    ! call splitstates(s3)
-    ! write (*,*) "********************************************"
-    ! call splitstates(s4)
-    ! write (*,*) "********************************************"
+    fname = 'splitstates.dat'
+    open(10, file = trim(fname))
 
-    ! call splitstatesatlevel(s1, level)
-    ! write (*,*) "********************************************"
-    ! call splitstatesatlevel(s2, level)
-    ! write (*,*) "********************************************"
-    ! call splitstatesatlevel(s3, level)
-    ! write (*,*) "********************************************"
-    ! call splitstatesatlevel(s4, level)
-    ! write (*,*) "********************************************"
+    call splitstates(10, s1)
+    call splitstates(10, s2)
+    call splitstates(10, s3)
+    call splitstates(10, s4)
 
-    call findmels(s1, s1)
-    write (*,*) "********************************************"
-    call findmels(s1, s2)
-    write (*,*) "********************************************"
-    call findmels(s2, s2)
-    write (*,*) "********************************************"
-    call findmels(s2, s3)
-    write (*,*) "********************************************"
-    call findmels(s3, s3)
-    write (*,*) "********************************************"
-    call findmels(s3, s4)
-    write (*,*) "********************************************"
-    call findmels(s4, s4)
-    ! write (*,*) "********************************************"
+    close(10)
 
-    ! call findmelsatlevel(s1, s1, level)
-    ! write (*,*) "********************************************"
-    ! call findmelsatlevel(s1, s2, level)
-    ! write (*,*) "********************************************"
-    ! call findmelsatlevel(s2, s2, level)
-    ! write (*,*) "********************************************"
-    ! call findmelsatlevel(s2, s3, level)
-    ! write (*,*) "********************************************"
-    ! call findmelsatlevel(s3, s3, level)
-    ! write (*,*) "********************************************"
-    ! call findmelsatlevel(s3, s4, level)
-    ! write (*,*) "********************************************"
-    ! call findmelsatlevel(s4, s4, level)
-    ! write (*,*) "********************************************"
+    fname = 'splitstatesatlevel.dat'
+    open(10, file = trim(fname))
+
+    call splitstatesatlevel(10, s1, level)
+    call splitstatesatlevel(10, s2, level)
+    call splitstatesatlevel(10, s3, level)
+    call splitstatesatlevel(10, s4, level)
+
+    close(10)
+
+    fname = 'splitstatesraw.dat'
+    open(10, file = trim(fname))
+
+    call splitstatesraw(10, s1)
+    call splitstatesraw(10, s2)
+    call splitstatesraw(10, s3)
+    call splitstatesraw(10, s4)
+
+    close(10)
+
+    fname = 'splitstatesatlevelraw.dat'
+    open(10, file = trim(fname))
+
+    call splitstatesatlevelraw(10, s1, level)
+    call splitstatesatlevelraw(10, s2, level)
+    call splitstatesatlevelraw(10, s3, level)
+    call splitstatesatlevelraw(10, s4, level)
+
+    close(10)
+
+    fname = 'findmels.dat'
+    open(10, file = trim(fname))
+
+    call findmels(10, s1, s1)
+    call findmels(10, s1, s2)
+    call findmels(10, s2, s2)
+    call findmels(10, s2, s3)
+    call findmels(10, s3, s3)
+    call findmels(10, s3, s4)
+    call findmels(10, s4, s4)
+
+    close(10)
+
+    fname = 'findmelsatlevel.dat'
+    open(10, file = trim(fname))
+
+    call findmelsatlevel(10, s1, s1, level)
+    call findmelsatlevel(10, s1, s2, level)
+    call findmelsatlevel(10, s2, s2, level)
+    call findmelsatlevel(10, s2, s3, level)
+    call findmelsatlevel(10, s3, s3, level)
+    call findmelsatlevel(10, s3, s4, level)
+    call findmelsatlevel(10, s4, s4, level)
+
+    close(10)
+
+    nlines = 0
+
+    open(11, file = 'splitstatesatlevelraw.dat')
+    do
+        read(11, *, end = 110)
+        nlines = nlines + 1
+    end do
+    110 close(11)
+
+    open(10, file = 'stateordinates.dat')
+    open(11, file = 'splitstatesatlevelraw.dat')
+
+    ! print *, nlines
+    
+    ! allocate(rawdata(nlines, 5))
+    allocate(sizedata(nlines))
+
+    
+    ! rawdata = transpose(rawdata)
+    
+    do i = 1, nlines
+        read(11, *) junk, junk, junk, junk, sizedata(i)
+        if ( i .eq. 1) then
+            write (*,*) sizedata(i), 0
+        else
+            write (*,*) sizedata(i), sum(sizedata(1:i-1))
+        end if
+    end do
+    close(10)
+    close(11)
+    deallocate(sizedata)
 
 end program spinless_fermions

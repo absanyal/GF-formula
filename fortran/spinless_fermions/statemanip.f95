@@ -213,7 +213,7 @@ contains
     end function
 
 
-    recursive subroutine findmels(s1, s2)
+    recursive subroutine findmels(writeto, s1, s2)
         type(state), intent(inout) :: s1
         type(state), intent(inout) :: s2
 
@@ -222,17 +222,17 @@ contains
         type(state) :: s2s0
         type(state) :: s2s1
 
+        integer, intent(in) :: writeto
+
         integer :: meltest = 0
 
         character(len=100) :: fmt
-
         fmt = "(4A, I2, A, 2I2)"
-
 
         if (checkvalidity(s1) .eq. 1 .and. &
         checkvalidity(s2) .eq. 1) then
             meltest = mel(s1, s2)
-            write (*,fmt) getlstate(s1) , char(9), getlstate(s2),&
+            write (writeto,fmt) getlstate(s1) , char(9), getlstate(s2),&
              char(9), meltest, char(9), getstatesize(s1), getstatesize(s2)
         end if
 
@@ -244,29 +244,29 @@ contains
         if (meltest .ne. 0) then
             if (checkvalidity(s1s0) .eq. 1 .and. &
             checkvalidity(s2s0) .eq. 1) then
-                call findmels(s1s0, s2s0)
+                call findmels(writeto, s1s0, s2s0)
             end if
 
             if (checkvalidity(s1s0) .eq. 1 .and. &
             checkvalidity(s2s1) .eq. 1) then
-                call findmels(s1s0, s2s1)
+                call findmels(writeto, s1s0, s2s1)
             end if
 
             if (checkvalidity(s1s1) .eq. 1 .and. &
             checkvalidity(s2s0) .eq. 1) then
-                call findmels(s1s1, s2s0)
+                call findmels(writeto, s1s1, s2s0)
             end if
 
             if (checkvalidity(s1s1) .eq. 1 .and. &
             checkvalidity(s2s1) .eq. 1) then
-                call findmels(s1s1, s2s1)
+                call findmels(writeto, s1s1, s2s1)
             end if
 
         end if
 
     end subroutine findmels
 
-    recursive subroutine findmelsatlevel(s1, s2, level)
+    recursive subroutine findmelsatlevel(writeto, s1, s2, level)
         type(state), intent(inout) :: s1
         type(state), intent(inout) :: s2
 
@@ -275,8 +275,8 @@ contains
         type(state) :: s2s0
         type(state) :: s2s1
 
+        integer, intent(in) :: writeto
         integer, intent(in) :: level
-
         integer :: meltest = 0
 
         character(len=100) :: fmt
@@ -287,7 +287,7 @@ contains
         checkvalidity(s2) .eq. 1) then
             meltest = mel(s1, s2)
             if (s1%s .eq. level) then
-                write (*,fmt) getlstate(s1) , char(9), getlstate(s2),&
+                write (writeto,fmt) getlstate(s1) , char(9), getlstate(s2),&
                 char(9), meltest, char(9), getstatesize(s1), getstatesize(s2)
             end if
             if (s1%s .le. level) then
@@ -303,57 +303,104 @@ contains
         if (meltest .ne. 0) then
             if (checkvalidity(s1s0) .eq. 1 .and. &
             checkvalidity(s2s0) .eq. 1) then
-                call findmelsatlevel(s1s0, s2s0, level)
+                call findmelsatlevel(writeto, s1s0, s2s0, level)
             end if
 
             if (checkvalidity(s1s0) .eq. 1 .and. &
             checkvalidity(s2s1) .eq. 1) then
-                call findmelsatlevel(s1s0, s2s1, level)
+                call findmelsatlevel(writeto, s1s0, s2s1, level)
             end if
 
             if (checkvalidity(s1s1) .eq. 1 .and. &
             checkvalidity(s2s0) .eq. 1) then
-                call findmelsatlevel(s1s1, s2s0, level)
+                call findmelsatlevel(writeto, s1s1, s2s0, level)
             end if
 
             if (checkvalidity(s1s1) .eq. 1 .and. &
             checkvalidity(s2s1) .eq. 1) then
-                call findmelsatlevel(s1s1, s2s1, level)
+                call findmelsatlevel(writeto, s1s1, s2s1, level)
             end if
 
         end if
 
     end subroutine findmelsatlevel
 
-    recursive subroutine splitstates(s1)
+    recursive subroutine splitstatesraw(writeto, s1)
         type(state), intent(inout) :: s1
+        integer , intent(in) :: writeto
+
         type(state) :: s1s0
         type(state) :: s1s1
+
         if (checkvalidity(s1) .eq. 1) then
-            write (*,*) getlstate(s1), char(9), getstatesize(s1)
+            write (writeto,*) getstate(s1), getstatesize(s1)
             s1s0 = relegate0(s1)
-            call splitstates(s1s0)
+            call splitstatesraw(writeto, s1s0)
             s1s1 = relegate1(s1)
-            call splitstates(s1s1)
+            call splitstatesraw(writeto, s1s1)
         end if
+
     end subroutine
 
-    recursive subroutine splitstatesatlevel(s1, level)
+    recursive subroutine splitstatesatlevelraw(writeto, s1, level)
         type(state), intent(inout) :: s1
+        integer , intent(in) :: writeto
         integer, intent(in) :: level
+
         type(state) :: s1s0
         type(state) :: s1s1
+
         if (checkvalidity(s1) .eq. 1) then
             if (s1%s .eq. level) then
-                write (*,*) getlstate(s1), char(9), getstatesize(s1)
+                write (writeto,*) getstate(s1),getstatesize(s1)
             end if
             if (s1%s .gt. level) then
                 s1s0 = relegate0(s1)
-                call splitstatesatlevel(s1s0, level)
+                call splitstatesatlevelraw(writeto, s1s0, level)
                 s1s1 = relegate1(s1)
-                call splitstatesatlevel(s1s1, level)
+                call splitstatesatlevelraw(writeto, s1s1, level)
             end if
         end if
+
+    end subroutine
+
+    recursive subroutine splitstates(writeto, s1)
+        type(state), intent(inout) :: s1
+        integer , intent(in) :: writeto
+
+        type(state) :: s1s0
+        type(state) :: s1s1
+
+        if (checkvalidity(s1) .eq. 1) then
+            write (writeto,*) getlstate(s1), char(9), getstatesize(s1)
+            s1s0 = relegate0(s1)
+            call splitstates(writeto, s1s0)
+            s1s1 = relegate1(s1)
+            call splitstates(writeto, s1s1)
+        end if
+
+    end subroutine
+
+    recursive subroutine splitstatesatlevel(writeto, s1, level)
+        type(state), intent(inout) :: s1
+        integer , intent(in) :: writeto
+        integer, intent(in) :: level
+
+        type(state) :: s1s0
+        type(state) :: s1s1
+
+        if (checkvalidity(s1) .eq. 1) then
+            if (s1%s .eq. level) then
+                write (writeto,*) getlstate(s1), char(9), getstatesize(s1)
+            end if
+            if (s1%s .gt. level) then
+                s1s0 = relegate0(s1)
+                call splitstatesatlevel(writeto, s1s0, level)
+                s1s1 = relegate1(s1)
+                call splitstatesatlevel(writeto, s1s1, level)
+            end if
+        end if
+
     end subroutine
 
 end module statemanip
