@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import dot, transpose, shape, pi
 from numpy.linalg import inv
+import matplotlib.pyplot as plt
 
 I = np.complex(0, 1)
 eta = 0.1
@@ -41,19 +42,23 @@ tau_bd_ac = transpose(tau_ac_bd)
 
 # print(tau_bd_ac)
 
-# H = [
-#     [0, 1, 0, 0, 0, 0],
-#     [1, 0, 1, 1, 0, 0],
-#     [0, 1, 0, 0, 1, 0],
-#     [0, 1, 0, 0, 1, 0],
-#     [0, 0, 1, 1, 0, 1],
-#     [0, 0, 0, 0, 1, 0]
-# ]
+H = [
+    [0, 1, 0, 0, 0, 0],
+    [1, 0, 1, 1, 0, 0],
+    [0, 1, 0, 0, 1, 0],
+    [0, 1, 0, 0, 1, 0],
+    [0, 0, 1, 1, 0, 1],
+    [0, 0, 0, 0, 1, 0]
+]
 
-# for w in w_list:
-#     fG = G(H, w)
-#     snf = 1/len(H)
-#     A.append((-snf / pi) * np.imag(np.trace(fG)))
+for w in w_list:
+    fG = G(H, w)
+    snf = 1/len(H)
+    A.append((-snf / pi) * np.imag(np.trace(fG)))
+
+plt.plot(w_list, A)
+
+A = []
 
 for w in w_list:
 
@@ -125,3 +130,7 @@ for i in range(len(w_list)):
     f.write(str(w_list[i]) + '\t' + str(A[i]) + '\n')
 
 f.close()
+
+plt.plot(w_list, A)
+
+plt.show()
