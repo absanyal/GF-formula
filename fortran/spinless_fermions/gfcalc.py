@@ -43,24 +43,15 @@ tau_bd_ac = transpose(tau_ac_bd)
 
 # print(tau_bd_ac)
 
-# H = [
-#     [0, 1, 0, 0, 0, 0],
-#     [1, 0, 1, 1, 0, 0],
-#     [0, 1, 0, 0, 1, 0],
-#     [0, 1, 0, 0, 1, 0],
-#     [0, 0, 1, 1, 0, 1],
-#     [0, 0, 0, 0, 1, 0]
-# ]
-
-H = array([
-    [0, 1, 0],
-    [1, 0, 1],
-    [0, 1, 0]
-])
+H = [
+    [0, 1, 0, ],
+    [1, 0, 1, ],
+    [0, 1, 0, ],
+]
 
 for w in w_list:
     fG = G(H, w)
-    snf = 1/len(H)
+    snf = 1 / len(H)
     A.append((-snf / pi) * np.imag(np.trace(fG)))
 
 plt.plot(w_list, A)
@@ -146,35 +137,35 @@ A = []
 
 # print(fG_ac[1:3, 1:3])
 
-H1 = array([[0]])
-H2 = array([[0]])
-H3 = array([[0]])
+H1 = [
+    [0]
+]
+H2 = [
+    [0, 1],
+    [1, 0]
+]
 
-tau12 = array([[0]])
-tau21 = array([[0]])
-tau23 = array([[0]])
-tau32 = array([[0]])
+tau12 = [
+    [1, 0],
+]
+
+tau21 = transpose(tau12)
+
+print(tau21)
 
 for w in w_list:
-
     g1 = G(H1, w)
     g2 = G(H2, w)
-    g3 = G(H3, w)
 
-    lg1 = inv(inv(g1))
-    lg2 = inv(inv(g2) - tmm(tau21, g1, tau12))
-    lg3 = inv(inv(g3) - tmm(tau32, g2, tau23))
+    fG1 = inv(inv(g1) - tmm(tau12, g2, tau21))
+    fG2 = inv(inv(g2) - tmm(tau21, g1, tau12))
 
-    rg3 = inv(inv(g3))
-    rg2 = inv(inv(g2) - tmm(tau23, g3, tau32))
-    rg1 = inv(inv(g1) - tmm(tau12, g2, tau21))
+    snf = 1/(len(g1) + len(g2))
 
-    fG1 = inv(inv(g1) - tmm(tau12, rg2, tau21))
-    fG2 = inv(inv(g2) - tmm(tau21, lg1, tau12) - tmm(tau23, rg3, tau32))
-    fG3 = inv(inv(g3) - tmm(tau32, lg2, tau23))
-
-    A.append((1/3) * (-1/pi) * imag(trace(fG1) + trace(fG2) + trace(fG2)))
+    A.append((-snf/pi) * imag(trace(fG1) + trace(fG2)))
 
 plt.plot(w_list, A)
+
+print(np.dot(tau12, tau21))
 
 plt.show()
