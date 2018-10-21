@@ -108,8 +108,9 @@ contains
         type(state), intent(inout) :: s1
         type(state), intent(inout) :: s2
 
-        integer :: Hu, Hl, Hs, Hsp1, Hsm1
+        ! integer :: isdiagonal
 
+        integer :: Hu, Hl, Hs, Hsp1, Hsm1
         integer :: mel
 
         integer :: vns1, valphas1, vbetas1
@@ -123,10 +124,13 @@ contains
         valphas2 = s2%alphas
         vbetas2 = s2%betas
 
+        ! isdiagonal = 1
+
         if (s1%s .eq. s2%s) then
             if (vns1 .ne. vns2 .or. &
                 valphas1 .ne. valphas2 .or. &
                 vbetas1 .ne. vbetas2) then
+                ! isdiagonal = 0
                 Hsp1 = kdelta(vns1, vns2) * kdelta(valphas1, valphas2) * &
                         (kdelta(vbetas1, vbetas2 + 1) &
                         + kdelta(vbetas1, vbetas2 - 1))
@@ -147,7 +151,7 @@ contains
 
             if (vns1 .eq. vns2 .and. &
                 valphas1 .eq. valphas2 .and. &
-                vbetas1 .eq. vbetas2 .and. s1%s .gt. 2) then
+                vbetas1 .eq. vbetas2) then
                 Hl = 1
             else
                 Hl = 0
@@ -213,9 +217,12 @@ contains
     end function
 
 
-    recursive subroutine findmels(writeto, s1, s2)
+    recursive subroutine findmels(writeto, s1, s2, isdiagonal)
         type(state), intent(inout) :: s1
         type(state), intent(inout) :: s2
+        integer, intent(in) :: isdiagonal
+        
+        integer :: setisdiag
 
         type(state) :: s1s0
         type(state) :: s1s1
@@ -223,15 +230,24 @@ contains
         type(state) :: s2s1
 
         integer, intent(in) :: writeto
+        character(len=100) :: fmt
 
         integer :: meltest = 0
+        setisdiag = isdiagonal
 
-        character(len=100) :: fmt
+        if (s1%alphas .ne. s2%alphas .or. s1%betas .ne. s2%betas .or. &
+            s1%ns .ne. s2%ns) then
+            setisdiag = 0
+        end if
+
         fmt = "(4A, I2, A, 2I2)"
 
         if (checkvalidity(s1) .eq. 1 .and. &
         checkvalidity(s2) .eq. 1) then
             meltest = mel(s1, s2)
+            if (s1%s .eq. 2 .and. setisdiag .eq. 1) then
+                meltest = 0
+            end if
             write (writeto,fmt) getlstate(s1) , char(9), getlstate(s2),&
              char(9), meltest, char(9), getstatesize(s1), getstatesize(s2)
         end if
@@ -244,22 +260,22 @@ contains
         if (meltest .ne. 0) then
             if (checkvalidity(s1s0) .eq. 1 .and. &
             checkvalidity(s2s0) .eq. 1) then
-                call findmels(writeto, s1s0, s2s0)
+                call findmels(writeto, s1s0, s2s0, setisdiag)
             end if
 
             if (checkvalidity(s1s0) .eq. 1 .and. &
             checkvalidity(s2s1) .eq. 1) then
-                call findmels(writeto, s1s0, s2s1)
+                call findmels(writeto, s1s0, s2s1, setisdiag)
             end if
 
             if (checkvalidity(s1s1) .eq. 1 .and. &
             checkvalidity(s2s0) .eq. 1) then
-                call findmels(writeto, s1s1, s2s0)
+                call findmels(writeto, s1s1, s2s0, setisdiag)
             end if
 
             if (checkvalidity(s1s1) .eq. 1 .and. &
             checkvalidity(s2s1) .eq. 1) then
-                call findmels(writeto, s1s1, s2s1)
+                call findmels(writeto, s1s1, s2s1, setisdiag)
             end if
 
         end if

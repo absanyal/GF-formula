@@ -80,13 +80,13 @@ program spinless_fermions
     fname = 'findmels.dat'
     open(10, file = trim(fname))
 
-    call findmels(10, s1, s1)
-    call findmels(10, s1, s2)
-    call findmels(10, s2, s2)
-    call findmels(10, s2, s3)
-    call findmels(10, s3, s3)
-    call findmels(10, s3, s4)
-    call findmels(10, s4, s4)
+    call findmels(10, s1, s1, 1)
+    call findmels(10, s1, s2, 0)
+    call findmels(10, s2, s2, 1)
+    call findmels(10, s2, s3, 0)
+    call findmels(10, s3, s3, 1)
+    call findmels(10, s3, s4, 0)
+    call findmels(10, s4, s4, 1)
 
     close(10)
 
@@ -103,36 +103,36 @@ program spinless_fermions
 
     close(10)
 
-    nlines = 0
+    ! nlines = 0
 
-    open(11, file = 'splitstatesatlevelraw.dat')
-    do
-        read(11, *, end = 110)
-        nlines = nlines + 1
-    end do
-    110 close(11)
+    ! open(11, file = 'splitstatesatlevelraw.dat')
+    ! do
+    !     read(11, *, end = 110)
+    !     nlines = nlines + 1
+    ! end do
+    ! 110 close(11)
 
-    open(10, file = 'stateordinates.dat')
-    open(11, file = 'splitstatesatlevelraw.dat')
+    ! open(10, file = 'stateordinates.dat')
+    ! open(11, file = 'splitstatesatlevelraw.dat')
 
-    ! print *, nlines
+    ! ! print *, nlines
     
-    ! allocate(rawdata(nlines, 5))
-    allocate(sizedata(nlines))
+    ! ! allocate(rawdata(nlines, 5))
+    ! allocate(sizedata(nlines))
 
     
-    ! rawdata = transpose(rawdata)
+    ! ! rawdata = transpose(rawdata)
     
-    do i = 1, nlines
-        read(11, *) junk, junk, junk, junk, sizedata(i)
-        if ( i .eq. 1) then
-            write (*,*) sizedata(i), 0
-        else
-            write (*,*) sizedata(i), sum(sizedata(1:i-1))
-        end if
-    end do
-    close(10)
-    close(11)
-    deallocate(sizedata)
+    ! do i = 1, nlines
+    !     read(11, *) junk, junk, junk, junk, sizedata(i)
+    !     if ( i .eq. 1) then
+    !         write (*,*) sizedata(i), 0
+    !     else
+    !         write (*,*) sizedata(i), sum(sizedata(1:i-1))
+    !     end if
+    ! end do
+    ! close(10)
+    ! close(11)
+    ! deallocate(sizedata)
 
 end program spinless_fermions
