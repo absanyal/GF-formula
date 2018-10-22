@@ -58,7 +58,7 @@ contains
         type(state), intent(inout) :: s1
         integer :: checkvalidity
         checkvalidity = 1
-        if (s1%s .lt. 2 .or. s1%ns .lt. 0) then
+        if (s1%s .lt. 1 .or. s1%ns .lt. 0) then
             checkvalidity = 0
         end if
         if (s1%s .eq. 0 .and. s1%ns .eq. 0 .and. &
@@ -124,40 +124,65 @@ contains
         valphas2 = s2%alphas
         vbetas2 = s2%betas
 
-        ! isdiagonal = 1
+        Hs = 0
+        Hsp1 = 0
+        Hsm1 = 0
 
         if (s1%s .eq. s2%s) then
-            if (vns1 .ne. vns2 .or. &
-                valphas1 .ne. valphas2 .or. &
-                vbetas1 .ne. vbetas2) then
-                ! isdiagonal = 0
-                Hsp1 = kdelta(vns1, vns2) * kdelta(valphas1, valphas2) * &
-                        (kdelta(vbetas1, vbetas2 + 1) &
-                        + kdelta(vbetas1, vbetas2 - 1))
-                
-                Hsm1 = kdelta(vns1, vns2) * kdelta(vbetas1, vbetas2) * &
-                        (kdelta(valphas1, valphas2 + 1) &
-                        + kdelta(valphas1, valphas2 - 1))
-                
-                Hs = kdelta(vns1, vns2-1) * kdelta(valphas1, valphas2-1) * &
-                        kdelta(vbetas1, vbetas2 + 1) + &
-                    kdelta(vns1, vns2+1) * kdelta(valphas1, valphas2+1) * &
-                        kdelta(vbetas1, vbetas2 - 1)
-            else
-                Hs = 0
-                Hsp1 = 0
-                Hsm1 = 0
-            end if
+            ! if (vns1 .ne. vns2 .or. &
+            !     valphas1 .ne. valphas2 .or. &
+            !     vbetas1 .ne. vbetas2) then
+                if (s1%s .ge. 1) then
+                    Hsp1 = kdelta(vns1, vns2) &
+                    * kdelta(valphas1, valphas2) * &
+                            (kdelta(vbetas1, vbetas2 + 1) &
+                            + kdelta(vbetas1, vbetas2 - 1))
+                    
+                    Hsm1 = kdelta(vns1, vns2) &
+                    * kdelta(vbetas1, vbetas2) * &
+                            (kdelta(valphas1, valphas2 + 1) &
+                            + kdelta(valphas1, valphas2 - 1))
+                    
+                    Hs = kdelta(vns1, vns2-1) &
+                    * kdelta(valphas1, valphas2-1) * &
+                            kdelta(vbetas1, vbetas2 + 1) + &
+                        kdelta(vns1, vns2+1) &
+                        * kdelta(valphas1, valphas2+1) * &
+                            kdelta(vbetas1, vbetas2 - 1)
+                end if
+                ! if (s1%s .eq. 1) then
+                !     ! Hsm1 = 0
+                !     Hs = 0
+                !     Hsp1 = 0
+                ! end if
+            ! end if
+
+            Hl = 0
 
             if (vns1 .eq. vns2 .and. &
                 valphas1 .eq. valphas2 .and. &
-                vbetas1 .eq. vbetas2) then
+                vbetas1 .eq. vbetas2 .and. s1%s .gt. 1) then
                 Hl = 1
-            else
-                Hl = 0
             end if
-            
+
             mel = Hs + Hsp1 + Hsm1 + Hl
+
+            ! if (s1%s .eq. 1 .and. mel .eq. 0) then
+            !     if (vns1 .eq. vns2 .and. &
+            !         valphas1 .eq. valphas2 .and. &
+            !         vbetas1 .eq. vbetas2) then
+            !         mel = 1
+            !     end if
+            ! end if
+
+            ! if (s1%s .eq. 1 .and. mel .ne. 1) then
+            !     if (vns1 .ne. vns2 .or. &
+            !         valphas1 .ne. valphas2 .or. &
+            !         vbetas1 .ne. vbetas2) then
+            !         mel = 1
+            !     end if
+            ! end if
+            
         else
             mel = 0
         end if
@@ -245,17 +270,27 @@ contains
         if (checkvalidity(s1) .eq. 1 .and. &
         checkvalidity(s2) .eq. 1) then
             meltest = mel(s1, s2)
+            if (setisdiag .ne. 1 .and. s1%s .eq. 1) then
+                meltest = kdelta(s1%ns, s2%ns) &
+                * kdelta(s1%alphas, s2%alphas) &
+                * kdelta(s1%betas, s2%betas)
+            end if
             if (s1%s .eq. 2 .and. setisdiag .eq. 1) then
                 meltest = 0
             end if
+            ! if (s1%s .eq. 1 .and. setisdiag .eq. 0) then
+            !     meltest = mel(s1, s2)
+            ! end if
             write (writeto,fmt) getlstate(s1) , char(9), getlstate(s2),&
              char(9), meltest, char(9), getstatesize(s1), getstatesize(s2)
         end if
 
+        
         s1s0 = relegate0(s1)
         s1s1 = relegate1(s1)
         s2s0 = relegate0(s2)
         s2s1 = relegate1(s2)
+        
 
         if (meltest .ne. 0) then
             if (checkvalidity(s1s0) .eq. 1 .and. &

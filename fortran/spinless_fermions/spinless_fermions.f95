@@ -3,8 +3,8 @@ program spinless_fermions
     use statemanip
     implicit none
 
-    integer :: num_sites = 6
-    integer :: num_particles = 3
+    integer :: num_sites = 4
+    integer :: num_particles = 2
     integer :: level = 2
 
     integer :: smax
