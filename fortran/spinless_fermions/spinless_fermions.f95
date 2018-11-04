@@ -3,9 +3,9 @@ program spinless_fermions
     use statemanip
     implicit none
 
-    integer :: num_sites = 4
-    integer :: num_particles = 2
-    integer :: level = 2
+    integer :: num_sites = 16
+    integer :: num_particles = 8
+    integer :: level = 10
 
     integer :: smax
     integer :: ns
@@ -80,59 +80,59 @@ program spinless_fermions
     fname = 'findmels.dat'
     open(10, file = trim(fname))
 
-    call findmels(10, s1, s1, 1)
-    call findmels(10, s1, s2, 0)
-    call findmels(10, s2, s2, 1)
-    call findmels(10, s2, s3, 0)
-    call findmels(10, s3, s3, 1)
-    call findmels(10, s3, s4, 0)
-    call findmels(10, s4, s4, 1)
+    ! call findmels(10, s1, s1, 1)
+    ! call findmels(10, s1, s2, 0)
+    ! call findmels(10, s2, s2, 1)
+    ! call findmels(10, s2, s3, 0)
+    ! call findmels(10, s3, s3, 1)
+    ! call findmels(10, s3, s4, 0)
+    ! call findmels(10, s4, s4, 1)
 
     close(10)
 
     fname = 'findmelsatlevel.dat'
     open(10, file = trim(fname))
 
-    call findmelsatlevel(10, s1, s1, level)
-    call findmelsatlevel(10, s1, s2, level)
-    call findmelsatlevel(10, s2, s2, level)
-    call findmelsatlevel(10, s2, s3, level)
-    call findmelsatlevel(10, s3, s3, level)
-    call findmelsatlevel(10, s3, s4, level)
-    call findmelsatlevel(10, s4, s4, level)
+    ! call findmelsatlevel(10, s1, s1, level)
+    ! call findmelsatlevel(10, s1, s2, level)
+    ! call findmelsatlevel(10, s2, s2, level)
+    ! call findmelsatlevel(10, s2, s3, level)
+    ! call findmelsatlevel(10, s3, s3, level)
+    ! call findmelsatlevel(10, s3, s4, level)
+    ! call findmelsatlevel(10, s4, s4, level)
 
     close(10)
 
-    ! nlines = 0
+    nlines = 0
 
-    ! open(11, file = 'splitstatesatlevelraw.dat')
-    ! do
-    !     read(11, *, end = 110)
-    !     nlines = nlines + 1
-    ! end do
-    ! 110 close(11)
+    open(11, file = 'splitstatesatlevelraw.dat')
+    do
+        read(11, *, end = 110)
+        nlines = nlines + 1
+    end do
+    110 close(11)
 
-    ! open(10, file = 'stateordinates.dat')
-    ! open(11, file = 'splitstatesatlevelraw.dat')
+    open(10, file = 'stateordinates.dat')
+    open(11, file = 'splitstatesatlevelraw.dat')
 
-    ! ! print *, nlines
+    ! print *, nlines
     
-    ! ! allocate(rawdata(nlines, 5))
-    ! allocate(sizedata(nlines))
+    ! allocate(rawdata(nlines, 5))
+    allocate(sizedata(nlines))
 
     
-    ! ! rawdata = transpose(rawdata)
+    ! rawdata = transpose(rawdata)
     
-    ! do i = 1, nlines
-    !     read(11, *) junk, junk, junk, junk, sizedata(i)
-    !     if ( i .eq. 1) then
-    !         write (*,*) sizedata(i), 0
-    !     else
-    !         write (*,*) sizedata(i), sum(sizedata(1:i-1))
-    !     end if
-    ! end do
-    ! close(10)
-    ! close(11)
-    ! deallocate(sizedata)
+    do i = 1, nlines
+        read(11, *) junk, junk, junk, junk, sizedata(i)
+        if ( i .eq. 1) then
+            write (10,*) sizedata(i), 0
+        else
+            write (10,*) sizedata(i), sum(sizedata(1:i-1))
+        end if
+    end do
+    close(10)
+    close(11)
+    deallocate(sizedata)
 
 end program spinless_fermions
