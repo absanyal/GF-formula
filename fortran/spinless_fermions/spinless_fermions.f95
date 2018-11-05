@@ -25,16 +25,23 @@ program spinless_fermions
 
     character(len = 100) :: fname
 
-    real, DIMENSION(3, 3) :: array=reshape( (/ 1.0, 0.0, 0.0, &
-                                              0.0, 2.0, 0.0, &
-                                              0.0, 0.0, 3.0 /), &
-                                           shape(array), order=(/2,1/) )
+    ! integer, DIMENSION(3, 3) :: array=reshape( (/ 1, 0, 0, &
+    !                                           0, 2, 0, &
+    !                                           3, 0, 3 /), &
+    !                                        shape(array), order=(/2,1/) )
+    integer, allocatable :: tau(:, :)
+
+
+    
+    ! allocate(eye3(3, 4))
+    ! eye3 = int_zeros(3, 4)
+    ! call matprint(eye3)
 
     smax = num_sites - 1
 
     ns = num_particles
 
-    write (*,*) inv(array)
+    ! write (*,*) inv(array)
 
     call setstate(s1, smax, ns, 0, 0)
     call setstate(s2, smax, ns, 1, 0)
@@ -147,5 +154,14 @@ program spinless_fermions
     deallocate(sizedata)
 
     end do
+
+    call setstate(s1, 4, 2, 0, 1)
+    call setstate(s2, 4, 2, 1, 1)
+    allocate(tau(getstatesize(s1), getstatesize(s2)))
+    tau = connecting_tau(s1, s2)
+    call matprint(tau)
+
+
+
 
 end program spinless_fermions

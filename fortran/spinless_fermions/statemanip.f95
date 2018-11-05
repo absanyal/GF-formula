@@ -99,6 +99,8 @@ contains
                 getstatesize = &
                 factorial(vs-1)/(factorial(vns-1)*factorial(vs-vns))
             end if
+        else
+            getstatesize = 0
         end if
     end function
 
@@ -453,5 +455,106 @@ contains
         end if
 
     end subroutine
+
+    function getletter(s1)
+        type(state), intent(inout) :: s1
+        ! character(len = 1) :: getletter
+        integer :: getletter
+        if (s1%alphas .eq. 0 .and. s1%betas .eq. 0) then
+            ! write(getletter, "(A)") "a"
+            getletter = 1
+        end if
+
+        if (s1%alphas .eq. 0 .and. s1%betas .eq. 1) then
+            ! write(getletter, "(A)") "b"
+            getletter = 2
+        end if
+
+        if (s1%alphas .eq. 1 .and. s1%betas .eq. 0) then
+            ! write(getletter, "(A)") "c"
+            getletter = 3
+        end if
+
+        if (s1%alphas .eq. 1 .and. s1%betas .eq. 1) then
+            ! write(getletter, "(A)") "d"
+            getletter = 4
+        end if
+    end function getletter
+
+    function int_identity(m)
+        integer, intent(in) :: m
+        integer :: j
+        integer, allocatable :: int_identity(:,:)
+        allocate(int_identity(m, m))
+        int_identity = 0
+        do j = 1, m
+            int_identity(j, j) = 1
+        end do
+    end function int_identity
+
+    function int_zeros(m, n)
+        integer, intent(in) :: m, n
+        integer :: j
+        integer, allocatable :: int_zeros(:,:)
+        allocate(int_zeros(m, n))
+        int_zeros = 0
+    end function int_zeros
+
+    subroutine matprint(h)
+        integer :: m
+        integer, dimension(:, :) :: h
+        integer :: j
+        m = size(h, 1)
+        do j = 1, m, 1
+            write(*,*) h(j, :)
+        end do
+    end subroutine matprint
+
+    function connecting_tau(s1, s2)
+        type(state), intent(inout) :: s1
+        type(state) :: s1s0
+        type(state) :: s1s1
+        type(state), intent(inout) :: s2
+        type(state) :: s2s0
+        type(state) :: s2s1
+        integer :: l1
+        integer :: l2
+        integer :: l11
+        integer :: l12
+        integer :: l21
+        integer :: l22
+        integer, allocatable :: connecting_tau(:, :)
+        integer :: startindex
+        integer :: i, j
+
+        allocate(connecting_tau(getstatesize(s1), getstatesize(s2)))
+        connecting_tau = 0
+
+        if (checkvalidity(s1) .eq. 1 .and. checkvalidity(s2) .eq. 1) then
+            l1 = getletter(s1)
+            l2 = getletter(s2)
+            if (l1 .eq. 3 .and. l2 .eq. 2) then
+                connecting_tau = int_identity(getstatesize(s1))
+            else
+                s1s0 = relegate0(s1)
+                s1s1 = relegate1(s1)
+                s2s0 = relegate0(s2)
+                s2s1 = relegate1(s2)
+                l11 = getletter(s1s0)
+                l12 = getletter(s1s1)
+                l21 = getletter(s2s0)
+                l22 = getletter(s2s1)
+                startindex = getstatesize(s1s0) + 1
+                j = 1
+                do i = startindex, getstatesize(s1), 1
+                    connecting_tau(i, j) = 1
+                    j = j + 1
+                end do
+
+
+            end if
+            
+        end if
+    end function connecting_tau
 
 end module statemanip
