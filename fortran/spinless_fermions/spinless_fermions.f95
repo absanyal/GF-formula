@@ -3,9 +3,9 @@ program spinless_fermions
     use statemanip
     implicit none
 
-    integer :: num_sites = 16
-    integer :: num_particles = 8
-    integer :: level = 10
+    integer :: num_sites = 6
+    integer :: num_particles = 3
+    integer :: level = 4
 
     integer :: smax
     integer :: ns
@@ -126,9 +126,9 @@ program spinless_fermions
     do i = 1, nlines
         read(11, *) junk, junk, junk, junk, sizedata(i)
         if ( i .eq. 1) then
-            write (10,*) sizedata(i), 0
+            write (10,*) sizedata(i), 1
         else
-            write (10,*) sizedata(i), sum(sizedata(1:i-1))
+            write (10,*) sizedata(i), sum(sizedata(1:i-1)) + 1
         end if
     end do
     close(10)
