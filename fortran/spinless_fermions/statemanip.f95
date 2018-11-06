@@ -534,7 +534,7 @@ contains
             l1 = getletter(s1)
             l2 = getletter(s2)
             if (l1 .eq. 3 .and. l2 .eq. 2) then
-                connecting_tau = int_identity(getstatesize(s1))
+                connecting_tau = int_zeros(getstatesize(s1), getstatesize(s2))
             else
                 s1s0 = relegate0(s1)
                 s1s1 = relegate1(s1)
