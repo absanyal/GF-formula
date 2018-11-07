@@ -20,16 +20,29 @@ program spinless_fermions
     type (state) :: s3
     type (state) :: s4
 
+    type (state) :: t_s1
+    type (state) :: t_s2
+    type (state) :: tstate
+
     integer :: i
     integer :: junk
+    integer :: ts, tns, ta, tb, tsize
+
+    ! real, allocatable :: h1(:,:)
+    ! real, allocatable :: h2(:,:)
+    ! real, allocatable :: htau12(:,:)
+    ! real, allocatable :: htau21(:,:)
+    real, allocatable :: blockh(:,:)
 
     character(len = 100) :: fname
+
+    real, allocatable :: testmatrix(:,:)
 
     ! integer, DIMENSION(3, 3) :: array=reshape( (/ 1, 0, 0, &
     !                                           0, 2, 0, &
     !                                           3, 0, 3 /), &
     !                                        shape(array), order=(/2,1/) )
-    integer, allocatable :: tau(:, :)
+    real, allocatable :: tau(:, :)
 
 
     
@@ -155,11 +168,89 @@ program spinless_fermions
 
     end do
 
-    call setstate(s1, 4, 2, 0, 1)
-    call setstate(s2, 4, 2, 1, 1)
-    allocate(tau(getstatesize(s1), getstatesize(s2)))
-    tau = connecting_tau(s1, s2)
-    call matprint(tau)
+    ! call setstate(s1, 3, 2, 0, 1)
+    ! call setstate(s2, 3, 2, 1, 1)
+    ! allocate(tau(getstatesize(s1), getstatesize(s2)))
+    ! tau = transpose(connecting_tau(s1, s2))
+    ! call matprint(tau)
+
+    nlines = 0
+    fname = 'splitstatesatlevelraw03.dat'
+    open(11, file = fname)
+    do
+        read(11, *, end = 111)
+        nlines = nlines + 1
+    end do
+    111 close(11)
+    ! allocate(sizedata(nlines))
+
+    open(11, file = fname)
+    read (11,*) ts, tns, ta, tb, tsize
+    call setstate(tstate, ts, tns, ta, tb)
+    rewind(11)
+    if (getletter(tstate) .eq. 1) then
+        i = 1
+        do while (i .le. nlines)
+            read (11,*) ts, tns, ta, tb, tsize
+            call setstate(t_s1, ts, tns, ta, tb)
+            i = i + 1
+            read (11,*) ts, tns, ta, tb, tsize
+            call setstate(t_s2, ts, tns, ta, tb)
+            i = i + 1
+            write(*, *) getlstate(t_s1), getlstate(t_s2)
+            allocate(blockh(getstatesize(t_s1) + getstatesize(t_s2), &
+                            getstatesize(t_s1) + getstatesize(t_s2)))
+            blockh = connectedblock(t_s1, t_s2)
+            call matprint(blockh)
+            deallocate(blockh)
+        end do
+    else
+        read (11,*) ts, tns, ta, tb, tsize
+        call setstate(t_s1, ts, tns, ta, tb)
+        write (*,*) getlstate(t_s1), getstatesize(t_s1)
+        allocate(blockh(getstatesize(t_s1), &
+                            getstatesize(t_s1)))
+        blockh = diagonalblock(t_s1)
+        call matprint(blockh)
+        deallocate(blockh)
+        i = 2
+        do while (i .le. nlines - 1)
+            read (11,*) ts, tns, ta, tb, tsize
+            call setstate(t_s1, ts, tns, ta, tb)
+            i = i + 1
+            read (11,*) ts, tns, ta, tb, tsize
+            call setstate(t_s2, ts, tns, ta, tb)
+            i = i + 1
+            write(*, *) getlstate(t_s1), getstatesize(t_s1), &
+                        getlstate(t_s2), getstatesize(t_s2)
+            allocate(blockh(getstatesize(t_s1) + getstatesize(t_s2), &
+                            getstatesize(t_s1) + getstatesize(t_s2)))
+            ! write(*,*) size(blockh, 1), size(blockh, 2)
+            blockh = connectedblock(t_s1, t_s2)
+            call matprint(blockh)
+            deallocate(blockh)
+        end do
+        read (11,*) ts, tns, ta, tb, tsize
+        call setstate(t_s1, ts, tns, ta, tb)
+        write (*,*) getlstate(t_s1), getstatesize(t_s1)
+        allocate(blockh(getstatesize(t_s1), &
+                            getstatesize(t_s1)))
+        blockh = diagonalblock(t_s1)
+        call matprint(blockh)
+        deallocate(blockh)
+    end if
+    close(11)
+
+    ! write(*,*) "*********TESTING CODE *****************"
+
+    ! call setstate(t_s1, 3, 2, 0, 1)
+    ! call setstate(t_s2, 3, 2, 1, 1)
+    ! write(*,*) getlstate(t_s1), getlstate(t_s2)
+    ! allocate(testmatrix(getstatesize(t_s1), getstatesize(t_s2)))
+    ! testmatrix = connecting_tau(t_s2, t_s1)
+    ! ! testmatrix = bmat(  twobytwo(), 2*twobytwo(), &
+    ! !                     twobytwo(), 3*twobytwo())
+    ! call matprint(testmatrix)
 
 
 

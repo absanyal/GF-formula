@@ -481,28 +481,28 @@ contains
         end if
     end function getletter
 
-    function int_identity(m)
+    function real_identity(m)
         integer, intent(in) :: m
         integer :: j
-        integer, allocatable :: int_identity(:,:)
-        allocate(int_identity(m, m))
-        int_identity = 0
+        real, allocatable :: real_identity(:,:)
+        allocate(real_identity(m, m))
+        real_identity = 0
         do j = 1, m
-            int_identity(j, j) = 1
+            real_identity(j, j) = 1.0
         end do
-    end function int_identity
+    end function real_identity
 
-    function int_zeros(m, n)
+    function real_zeros(m, n)
         integer, intent(in) :: m, n
         integer :: j
-        integer, allocatable :: int_zeros(:,:)
-        allocate(int_zeros(m, n))
-        int_zeros = 0
-    end function int_zeros
+        real, allocatable :: real_zeros(:,:)
+        allocate(real_zeros(m, n))
+        real_zeros = 0.0
+    end function real_zeros
 
     subroutine matprint(h)
         integer :: m
-        integer, dimension(:, :) :: h
+        real, dimension(:, :) :: h
         integer :: j
         m = size(h, 1)
         do j = 1, m, 1
@@ -523,7 +523,7 @@ contains
         integer :: l12
         integer :: l21
         integer :: l22
-        integer, allocatable :: connecting_tau(:, :)
+        real, allocatable :: connecting_tau(:, :)
         integer :: startindex
         integer :: i, j
 
@@ -534,7 +534,7 @@ contains
             l1 = getletter(s1)
             l2 = getletter(s2)
             if (l1 .eq. 3 .and. l2 .eq. 2) then
-                connecting_tau = int_zeros(getstatesize(s1), getstatesize(s2))
+                connecting_tau = real_zeros(getstatesize(s1), getstatesize(s2))
             else
                 s1s0 = relegate0(s1)
                 s1s1 = relegate1(s1)
@@ -550,11 +550,84 @@ contains
                     connecting_tau(i, j) = 1
                     j = j + 1
                 end do
-
-
             end if
             
         end if
     end function connecting_tau
+
+    function hcat( A, B ) result( X )
+        real, dimension(:,:) :: A, B
+        real :: X( size(A,1), size(A,2)+size(B,2) )
+
+        X = reshape( [ A, B], shape( X ) )
+    end function hcat
+
+    function vcat( A, B ) result( X )
+        real, dimension(:,:) :: A, B
+        real :: X( size(A,1)+size(B,1), size(A,2) )
+
+        X = transpose( reshape( &
+                [ transpose(A), transpose(B) ], &
+                [ size(X,2), size(X,1) ] ) )
+    end function vcat
+
+    function bmat(a, b, c, d) result (x)
+        real, dimension(:,:) :: a, b, c, d
+        real :: x(size(a, 2) + size(b, 2), size(a, 1) + size(c, 1))
+        X = vcat( hcat(a, b), hcat(c, d) )
+    end function bmat
+
+    function onebyone()
+        real, DIMENSION(1, 1) :: onebyone
+        onebyone = reshape( (/ 0 /), &
+                                           shape(onebyone), order=(/2,1/) )
+    end function onebyone
+
+    function twobytwo()
+        real, DIMENSION(2, 2) :: twobytwo
+        twobytwo =reshape( (/ 0, 1, 1, 0 /), &
+                                           shape(twobytwo), order=(/2,1/) )
+    end function twobytwo
+
+    function diagonalblock(s1)
+        type (state), intent(inout) :: s1
+        real, allocatable :: diagonalblock(:, :)
+        if (getstatesize(s1) .eq. 1) then
+            allocate(diagonalblock(1, 1))
+            diagonalblock = onebyone()
+        end if
+        if (getstatesize(s1) .eq. 2) then
+            allocate(diagonalblock(2, 2))
+            diagonalblock = twobytwo()
+        end if
+    end function diagonalblock
+
+    function connectedblock(s1, s2)
+        type (state), intent(inout) :: s1
+        type (state), intent(inout) :: s2
+        real, allocatable :: connectedblock(:,:)
+        real, allocatable :: h1(:,:)
+        real, allocatable :: h2(:,:)
+        real, allocatable :: htau12(:,:)
+        real, allocatable :: htau21(:,:)
+        allocate( h1 ( getstatesize(s1), getstatesize(s1) ) )
+        allocate(h2(getstatesize(s2), getstatesize(s2)))
+        allocate(htau12(getstatesize(s1), getstatesize(s2)))
+        allocate(htau21(getstatesize(s2), getstatesize(s1)))
+        allocate(connectedblock( getstatesize(s1) + getstatesize(s2), &
+                                 getstatesize(s1) + getstatesize(s2) ) )
+        h1 = diagonalblock(s1)
+        h2 = diagonalblock(s2)
+        htau12 = connecting_tau(s1, s2)
+        htau21 = transpose(htau12)
+        connectedblock = bmat(h1, htau12, htau21, h2)
+        ! connectedblock = reshape([h1, htau12, htau21, h2], &
+        !                 shape(connectedblock), order = [2, 1] )
+        ! connectedblock = vcat(hcat(h1, htau12), hcat(htau21, h2))
+        deallocate(h1)
+        deallocate(h2)
+        deallocate(htau12)
+        deallocate(htau21)
+    end function connectedblock
 
 end module statemanip
