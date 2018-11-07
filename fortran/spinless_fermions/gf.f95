@@ -22,7 +22,7 @@ contains
 
         ! DGETRF computes an LU factorization of a general M-by-N matrix A
         ! using partial pivoting with row interchanges.
-        call DGETRF(n, n, Ainv, n, ipiv, info)
+        call SGETRF(n, n, Ainv, n, ipiv, info)
         ! print *, info
 
         if (info /= 0) then
@@ -31,7 +31,7 @@ contains
 
         ! DGETRI computes the inverse of a matrix using the LU factorization
         ! computed by DGETRF.
-        call DGETRI(n, Ainv, n, ipiv, work, n, info)
+        call SGETRI(n, Ainv, n, ipiv, work, n, info)
         !  write (*,*) info
 
         if (info /= 0) then
