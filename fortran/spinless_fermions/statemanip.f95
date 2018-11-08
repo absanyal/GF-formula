@@ -481,28 +481,28 @@ contains
         end if
     end function getletter
 
-    function real_identity(m)
+    function complex_identity(m)
         integer, intent(in) :: m
         integer :: j
-        real, allocatable :: real_identity(:,:)
-        allocate(real_identity(m, m))
-        real_identity = 0
+        complex, allocatable :: complex_identity(:,:)
+        allocate(complex_identity(m, m))
+        complex_identity = 0
         do j = 1, m
-            real_identity(j, j) = 1.0
+            complex_identity(j, j) = 1.0
         end do
-    end function real_identity
+    end function complex_identity
 
-    function real_zeros(m, n)
+    function complex_zeros(m, n)
         integer, intent(in) :: m, n
         integer :: j
-        real, allocatable :: real_zeros(:,:)
-        allocate(real_zeros(m, n))
-        real_zeros = 0.0
-    end function real_zeros
+        complex, allocatable :: complex_zeros(:,:)
+        allocate(complex_zeros(m, n))
+        complex_zeros = 0.0
+    end function complex_zeros
 
     subroutine matprint(h)
         integer :: m
-        real, dimension(:, :) :: h
+        complex, dimension(:, :) :: h
         integer :: j
         m = size(h, 1)
         do j = 1, m, 1
@@ -523,7 +523,7 @@ contains
         integer :: l12
         integer :: l21
         integer :: l22
-        real, allocatable :: connecting_tau(:, :)
+        complex, allocatable :: connecting_tau(:, :)
         integer :: startindex
         integer :: i, j
 
@@ -534,7 +534,7 @@ contains
             l1 = getletter(s1)
             l2 = getletter(s2)
             if (l1 .eq. 3 .and. l2 .eq. 2) then
-                connecting_tau = real_zeros(getstatesize(s1), getstatesize(s2))
+                connecting_tau = complex_zeros(getstatesize(s1), getstatesize(s2))
             else
                 s1s0 = relegate0(s1)
                 s1s1 = relegate1(s1)
@@ -556,15 +556,15 @@ contains
     end function connecting_tau
 
     function hcat( A, B ) result( X )
-        real, dimension(:,:) :: A, B
-        real :: X( size(A,1), size(A,2)+size(B,2) )
+        complex, dimension(:,:) :: A, B
+        complex :: X( size(A,1), size(A,2)+size(B,2) )
 
         X = reshape( [ A, B], shape( X ) )
     end function hcat
 
     function vcat( A, B ) result( X )
-        real, dimension(:,:) :: A, B
-        real :: X( size(A,1)+size(B,1), size(A,2) )
+        complex, dimension(:,:) :: A, B
+        complex :: X( size(A,1)+size(B,1), size(A,2) )
 
         X = transpose( reshape( &
                 [ transpose(A), transpose(B) ], &
@@ -572,26 +572,31 @@ contains
     end function vcat
 
     function bmat(a, b, c, d) result (x)
-        real, dimension(:,:) :: a, b, c, d
-        real :: x(size(a, 2) + size(b, 2), size(a, 1) + size(c, 1))
+        complex, dimension(:,:) :: a, b, c, d
+        complex :: x(size(a, 2) + size(b, 2), size(a, 1) + size(c, 1))
         X = vcat( hcat(a, b), hcat(c, d) )
     end function bmat
 
     function onebyone()
-        real, DIMENSION(1, 1) :: onebyone
-        onebyone = reshape( (/ 0 /), &
-                                           shape(onebyone), order=(/2,1/) )
+        complex, DIMENSION(1, 1) :: onebyone
+        ! onebyone = reshape( (/ 0 /), &
+        !                                    shape(onebyone), order=(/2,1/) )
+        onebyone(1, 1) = complex(0.0, 0.0)
     end function onebyone
 
     function twobytwo()
-        real, DIMENSION(2, 2) :: twobytwo
-        twobytwo =reshape( (/ 0, 1, 1, 0 /), &
-                                           shape(twobytwo), order=(/2,1/) )
+        complex, DIMENSION(2, 2) :: twobytwo
+        ! twobytwo =reshape( (/ 0, 1, 1, 0 /), &
+        !                                    shape(twobytwo), order=(/2,1/) )
+        twobytwo(1, 1) = complex(0.0, 0.0)
+        twobytwo(1, 2) = complex(1.0, 0.0)
+        twobytwo(2, 1) = complex(1.0, 0.0)
+        twobytwo(2, 2) = complex(0.0, 0.0)
     end function twobytwo
 
     function diagonalblock(s1)
         type (state), intent(inout) :: s1
-        real, allocatable :: diagonalblock(:, :)
+        complex, allocatable :: diagonalblock(:, :)
         if (getstatesize(s1) .eq. 1) then
             allocate(diagonalblock(1, 1))
             diagonalblock = onebyone()
@@ -605,11 +610,11 @@ contains
     function connectedblock(s1, s2)
         type (state), intent(inout) :: s1
         type (state), intent(inout) :: s2
-        real, allocatable :: connectedblock(:,:)
-        real, allocatable :: h1(:,:)
-        real, allocatable :: h2(:,:)
-        real, allocatable :: htau12(:,:)
-        real, allocatable :: htau21(:,:)
+        complex, allocatable :: connectedblock(:,:)
+        complex, allocatable :: h1(:,:)
+        complex, allocatable :: h2(:,:)
+        complex, allocatable :: htau12(:,:)
+        complex, allocatable :: htau21(:,:)
         allocate( h1 ( getstatesize(s1), getstatesize(s1) ) )
         allocate(h2(getstatesize(s2), getstatesize(s2)))
         allocate(htau12(getstatesize(s1), getstatesize(s2)))

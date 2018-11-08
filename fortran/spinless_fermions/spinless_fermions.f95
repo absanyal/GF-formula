@@ -28,21 +28,21 @@ program spinless_fermions
     integer :: junk
     integer :: ts, tns, ta, tb, tsize
 
-    ! real, allocatable :: h1(:,:)
-    ! real, allocatable :: h2(:,:)
-    ! real, allocatable :: htau12(:,:)
-    ! real, allocatable :: htau21(:,:)
-    real, allocatable :: blockh(:,:)
+    ! complex, allocatable :: h1(:,:)
+    ! complex, allocatable :: h2(:,:)
+    ! complex, allocatable :: htau12(:,:)
+    ! complex, allocatable :: htau21(:,:)
+    complex, allocatable :: blockh(:,:)
 
     character(len = 100) :: fname
 
-    real, allocatable :: testmatrix(:,:)
+    complex, allocatable :: testmatrix(:,:)
 
     ! integer, DIMENSION(3, 3) :: array=reshape( (/ 1, 0, 0, &
     !                                           0, 2, 0, &
     !                                           3, 0, 3 /), &
     !                                        shape(array), order=(/2,1/) )
-    real, allocatable :: tau(:, :)
+    complex, allocatable :: tau(:, :)
 
 
     
