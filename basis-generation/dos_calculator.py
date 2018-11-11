@@ -218,6 +218,8 @@ print("\nDensity of states generated in",
 
 plt.xlim(startpoint, stoppoint)
 plt.plot(w_list, Ap_list)
+plt.ylabel('Density of states')
+plt.xlabel('Frequency')
 
 plt.title(
     "DOS for " + str(N) + " sites with " + str(n)
