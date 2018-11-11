@@ -2,6 +2,8 @@ module statemanip
 
 implicit none
 
+    real, parameter :: eta = 0.1
+
     type state
         integer :: s = 0
         integer :: ns = 0
@@ -486,9 +488,9 @@ contains
         integer :: j
         complex, allocatable :: complex_identity(:,:)
         allocate(complex_identity(m, m))
-        complex_identity = 0
+        complex_identity = complex(0.0, 0.0)
         do j = 1, m
-            complex_identity(j, j) = 1.0
+            complex_identity(j, j) = complex(1.0, 0.0)
         end do
     end function complex_identity
 
@@ -497,7 +499,7 @@ contains
         integer :: j
         complex, allocatable :: complex_zeros(:,:)
         allocate(complex_zeros(m, n))
-        complex_zeros = 0.0
+        complex_zeros = complex(0.0, 0.0)
     end function complex_zeros
 
     subroutine matprint(h)
@@ -509,6 +511,17 @@ contains
             write(*,*) h(j, :)
         end do
     end subroutine matprint
+
+    subroutine matprinttofile(writeto, h)
+        integer :: m
+        integer, intent(in) :: writeto
+        complex, dimension(:, :) :: h
+        integer :: j
+        m = size(h, 1)
+        do j = 1, m, 1
+            write(writeto, *) h(j, :)
+        end do
+    end subroutine matprinttofile
 
     function connecting_tau(s1, s2)
         type(state), intent(inout) :: s1
@@ -528,7 +541,7 @@ contains
         integer :: i, j
 
         allocate(connecting_tau(getstatesize(s1), getstatesize(s2)))
-        connecting_tau = 0
+        connecting_tau = complex(0, 0)
 
         if (checkvalidity(s1) .eq. 1 .and. checkvalidity(s2) .eq. 1) then
             l1 = getletter(s1)
@@ -634,5 +647,59 @@ contains
         deallocate(htau12)
         deallocate(htau21)
     end function connectedblock
+
+    function inv(A) result(Ainv)
+        complex, dimension(:,:), intent(in) :: A
+        complex, dimension(size(A,1),size(A,2)) :: Ainv
+
+        complex, dimension(size(A,1)) :: work  ! work array for LAPACK
+        integer, dimension(size(A,1)) :: ipiv   ! pivot indices
+        integer :: n, info
+
+        ! External procedures defined in LAPACK
+        external cGETRF
+        external cGETRI
+
+        ! Store A in Ainv to prevent it from being overwritten by LAPACK
+        Ainv = A
+        n = size(A,1)
+
+        ! DGETRF computes an LU factorization of a general M-by-N matrix A
+        ! using partial pivoting with row interchanges.
+        call cGETRF(n, n, Ainv, n, ipiv, info)
+        ! print *, info
+
+        if (info /= 0) then
+            stop !'Matrix is numerically singular!'
+        end if
+
+        ! DGETRI computes the inverse of a matrix using the LU factorization
+        ! computed by DGETRF.
+        call cGETRI(n, Ainv, n, ipiv, work, n, info)
+        !  write (*,*) info
+
+        if (info /= 0) then
+            stop !'Matrix inversion failed!'
+        end if
+    end function inv
+
+    function g(h, w)
+        complex, allocatable :: g(:,:)
+        complex, allocatable, intent(in) :: h(:,:)
+        real, intent(in) :: w
+        g = inv((w + complex(0, eta)) * complex_identity(size(h, 1)) &
+            - h)
+    end function g
+
+    function trace(h)
+        complex, allocatable, intent(in) :: h(:,:)
+        complex :: trace
+        integer :: j
+        j = 1
+        trace = 0
+        do j = 1, size(h, 1)
+            trace = trace + h(j, j)
+        end do
+    end function
 
 end module statemanip
