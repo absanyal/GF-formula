@@ -15,19 +15,21 @@ import os
 os.system('cls')
 os.system('clear')
 
-N = 4
-n = 4
+N = 6
+n = 3
 
 p = 10
 
-U = 4
+U = 0
+
+Unn = 8
 
 eta = 0.1
 
-spin = (0.5 * n) % 1
-#spin = 0.5
+# spin = (0.5 * n) % 1
+spin = 0.5 * n
 
-t = -1
+t = 1
 tprime = t
 I = complex(0, 1)
 
@@ -35,6 +37,16 @@ I = complex(0, 1)
 #stoppoint = 8.2
 
 #print("\033c", end = '')
+
+
+def getunn(s1):
+    unn = 0
+    c = s1.upconfig[:]
+    for i in range(len(c)-1):
+        if (c[i] == 1 and c[i+1] == 1):
+            unn += 1
+    return unn
+
 
 if (n == 1):
     fs = "fermion"
@@ -80,10 +92,14 @@ print("Basis generated and arranged in",
       round((t_basis_stop - t_basis_start), 5), 's.')
 
 # Print the basis states set
-# i = 0
-# for s in basis:
-#     print(i, s.getstate())
-#     i += 1
+i = 0
+for s in basis:
+    print(i, s.getstate(), getunn(s))
+    i += 1
+
+unnlist = []
+for s in basis:
+    unnlist.append(getunn(s))
 
 print("Generating the Hamiltonian...")
 
@@ -141,19 +157,22 @@ for bi in range(len(basis1)):
     Hprog = len(basis1) * (bi + 1) + bj + 1
     pb.progressbar(Hprog, 0, len(basis1) * len(basis2))
 
+for i in range(len(H)):
+    H[i, i] += Unn * unnlist[i]
+
 t_H_stop = time.perf_counter()
 
 print("\nHamiltonian matrix generated in",
       round(t_H_stop - t_H_start, 5), 's.')
 
-# print('The Hamiltonian matrix is:')
-# for i in range(len(H)):
-#     for j in range(len(H)):
-#         if (H[i, j] >= 0):
-#             print(' ', H[i, j], end = ' ', sep = '')
-#         else:
-#             print(H[i, j], end = ' ', sep = '')
-#     print('')
+print('The Hamiltonian matrix is:')
+for i in range(len(H)):
+    for j in range(len(H)):
+        if (H[i, j] >= 0):
+            print(' ', H[i, j], end=' ', sep='')
+        else:
+            print(H[i, j], end=' ', sep='')
+    print('')
 
 
 def z(omega):
@@ -178,7 +197,7 @@ for e in ev:
 
 print('')
 
-w_list = np.linspace(startpoint, stoppoint, 2000)
+w_list = np.linspace(startpoint, stoppoint, 5000)
 
 #t_lsw_start = time.perf_counter()
 # print("Generating local spectral weight function for state:\n", \
@@ -223,7 +242,7 @@ plt.xlabel('Frequency')
 
 plt.title(
     "DOS for " + str(N) + " sites with " + str(n)
-    + " " + fs + ", Sz = " + str(spin) + ", U = " + str(U)
+    + " " + fs + ", Sz = " + str(spin) + r", $U_{NN} = $" + str(Unn)
 )
 
 plt.savefig(
@@ -232,7 +251,7 @@ plt.savefig(
 
 plt.show()
 
-f = open('dos.dat', 'w')
+f = open('dos_unn.dat', 'w')
 for i in range(len(w_list)):
     f.write(str(w_list[i]) + '\t' + str(Ap_list[i]) + '\n')
 f.close()
