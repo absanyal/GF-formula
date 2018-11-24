@@ -21,7 +21,7 @@ def tmm(a, b, c):
     return dot(a, dot(b, c))
 
 
-w_list = np.linspace(-5, 19, 5000)
+w_list = np.linspace(-5, 18, 1000)
 # w_list = [0]
 A = []
 
