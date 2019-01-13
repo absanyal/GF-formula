@@ -702,4 +702,31 @@ contains
         end do
     end function
 
+    subroutine setfiletomatrix(inputname, outputmatrix)
+        character(len = *) :: inputname
+        integer :: nlines
+        integer :: i
+
+        complex, allocatable :: outputmatrix(:,:)
+
+        nlines = 0
+
+        open(15, file = inputname)
+        do
+            read(15, *, end = 110)
+            nlines = nlines + 1
+        end do
+        110 close(15)
+
+        open(20, file = inputname)
+        allocate(outputmatrix(nlines, nlines))
+        outputmatrix = (0.0, 0.0)
+        do i = 1, nlines
+            read(20,*) outputmatrix(i, :)
+        end do
+        close(20)
+        
+
+    end subroutine
+
 end module statemanip
