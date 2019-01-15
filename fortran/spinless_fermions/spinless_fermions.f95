@@ -3,8 +3,8 @@ program spinless_fermions
     use statemanip
     implicit none
 
-    integer :: num_sites = 6
-    integer :: num_particles = 3
+    integer :: num_sites = 8
+    integer :: num_particles = 4
     integer :: level
 
     integer :: smax
@@ -186,7 +186,7 @@ program spinless_fermions
             close(11)
 
             if (getletter(t_s1) .eq. 1 .and. getletter(t_s2) .eq. 3) then
-                write(*,*) getlstate(t_s1), getlstate(t_s2)
+                write(*,*) getlstate(t_s1), tpos1, getlstate(t_s2), tpos2
 
                 write(fname, '(a, i2.2, a, i2.2, a)') &
                 'g_', ts1, '_',  tpos1, ".dat"
@@ -205,7 +205,7 @@ program spinless_fermions
 
                 currenthead = currenthead + 2
             else if (getletter(t_s1) .eq. 2 .and. getletter(t_s2) .eq. 4) then
-                write(*,*) getlstate(t_s1), getlstate(t_s2)
+                write(*,*) getlstate(t_s1),tpos1, getlstate(t_s2), tpos2
 
                 write(fname, '(a, i2.2, a, i2.2, a)') &
                 'g_', ts1, '_',  tpos1, ".dat"
@@ -224,29 +224,58 @@ program spinless_fermions
 
                 currenthead = currenthead + 2
             else
-                write(*,*) getlstate(t_s1)
+                write(*,*) getlstate(t_s1), tpos1
 
                 write(fname, '(a, i2.2, a, i2.2, a)') &
                 'g_', ts1, '_',  tpos1, ".dat"
                 call setfiletomatrix(fname, g11)
-                ! write(*,*) fname
-                ! call matprint(g11)
+                
+                write(fname, '(a, i2.2, a, i2.2, a)') &
+                'g_', ts1+1, '_',  tpos1, ".dat"
+                open(15, file = fname)
+                allocate(fg11(size(g11, 1), size(g11, 2)))
+                fg11 = g11
+                call matprinttofile(15, fg11)
+                close(15)
 
                 deallocate(g11)
-                ! deallocate(g22)
+                deallocate(fg11)
+
 
                 currenthead = currenthead + 1
             end if
 
             if (currenthead .eq. nlines) then
-                write(*,*) getlstate(t_s2)
+
+                write(fname, '(a, i2.2, a)') "stateordinatesatlevel", level, ".dat"
+                open(11, file = fname)
+                i = 1
+                do while (i .ne. currenthead)
+                    read(11,*) junk, junk, junk, junk, junk
+                    i = i + 1
+                end do
+            
+                ! read(11,*) ts1, tns1, ta1, tb1, tpos1
+                ! call setstate(t_s1, ts1, tns1, ta1, tb1)
+                read(11,*) ts2, tns2, ta2, tb2, tpos2
+                call setstate(t_s2, ts2, tns2, ta2, tb2)
+                close(11)
+                
+                write(*,*) getlstate(t_s2), tpos2
                 write(fname, '(a, i2.2, a, i2.2, a)') &
                 'g_', ts2, '_',  tpos2, ".dat"
                 call setfiletomatrix(fname, g22)
-                ! call matprint(g22)
-                ! write(*,*) fname
+                
+                write(fname, '(a, i2.2, a, i2.2, a)') &
+                'g_', ts2+1, '_',  tpos2, ".dat"
+                open(15, file = fname)
+                allocate(fg22(size(g22, 1), size(g22, 2)))
+                fg22 = g22
+                call matprinttofile(15, fg22)
+                close(15)
 
                 deallocate(g22)
+                deallocate(fg22)
             end if
 
         end do
