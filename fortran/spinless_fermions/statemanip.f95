@@ -725,8 +725,27 @@ contains
             read(20,*) outputmatrix(i, :)
         end do
         close(20)
-        
 
     end subroutine
+
+    function matprod(A, B)
+        complex, allocatable :: A(:,:)
+        complex, allocatable :: B(:,:)
+        complex, allocatable :: matprod(:,:)
+
+        integer :: i, j, n
+
+        allocate(matprod(size(A, 1), size(B, 2)))
+
+        matprod = 0
+
+        do i = 1, size(matprod, 1)
+            do j = 1, size(matprod, 2)
+                do n = 1, size(matprod, 2)
+                    matprod(i, j) = matprod(i, j) + A(i, n) * B(n, j)
+                end do
+            end do
+        end do
+    end function
 
 end module statemanip
