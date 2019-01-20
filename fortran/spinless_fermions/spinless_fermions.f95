@@ -3,8 +3,8 @@ program spinless_fermions
     use statemanip
     implicit none
 
-    integer :: num_sites = 8
-    integer :: num_particles = 4
+    integer :: num_sites = 6
+    integer :: num_particles = 3
     integer :: level
 
     integer :: smax
@@ -32,12 +32,9 @@ program spinless_fermions
 
     complex, allocatable :: g11(:,:)
     complex, allocatable :: g22(:,:)
-    complex, allocatable :: tau12(:,:)
-    complex, allocatable :: tau21(:,:)
-    complex, allocatable :: blockh(:,:)
-    complex, allocatable :: blockg(:,:)
+    complex, allocatable :: u12(:,:)
+    complex, allocatable :: u21(:,:)
     complex, allocatable :: testmatrix(:,:)
-    ! complex, allocatable :: tau(:, :)
     complex, allocatable :: fg11(:,:)
     complex, allocatable :: fg12(:,:)
     complex, allocatable :: fg21(:,:)
@@ -46,7 +43,6 @@ program spinless_fermions
     character(len = 100) :: fname
 
     real :: w
-    ! integer :: level
 
     w = 0
 
@@ -200,8 +196,36 @@ program spinless_fermions
                 ! write(*,*) fname
                 ! call matprint(g22)
 
+                allocate( u12( size(g11, 1), size(g22, 2) ) )
+                allocate( u21( size(g22, 1), size(g11, 2) ) )
+                
+                allocate( fg11( size(g11, 1), size(g11, 2)) )
+                allocate( fg22( size(g22, 1), size(g22, 2)) )
+                allocate( fg12( size(u12, 1), size(u12, 2)) )
+                allocate( fg21( size(u21, 1), size(u21, 2)) )
+                
+                u12 = connecting_u(t_s1, t_s2)
+                u21 = transpose(u12)
+
+                fg11 = inv( inv(g11) - tmm( u12, g22, u21 ) )
+                fg22 = inv( inv(g22) - tmm( u21, g11, u12 ) )
+                fg12 = tmm( fg11, u12, g22 )
+                fg21 = tmm( fg22, u21, g11 )
+
+                write(fname, '(a, i2.2, a, i2.2, a)') &
+                'g_', ts1+1, '_',  tpos1, ".dat"
+                open(20, file = fname)
+                call matprinttofile(20, bmat(fg11, fg12, fg21, fg22))
+                close(20)
+
                 deallocate(g11)
                 deallocate(g22)
+                deallocate(u12)
+                deallocate(u21)
+                deallocate(fg11)
+                deallocate(fg22)
+                deallocate(fg12)
+                deallocate(fg21)
 
                 currenthead = currenthead + 2
             else if (getletter(t_s1) .eq. 2 .and. getletter(t_s2) .eq. 4) then
@@ -219,8 +243,36 @@ program spinless_fermions
                 ! write(*,*) fname
                 ! call matprint(g22)
 
+                allocate( u12( size(g11, 1), size(g22, 2) ) )
+                allocate( u21( size(g22, 1), size(g11, 2) ) )
+                
+                allocate( fg11( size(g11, 1), size(g11, 2)) )
+                allocate( fg22( size(g22, 1), size(g22, 2)) )
+                allocate( fg12( size(u12, 1), size(u12, 2)) )
+                allocate( fg21( size(u21, 1), size(u21, 2)) )
+                
+                u12 = connecting_u(t_s1, t_s2)
+                u21 = transpose(u12)
+
+                fg11 = inv( inv(g11) - tmm( u12, g22, u21 ) )
+                fg22 = inv( inv(g22) - tmm( u21, g11, u12 ) )
+                fg12 = tmm( fg11, u12, g22 )
+                fg21 = tmm( fg22, u21, g11 )
+
+                write(fname, '(a, i2.2, a, i2.2, a)') &
+                'g_', ts1+1, '_',  tpos1, ".dat"
+                open(20, file = fname)
+                call matprinttofile(20, bmat(fg11, fg12, fg21, fg22))
+                close(20)
+
                 deallocate(g11)
                 deallocate(g22)
+                deallocate(u12)
+                deallocate(u21)
+                deallocate(fg11)
+                deallocate(fg22)
+                deallocate(fg12)
+                deallocate(fg21)
 
                 currenthead = currenthead + 2
             else

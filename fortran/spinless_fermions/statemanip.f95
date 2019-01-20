@@ -460,25 +460,20 @@ contains
 
     function getletter(s1)
         type(state), intent(inout) :: s1
-        ! character(len = 1) :: getletter
         integer :: getletter
         if (s1%alphas .eq. 0 .and. s1%betas .eq. 0) then
-            ! write(getletter, "(A)") "a"
             getletter = 1
         end if
 
         if (s1%alphas .eq. 0 .and. s1%betas .eq. 1) then
-            ! write(getletter, "(A)") "b"
             getletter = 2
         end if
 
         if (s1%alphas .eq. 1 .and. s1%betas .eq. 0) then
-            ! write(getletter, "(A)") "c"
             getletter = 3
         end if
 
         if (s1%alphas .eq. 1 .and. s1%betas .eq. 1) then
-            ! write(getletter, "(A)") "d"
             getletter = 4
         end if
     end function getletter
@@ -523,7 +518,7 @@ contains
         end do
     end subroutine matprinttofile
 
-    function connecting_tau(s1, s2)
+    function connecting_u(s1, s2)
         type(state), intent(inout) :: s1
         type(state) :: s1s0
         type(state) :: s1s1
@@ -536,18 +531,18 @@ contains
         integer :: l12
         integer :: l21
         integer :: l22
-        complex, allocatable :: connecting_tau(:, :)
+        complex, allocatable :: connecting_u(:, :)
         integer :: startindex
         integer :: i, j
 
-        allocate(connecting_tau(getstatesize(s1), getstatesize(s2)))
-        connecting_tau = complex(0, 0)
+        allocate(connecting_u(getstatesize(s1), getstatesize(s2)))
+        connecting_u = complex(0, 0)
 
         if (checkvalidity(s1) .eq. 1 .and. checkvalidity(s2) .eq. 1) then
             l1 = getletter(s1)
             l2 = getletter(s2)
             if (l1 .eq. 3 .and. l2 .eq. 2) then
-                connecting_tau = complex_zeros(getstatesize(s1), getstatesize(s2))
+                connecting_u = complex_zeros(getstatesize(s1), getstatesize(s2))
             else
                 s1s0 = relegate0(s1)
                 s1s1 = relegate1(s1)
@@ -560,13 +555,13 @@ contains
                 startindex = getstatesize(s1s0) + 1
                 j = 1
                 do i = startindex, getstatesize(s1), 1
-                    connecting_tau(i, j) = 1
+                    connecting_u(i, j) = 1
                     j = j + 1
                 end do
             end if
             
         end if
-    end function connecting_tau
+    end function connecting_u
 
     function hcat( A, B ) result( X )
         complex, dimension(:,:) :: A, B
@@ -592,15 +587,11 @@ contains
 
     function onebyone()
         complex, DIMENSION(1, 1) :: onebyone
-        ! onebyone = reshape( (/ 0 /), &
-        !                                    shape(onebyone), order=(/2,1/) )
         onebyone(1, 1) = complex(0.0, 0.0)
     end function onebyone
 
     function twobytwo()
         complex, DIMENSION(2, 2) :: twobytwo
-        ! twobytwo =reshape( (/ 0, 1, 1, 0 /), &
-        !                                    shape(twobytwo), order=(/2,1/) )
         twobytwo(1, 1) = complex(0.0, 0.0)
         twobytwo(1, 2) = complex(1.0, 0.0)
         twobytwo(2, 1) = complex(1.0, 0.0)
@@ -619,34 +610,6 @@ contains
             diagonalblock = twobytwo()
         end if
     end function diagonalblock
-
-    function connectedblock(s1, s2)
-        type (state), intent(inout) :: s1
-        type (state), intent(inout) :: s2
-        complex, allocatable :: connectedblock(:,:)
-        complex, allocatable :: h1(:,:)
-        complex, allocatable :: h2(:,:)
-        complex, allocatable :: htau12(:,:)
-        complex, allocatable :: htau21(:,:)
-        allocate( h1 ( getstatesize(s1), getstatesize(s1) ) )
-        allocate(h2(getstatesize(s2), getstatesize(s2)))
-        allocate(htau12(getstatesize(s1), getstatesize(s2)))
-        allocate(htau21(getstatesize(s2), getstatesize(s1)))
-        allocate(connectedblock( getstatesize(s1) + getstatesize(s2), &
-                                 getstatesize(s1) + getstatesize(s2) ) )
-        h1 = diagonalblock(s1)
-        h2 = diagonalblock(s2)
-        htau12 = connecting_tau(s1, s2)
-        htau21 = transpose(htau12)
-        connectedblock = bmat(h1, htau12, htau21, h2)
-        ! connectedblock = reshape([h1, htau12, htau21, h2], &
-        !                 shape(connectedblock), order = [2, 1] )
-        ! connectedblock = vcat(hcat(h1, htau12), hcat(htau21, h2))
-        deallocate(h1)
-        deallocate(h2)
-        deallocate(htau12)
-        deallocate(htau21)
-    end function connectedblock
 
     function inv(A) result(Ainv)
         complex, dimension(:,:), intent(in) :: A
@@ -746,6 +709,15 @@ contains
                 end do
             end do
         end do
+    end function
+
+    function tmm(A, B, C)
+        complex, allocatable :: A(:,:)
+        complex, allocatable :: B(:,:)
+        complex, allocatable :: C(:,:)
+        complex, allocatable :: tmm(:,:)
+
+        tmm = matprod(A, matprod(B, C))
     end function
 
 end module statemanip
