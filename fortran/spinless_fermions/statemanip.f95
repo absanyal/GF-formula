@@ -2,7 +2,7 @@ module statemanip
 
 implicit none
 
-    real, parameter :: eta = 0.1
+    real(8), parameter :: eta = 0.1
 
     type state
         integer :: s = 0
@@ -106,93 +106,6 @@ contains
         end if
     end function
 
-    function mel(s1, s2)
-        implicit none
-
-        type(state), intent(inout) :: s1
-        type(state), intent(inout) :: s2
-
-        ! integer :: isdiagonal
-
-        integer :: Hu, Hl, Hs, Hsp1, Hsm1
-        integer :: mel
-
-        integer :: vns1, valphas1, vbetas1
-        integer :: vns2, valphas2, vbetas2
-
-        vns1 = s1%ns
-        valphas1 = s1%alphas
-        vbetas1 = s1%betas
-
-        vns2 = s2%ns
-        valphas2 = s2%alphas
-        vbetas2 = s2%betas
-
-        Hs = 0
-        Hsp1 = 0
-        Hsm1 = 0
-
-        if (s1%s .eq. s2%s) then
-            ! if (vns1 .ne. vns2 .or. &
-            !     valphas1 .ne. valphas2 .or. &
-            !     vbetas1 .ne. vbetas2) then
-                if (s1%s .ge. 1) then
-                    Hsp1 = kdelta(vns1, vns2) &
-                    * kdelta(valphas1, valphas2) * &
-                            (kdelta(vbetas1, vbetas2 + 1) &
-                            + kdelta(vbetas1, vbetas2 - 1))
-                    
-                    Hsm1 = kdelta(vns1, vns2) &
-                    * kdelta(vbetas1, vbetas2) * &
-                            (kdelta(valphas1, valphas2 + 1) &
-                            + kdelta(valphas1, valphas2 - 1))
-                    
-                    Hs = kdelta(vns1, vns2-1) &
-                    * kdelta(valphas1, valphas2-1) * &
-                            kdelta(vbetas1, vbetas2 + 1) + &
-                        kdelta(vns1, vns2+1) &
-                        * kdelta(valphas1, valphas2+1) * &
-                            kdelta(vbetas1, vbetas2 - 1)
-                end if
-                ! if (s1%s .eq. 1) then
-                !     ! Hsm1 = 0
-                !     Hs = 0
-                !     Hsp1 = 0
-                ! end if
-            ! end if
-
-            Hl = 0
-
-            if (vns1 .eq. vns2 .and. &
-                valphas1 .eq. valphas2 .and. &
-                vbetas1 .eq. vbetas2 .and. s1%s .gt. 1) then
-                Hl = 1
-            end if
-
-            mel = Hs + Hsp1 + Hsm1 + Hl
-
-            ! if (s1%s .eq. 1 .and. mel .eq. 0) then
-            !     if (vns1 .eq. vns2 .and. &
-            !         valphas1 .eq. valphas2 .and. &
-            !         vbetas1 .eq. vbetas2) then
-            !         mel = 1
-            !     end if
-            ! end if
-
-            ! if (s1%s .eq. 1 .and. mel .ne. 1) then
-            !     if (vns1 .ne. vns2 .or. &
-            !         valphas1 .ne. valphas2 .or. &
-            !         vbetas1 .ne. vbetas2) then
-            !         mel = 1
-            !     end if
-            ! end if
-            
-        else
-            mel = 0
-        end if
-
-    end function mel
-
     function relegate0(s1)
         type(state), intent(inout) :: s1
         type(state) :: relegate0
@@ -244,141 +157,6 @@ contains
         write(getlstate, "(I2, A2, I2)") s1%s, k, s1%ns
     
     end function
-
-
-    recursive subroutine findmels(writeto, s1, s2, isdiagonal)
-        type(state), intent(inout) :: s1
-        type(state), intent(inout) :: s2
-        integer, intent(in) :: isdiagonal
-        
-        integer :: setisdiag
-
-        type(state) :: s1s0
-        type(state) :: s1s1
-        type(state) :: s2s0
-        type(state) :: s2s1
-
-        integer, intent(in) :: writeto
-        character(len=100) :: fmt
-
-        integer :: meltest = 0
-        setisdiag = isdiagonal
-
-        if (s1%alphas .ne. s2%alphas .or. s1%betas .ne. s2%betas .or. &
-            s1%ns .ne. s2%ns) then
-            setisdiag = 0
-        end if
-
-        fmt = "(4A, I2, A, 2I2)"
-
-        if (checkvalidity(s1) .eq. 1 .and. &
-        checkvalidity(s2) .eq. 1) then
-            meltest = mel(s1, s2)
-            if (setisdiag .ne. 1 .and. s1%s .eq. 1) then
-                meltest = kdelta(s1%ns, s2%ns) &
-                * kdelta(s1%alphas, s2%alphas) &
-                * kdelta(s1%betas, s2%betas)
-            end if
-            if (s1%s .eq. 2 .and. setisdiag .eq. 1) then
-                meltest = 0
-            end if
-            ! if (s1%s .eq. 1 .and. setisdiag .eq. 0) then
-            !     meltest = mel(s1, s2)
-            ! end if
-            write (writeto,fmt) getlstate(s1) , char(9), getlstate(s2),&
-             char(9), meltest, char(9), getstatesize(s1), getstatesize(s2)
-        end if
-
-        
-        s1s0 = relegate0(s1)
-        s1s1 = relegate1(s1)
-        s2s0 = relegate0(s2)
-        s2s1 = relegate1(s2)
-        
-
-        if (meltest .ne. 0) then
-            if (checkvalidity(s1s0) .eq. 1 .and. &
-            checkvalidity(s2s0) .eq. 1) then
-                call findmels(writeto, s1s0, s2s0, setisdiag)
-            end if
-
-            if (checkvalidity(s1s0) .eq. 1 .and. &
-            checkvalidity(s2s1) .eq. 1) then
-                call findmels(writeto, s1s0, s2s1, setisdiag)
-            end if
-
-            if (checkvalidity(s1s1) .eq. 1 .and. &
-            checkvalidity(s2s0) .eq. 1) then
-                call findmels(writeto, s1s1, s2s0, setisdiag)
-            end if
-
-            if (checkvalidity(s1s1) .eq. 1 .and. &
-            checkvalidity(s2s1) .eq. 1) then
-                call findmels(writeto, s1s1, s2s1, setisdiag)
-            end if
-
-        end if
-
-    end subroutine findmels
-
-    recursive subroutine findmelsatlevel(writeto, s1, s2, level)
-        type(state), intent(inout) :: s1
-        type(state), intent(inout) :: s2
-
-        type(state) :: s1s0
-        type(state) :: s1s1
-        type(state) :: s2s0
-        type(state) :: s2s1
-
-        integer, intent(in) :: writeto
-        integer, intent(in) :: level
-        integer :: meltest = 0
-
-        character(len=100) :: fmt
-
-        fmt = "(4A, I2, A, 2I2)"
-
-        if (checkvalidity(s1) .eq. 1 .and. &
-        checkvalidity(s2) .eq. 1) then
-            meltest = mel(s1, s2)
-            if (s1%s .eq. level) then
-                write (writeto,fmt) getlstate(s1) , char(9), getlstate(s2),&
-                char(9), meltest, char(9), getstatesize(s1), getstatesize(s2)
-            end if
-            if (s1%s .le. level) then
-                meltest = 0
-            end if
-        end if
-
-        s1s0 = relegate0(s1)
-        s1s1 = relegate1(s1)
-        s2s0 = relegate0(s2)
-        s2s1 = relegate1(s2)
-
-        if (meltest .ne. 0) then
-            if (checkvalidity(s1s0) .eq. 1 .and. &
-            checkvalidity(s2s0) .eq. 1) then
-                call findmelsatlevel(writeto, s1s0, s2s0, level)
-            end if
-
-            if (checkvalidity(s1s0) .eq. 1 .and. &
-            checkvalidity(s2s1) .eq. 1) then
-                call findmelsatlevel(writeto, s1s0, s2s1, level)
-            end if
-
-            if (checkvalidity(s1s1) .eq. 1 .and. &
-            checkvalidity(s2s0) .eq. 1) then
-                call findmelsatlevel(writeto, s1s1, s2s0, level)
-            end if
-
-            if (checkvalidity(s1s1) .eq. 1 .and. &
-            checkvalidity(s2s1) .eq. 1) then
-                call findmelsatlevel(writeto, s1s1, s2s1, level)
-            end if
-
-        end if
-
-    end subroutine findmelsatlevel
 
     recursive subroutine splitstatesraw(writeto, s1)
         type(state), intent(inout) :: s1
@@ -481,7 +259,7 @@ contains
     function complex_identity(m)
         integer, intent(in) :: m
         integer :: j
-        complex, allocatable :: complex_identity(:,:)
+        complex(8), allocatable :: complex_identity(:,:)
         allocate(complex_identity(m, m))
         complex_identity = complex(0.0, 0.0)
         do j = 1, m
@@ -492,25 +270,25 @@ contains
     function complex_zeros(m, n)
         integer, intent(in) :: m, n
         integer :: j
-        complex, allocatable :: complex_zeros(:,:)
+        complex(8), allocatable :: complex_zeros(:,:)
         allocate(complex_zeros(m, n))
         complex_zeros = complex(0.0, 0.0)
     end function complex_zeros
 
     subroutine matprint(h)
         integer :: m
-        complex, dimension(:, :) :: h
+        complex(8), dimension(:, :) :: h
         integer :: j
         m = size(h, 1)
         do j = 1, m, 1
-            write(*,*) h(j, :)
+            write(*,*)  h(j, :)
         end do
     end subroutine matprint
 
     subroutine matprinttofile(writeto, h)
         integer :: m
         integer, intent(in) :: writeto
-        complex, dimension(:, :) :: h
+        complex(8), dimension(:, :) :: h
         integer :: j
         m = size(h, 1)
         do j = 1, m, 1
@@ -531,12 +309,12 @@ contains
         integer :: l12
         integer :: l21
         integer :: l22
-        complex, allocatable :: connecting_u(:, :)
+        complex(8), allocatable :: connecting_u(:, :)
         integer :: startindex
         integer :: i, j
 
         allocate(connecting_u(getstatesize(s1), getstatesize(s2)))
-        connecting_u = complex(0, 0)
+        connecting_u = complex(0.0, 0.0)
 
         if (checkvalidity(s1) .eq. 1 .and. checkvalidity(s2) .eq. 1) then
             l1 = getletter(s1)
@@ -564,15 +342,15 @@ contains
     end function connecting_u
 
     function hcat( A, B ) result( X )
-        complex, dimension(:,:) :: A, B
-        complex :: X( size(A,1), size(A,2)+size(B,2) )
+        complex(8), dimension(:,:) :: A, B
+        complex(8) :: X( size(A,1), size(A,2)+size(B,2) )
 
         X = reshape( [ A, B], shape( X ) )
     end function hcat
 
     function vcat( A, B ) result( X )
-        complex, dimension(:,:) :: A, B
-        complex :: X( size(A,1)+size(B,1), size(A,2) )
+        complex(8), dimension(:,:) :: A, B
+        complex(8) :: X( size(A,1)+size(B,1), size(A,2) )
 
         X = transpose( reshape( &
                 [ transpose(A), transpose(B) ], &
@@ -580,18 +358,18 @@ contains
     end function vcat
 
     function bmat(a, b, c, d) result (x)
-        complex, dimension(:,:) :: a, b, c, d
-        complex :: x(size(a, 2) + size(b, 2), size(a, 1) + size(c, 1))
+        complex(8), dimension(:,:) :: a, b, c, d
+        complex(8) :: x(size(a, 2) + size(b, 2), size(a, 1) + size(c, 1))
         X = vcat( hcat(a, b), hcat(c, d) )
     end function bmat
 
     function onebyone()
-        complex, DIMENSION(1, 1) :: onebyone
+        complex(8), DIMENSION(1, 1) :: onebyone
         onebyone(1, 1) = complex(0.0, 0.0)
     end function onebyone
 
     function twobytwo()
-        complex, DIMENSION(2, 2) :: twobytwo
+        complex(8), DIMENSION(2, 2) :: twobytwo
         twobytwo(1, 1) = complex(0.0, 0.0)
         twobytwo(1, 2) = complex(1.0, 0.0)
         twobytwo(2, 1) = complex(1.0, 0.0)
@@ -600,7 +378,7 @@ contains
 
     function diagonalblock(s1)
         type (state), intent(inout) :: s1
-        complex, allocatable :: diagonalblock(:, :)
+        complex(8), allocatable :: diagonalblock(:, :)
         if (getstatesize(s1) .eq. 1) then
             allocate(diagonalblock(1, 1))
             diagonalblock = onebyone()
@@ -612,16 +390,16 @@ contains
     end function diagonalblock
 
     function inv(A) result(Ainv)
-        complex, dimension(:,:), intent(in) :: A
-        complex, dimension(size(A,1),size(A,2)) :: Ainv
+        complex(8), dimension(:,:), intent(in) :: A
+        complex(8), dimension(size(A,1),size(A,2)) :: Ainv
 
-        complex, dimension(size(A,1)) :: work  ! work array for LAPACK
+        complex(8), dimension(size(A,1)) :: work  ! work array for LAPACK
         integer, dimension(size(A,1)) :: ipiv   ! pivot indices
         integer :: n, info
 
         ! External procedures defined in LAPACK
-        external cGETRF
-        external cGETRI
+        external zGETRF
+        external zGETRI
 
         ! Store A in Ainv to prevent it from being overwritten by LAPACK
         Ainv = A
@@ -629,7 +407,7 @@ contains
 
         ! DGETRF computes an LU factorization of a general M-by-N matrix A
         ! using partial pivoting with row interchanges.
-        call cGETRF(n, n, Ainv, n, ipiv, info)
+        call zGETRF(n, n, Ainv, n, ipiv, info)
         ! print *, info
 
         if (info /= 0) then
@@ -638,7 +416,7 @@ contains
 
         ! DGETRI computes the inverse of a matrix using the LU factorization
         ! computed by DGETRF.
-        call cGETRI(n, Ainv, n, ipiv, work, n, info)
+        call zGETRI(n, Ainv, n, ipiv, work, n, info)
         !  write (*,*) info
 
         if (info /= 0) then
@@ -647,16 +425,16 @@ contains
     end function inv
 
     function g(h, w)
-        complex, allocatable :: g(:,:)
-        complex, allocatable, intent(in) :: h(:,:)
-        real, intent(in) :: w
+        complex(8), allocatable :: g(:,:)
+        complex(8), allocatable, intent(in) :: h(:,:)
+        real(8), intent(in) :: w
         g = inv((w + complex(0, eta)) * complex_identity(size(h, 1)) &
             - h)
     end function g
 
     function trace(h)
-        complex, allocatable, intent(in) :: h(:,:)
-        complex :: trace
+        complex(8), allocatable, intent(in) :: h(:,:)
+        complex(8) :: trace
         integer :: j
         j = 1
         trace = 0
@@ -670,7 +448,7 @@ contains
         integer :: nlines
         integer :: i
 
-        complex, allocatable :: outputmatrix(:,:)
+        complex(8), allocatable :: outputmatrix(:,:)
 
         nlines = 0
 
@@ -692,32 +470,51 @@ contains
     end subroutine
 
     function matprod(A, B)
-        complex, allocatable :: A(:,:)
-        complex, allocatable :: B(:,:)
-        complex, allocatable :: matprod(:,:)
+        complex(8), allocatable :: A(:,:)
+        complex(8), allocatable :: B(:,:)
+        complex(8), allocatable :: matprod(:,:)
 
         integer :: i, j, n
 
         allocate(matprod(size(A, 1), size(B, 2)))
 
-        matprod = 0
+        do i = 1, size(matprod, 1)
+            do j = 1, size(matprod, 2)
+                do n = 1, size(matprod, 2)
+                    matprod(i, j) = complex(0.0, 0.0)
+                end do
+            end do
+        end do
 
         do i = 1, size(matprod, 1)
             do j = 1, size(matprod, 2)
                 do n = 1, size(matprod, 2)
-                    matprod(i, j) = matprod(i, j) + A(i, n) * B(n, j)
+                    matprod(i, j) = matprod(i, j) + &
+                    A(i, n) * B(n, j)
                 end do
             end do
         end do
+
+        ! deallocate(matprod)
     end function
 
     function tmm(A, B, C)
-        complex, allocatable :: A(:,:)
-        complex, allocatable :: B(:,:)
-        complex, allocatable :: C(:,:)
-        complex, allocatable :: tmm(:,:)
+        complex(8), allocatable :: A(:,:)
+        complex(8), allocatable :: B(:,:)
+        complex(8), allocatable :: C(:,:)
+        complex(8), allocatable :: tmm(:,:)
 
         tmm = matprod(A, matprod(B, C))
+    end function
+
+    function cmplxfilterbelow(z)
+        complex(8), intent(in) :: z
+        complex(8) :: cmplxfilterbelow
+        real(8) :: modsqz
+        modsqz = z * conjg(z)
+        if ( modsqz .le. 1.0E-20) then
+            cmplxfilterbelow = complex(0.0, 0.0)
+        end if
     end function
 
 end module statemanip
