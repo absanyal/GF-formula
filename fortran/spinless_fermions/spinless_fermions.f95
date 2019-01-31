@@ -3,8 +3,8 @@ program spinless_fermions
     use statemanip
     implicit none
 
-    integer :: num_sites = 4
-    integer :: num_particles = 2
+    integer :: num_sites = 6
+    integer :: num_particles = 3
     integer :: level
 
     integer :: smax
@@ -30,17 +30,22 @@ program spinless_fermions
     integer :: ts2, tns2, ta2, tb2, tpos2
     integer :: currenthead = 1
 
-    complex(8), allocatable :: g11(:,:)
-    complex(8), allocatable :: g22(:,:)
-    complex(8), allocatable :: u12(:,:)
-    complex(8), allocatable :: u21(:,:)
-    complex(8), allocatable :: testmatrix(:,:)
-    complex(8), allocatable :: testmatrix1(:,:)
-    complex(8), allocatable :: testmatrix2(:,:)
-    complex(8), allocatable :: fg11(:,:)
-    complex(8), allocatable :: fg12(:,:)
-    complex(8), allocatable :: fg21(:,:)
-    complex(8), allocatable :: fg22(:,:)
+    double complex, allocatable :: g11(:,:)
+    double complex, allocatable :: g22(:,:)
+    double complex, allocatable :: u12(:,:)
+    double complex, allocatable :: u21(:,:)
+    double complex, allocatable :: testmatrix(:,:)
+    double complex, allocatable :: testmatrix1(:,:)
+    double complex, allocatable :: testmatrix2(:,:)
+    double complex, allocatable :: fg11(:,:)
+    double complex, allocatable :: fg12(:,:)
+    double complex, allocatable :: fg21(:,:)
+    double complex, allocatable :: fg22(:,:)
+
+    double complex :: bineet_test1
+    double complex :: bineet_test2
+    real(8) :: bineet_real_test1
+    real(8) :: modsqz
 
     character(len = 100) :: fname
 
@@ -48,6 +53,8 @@ program spinless_fermions
     real(8) :: dos
 
     real(8), parameter :: pi = 3.1415926535
+
+    integer, parameter :: checklevel = 3
 
 
     smax = num_sites - 1
@@ -131,9 +138,11 @@ program spinless_fermions
 
     end do
 
-    w = -5
+    w = 0.0
+    do while (w .eq. 0.0) !FOR TESTING; comment out the two lines below
 
-    do while (w .le. 5)
+    ! w = -5
+    ! do while (w .le. 5)
 
     level = 3
     nlines = 0
@@ -161,7 +170,7 @@ program spinless_fermions
 
     level = 3
     do while (level .le. smax)
-        ! write(*,*) level
+        write(*,*) level
         nlines = 0
         currenthead = 1
         write(fname, '(a, i2.2, a)') "stateordinatesatlevel", level, ".dat"
@@ -223,6 +232,30 @@ program spinless_fermions
 
                 ! call matprint(fg11)
 
+                if (level .eq. checklevel) then
+                    write(*,*) 'g11'
+                    call matprint(g11)
+                    write(*,*) 'g11 inverse'
+                    call matprint(inv(g11))
+                    write(*,*) 'g22'
+                    call matprint(g22)
+                    write(*,*) 'g22 inverse'
+                    call matprint(inv(g22))
+                    write(*,*) 'u12'
+                    call matprint(u12)
+                    write(*,*) 'u21'
+                    call matprint(u21)
+                    write(*,*) 'g22*u21'
+                    call matprint(matprod(g22,u21))
+                    write(*,*) 'u12 * g22 * u21'
+                    call matprint(tmm( u12, g22, u21 ))
+                    write(*,*) 'inv(g11) - u12 * g22 * u21'
+                    call matprint(inv(g11) - tmm( u12, g22, u21 ))
+                    write(*,*) 'full connected fg11'
+                    call matprint(fg11)
+                    write(*,*) '-------------------'
+                end if
+
                 write(fname, '(a, i2.2, a, i2.2, a)') &
                 'g_', ts1+1, '_',  tpos1, ".dat"
                 open(20, file = fname)
@@ -273,6 +306,30 @@ program spinless_fermions
                 fg12 = tmm( fg11, u12, g22 )
                 fg21 = tmm( fg22, u21, g11 )
 
+                if (level .eq. checklevel) then
+                    write(*,*) 'g11'
+                    call matprint(g11)
+                    write(*,*) 'g11 inverse'
+                    call matprint(inv(g11))
+                    write(*,*) 'g22'
+                    call matprint(g22)
+                    write(*,*) 'g22 inverse'
+                    call matprint(inv(g22))
+                    write(*,*) 'u12'
+                    call matprint(u12)
+                    write(*,*) 'u21'
+                    call matprint(u21)
+                    write(*,*) 'g22*u21'
+                    call matprint(matprod(g22,u21))
+                    write(*,*) 'u12 * g22 * u21'
+                    call matprint(tmm( u12, g22, u21 ))
+                    write(*,*) 'inv(g11) - u12 * g22 * u21'
+                    call matprint(inv(g11) - tmm( u12, g22, u21 ))
+                    write(*,*) 'full connected fg11'
+                    call matprint(fg11)
+                    write(*,*) '-------------------'
+                end if
+
                 write(fname, '(a, i2.2, a, i2.2, a)') &
                 'g_', ts1+1, '_',  tpos1, ".dat"
                 open(20, file = fname)
@@ -295,6 +352,14 @@ program spinless_fermions
                 write(fname, '(a, i2.2, a, i2.2, a)') &
                 'g_', ts1, '_',  tpos1, ".dat"
                 call setfiletomatrix(fname, g11)
+
+                if (level .eq. checklevel) then
+                    write(*,*) 'g11'
+                    call matprint(g11)
+                    write(*,*) 'g11 inverse'
+                    call matprint(inv(g11))
+                    write(*,*) '-------------------'
+                end if
                 
                 write(fname, '(a, i2.2, a, i2.2, a)') &
                 'g_', ts1+1, '_',  tpos1, ".dat"
@@ -321,8 +386,6 @@ program spinless_fermions
                     i = i + 1
                 end do
             
-                ! read(11,*) ts1, tns1, ta1, tb1, tpos1
-                ! call setstate(t_s1, ts1, tns1, ta1, tb1)
                 read(11,*) ts2, tns2, ta2, tb2, tpos2
                 call setstate(t_s2, ts2, tns2, ta2, tb2)
                 close(11)
@@ -338,6 +401,15 @@ program spinless_fermions
                 allocate(fg22(size(g22, 1), size(g22, 2)))
                 fg22 = g22
                 call matprinttofile(15, fg22)
+
+                if (level .eq. checklevel) then
+                    write(*,*) 'g22'
+                    call matprint(g22)
+                    write(*,*) 'g22 inverse'
+                    call matprint(inv(g22))
+                    write(*,*) '-------------------'
+                end if
+
                 close(15)
 
                 deallocate(g22)
@@ -352,6 +424,7 @@ program spinless_fermions
     call setstate(s2, smax+1, ns, 1, 0)
     
     ! write(*,*) getlstate(s1), getlstate(s2)
+    write(*,*) smax+1
     tpos1 = 1
     tpos2 = 1 + getstatesize(s1)
     write(fname, '(a, i2.2, a, i2.2, a)') &
@@ -374,14 +447,22 @@ program spinless_fermions
     u12 = connecting_u(s1, s2)
     u21 = transpose(u12)
 
+    ! write(*,*) 'The 2 input matrices at smax+1 level'
+    ! call diagonal_imaginary_part(g11)
+    ! write(*,*) '*****************'
+    ! call diagonal_imaginary_part(g22)
+
     ! call matprint(u12)
     ! call matprint(u21)
 
     fg11 = inv( inv(g11) - tmm( u12, g22, u21 ) )
     fg22 = inv( inv(g22) - tmm( u21, g11, u12 ) )
-    ! fg12 = tmm( fg11, u12, g22 )
-    ! fg21 = tmm( fg22, u21, g11 )
-    ! call matprinttofile(20, bmat(fg11, fg12, fg21, fg22))
+    
+    ! write(*,*) 'After final calculation'
+    ! call diagonal_imaginary_part(fg11)
+    ! write(*,*) '*****************'
+    ! call diagonal_imaginary_part(fg22)
+
     dos = - imag(trace(fg11) + trace(fg22))/ &
     (getstatesize(s1) + getstatesize(s2)) / (pi)
 
@@ -402,8 +483,8 @@ program spinless_fermions
     deallocate(fg21)
 
 
-    w = w + 10.0/1000.0
     write(*,*) w, dos
+    w = w + 10.0/1000.0
 
     end do
 
@@ -436,7 +517,64 @@ program spinless_fermions
 
     ! call matprint( matmul(testmatrix1, testmatrix2) )
 
+    ! write(*,*) '4,1'
+    ! call setfiletomatrix('g_04_01.dat', testmatrix)
+    ! call diagonal_only_part(testmatrix)
+    ! deallocate(testmatrix)
 
+    ! write(*,*) '4,2'
+    ! call setfiletomatrix('g_04_02.dat', testmatrix)
+    ! call diagonal_only_part(testmatrix)
+    ! write(*,*) '------------------'
+    ! call matprint(testmatrix)
+    ! deallocate(testmatrix)
 
+    ! write(*,*) '4,3'
+    ! call setfiletomatrix('g_04_05.dat', testmatrix)
+    ! call diagonal_only_part(testmatrix)
+    ! deallocate(testmatrix)
+
+    ! write(*,*) '4,4'
+    ! call setfiletomatrix('g_04_08.dat', testmatrix)
+    ! call diagonal_only_part(testmatrix)
+    ! deallocate(testmatrix)
+    
+    !write(*,*) real((3.0, 4.0) * conjg((3.0, 4.0) ))
+    
+    ! allocate (testmatrix1 (2,2))
+    ! testmatrix1(1,1) = complex( 0.0, -0.09)
+    ! testmatrix1(2,2) = complex( 0.0, -0.09)
+    ! testmatrix1(1,2) = complex( -1.0, 0.0)
+    ! testmatrix1(2,1) = complex( -1.0, 0.0)
+
+    ! allocate (testmatrix2 (2,1))
+    ! testmatrix2(1,1) = complex(1.0,0.0)
+    ! testmatrix2(2,1) = complex(0.0,0.0)
+
+    ! call matprint(testmatrix1)
+    ! write(*,*)
+    ! call matprint(testmatrix2)
+
+    ! write(*,*) ' test prod '
+
+    ! call matprint(matprod(testmatrix1, testmatrix2)) 
+    
+    ! bineet_test1 = complex(0.0,-0.09)
+    ! bineet_test2 = complex(1.0,0.0)
+
+    ! ! write(*,*) bineet_test1*bineet_test2
+
+    ! write(*,*) bineet_test1
+    ! write(*,*) cmplxfilterbelow(bineet_test1)
+    
+    ! modsqz = real(bineet_test1 * conjg(bineet_test1))
+    ! write(*,*) modsqz
+
+    ! if ( modsqz .le. 1.0E-10) then
+    !     write(*,*) 'below'
+    !     ! cmplxfilterbelow = complex(0.0, 0.0)
+    ! else
+    !     write(*,*) 'above'
+    ! end if
 
 end program spinless_fermions

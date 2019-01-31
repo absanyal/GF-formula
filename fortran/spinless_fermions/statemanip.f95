@@ -259,7 +259,7 @@ contains
     function complex_identity(m)
         integer, intent(in) :: m
         integer :: j
-        complex(8), allocatable :: complex_identity(:,:)
+        double complex, allocatable :: complex_identity(:,:)
         allocate(complex_identity(m, m))
         complex_identity = complex(0.0, 0.0)
         do j = 1, m
@@ -270,25 +270,39 @@ contains
     function complex_zeros(m, n)
         integer, intent(in) :: m, n
         integer :: j
-        complex(8), allocatable :: complex_zeros(:,:)
+        double complex, allocatable :: complex_zeros(:,:)
         allocate(complex_zeros(m, n))
         complex_zeros = complex(0.0, 0.0)
     end function complex_zeros
 
     subroutine matprint(h)
         integer :: m
-        complex(8), dimension(:, :) :: h
+        double complex, dimension(:, :) :: h
         integer :: j
         m = size(h, 1)
+! 234     format(3f16.8,3f16.8)
         do j = 1, m, 1
-            write(*,*)  h(j, :)
+            ! write(*, 234) dble(h(j, :)), imag(h(j, :))
+            write(*,*) h(j,:)
         end do
     end subroutine matprint
+
+        subroutine frmtmatprint(h)
+            integer :: m
+            double complex, dimension(:, :) :: h
+            integer :: j
+            m = size(h, 1)
+    234     format(3f16.8,3f16.8)
+            do j = 1, m, 1
+                write(*, 234) dble(h(j, :)), imag(h(j, :))
+                ! write(*,*) h(j,:)
+        end do
+    end subroutine frmtmatprint
 
     subroutine matprinttofile(writeto, h)
         integer :: m
         integer, intent(in) :: writeto
-        complex(8), dimension(:, :) :: h
+        double complex, dimension(:, :) :: h
         integer :: j
         m = size(h, 1)
         do j = 1, m, 1
@@ -309,7 +323,7 @@ contains
         integer :: l12
         integer :: l21
         integer :: l22
-        complex(8), allocatable :: connecting_u(:, :)
+        double complex, allocatable :: connecting_u(:, :)
         integer :: startindex
         integer :: i, j
 
@@ -342,15 +356,15 @@ contains
     end function connecting_u
 
     function hcat( A, B ) result( X )
-        complex(8), dimension(:,:) :: A, B
-        complex(8) :: X( size(A,1), size(A,2)+size(B,2) )
+        double complex, dimension(:,:) :: A, B
+        double complex :: X( size(A,1), size(A,2)+size(B,2) )
 
         X = reshape( [ A, B], shape( X ) )
     end function hcat
 
     function vcat( A, B ) result( X )
-        complex(8), dimension(:,:) :: A, B
-        complex(8) :: X( size(A,1)+size(B,1), size(A,2) )
+        double complex, dimension(:,:) :: A, B
+        double complex :: X( size(A,1)+size(B,1), size(A,2) )
 
         X = transpose( reshape( &
                 [ transpose(A), transpose(B) ], &
@@ -358,18 +372,18 @@ contains
     end function vcat
 
     function bmat(a, b, c, d) result (x)
-        complex(8), dimension(:,:) :: a, b, c, d
-        complex(8) :: x(size(a, 2) + size(b, 2), size(a, 1) + size(c, 1))
+        double complex, dimension(:,:) :: a, b, c, d
+        double complex :: x(size(a, 2) + size(b, 2), size(a, 1) + size(c, 1))
         X = vcat( hcat(a, b), hcat(c, d) )
     end function bmat
 
     function onebyone()
-        complex(8), DIMENSION(1, 1) :: onebyone
+        double complex, DIMENSION(1, 1) :: onebyone
         onebyone(1, 1) = complex(0.0, 0.0)
     end function onebyone
 
     function twobytwo()
-        complex(8), DIMENSION(2, 2) :: twobytwo
+        double complex, DIMENSION(2, 2) :: twobytwo
         twobytwo(1, 1) = complex(0.0, 0.0)
         twobytwo(1, 2) = complex(1.0, 0.0)
         twobytwo(2, 1) = complex(1.0, 0.0)
@@ -378,7 +392,7 @@ contains
 
     function diagonalblock(s1)
         type (state), intent(inout) :: s1
-        complex(8), allocatable :: diagonalblock(:, :)
+        double complex, allocatable :: diagonalblock(:, :)
         if (getstatesize(s1) .eq. 1) then
             allocate(diagonalblock(1, 1))
             diagonalblock = onebyone()
@@ -390,10 +404,10 @@ contains
     end function diagonalblock
 
     function inv(A) result(Ainv)
-        complex(8), dimension(:,:), intent(in) :: A
-        complex(8), dimension(size(A,1),size(A,2)) :: Ainv
+        double complex, dimension(:,:), intent(in) :: A
+        double complex, dimension(size(A,1),size(A,2)) :: Ainv
 
-        complex(8), dimension(size(A,1)) :: work  ! work array for LAPACK
+        double complex, dimension(size(A,1)) :: work  ! work array for LAPACK
         integer, dimension(size(A,1)) :: ipiv   ! pivot indices
         integer :: n, info
 
@@ -411,7 +425,8 @@ contains
         ! print *, info
 
         if (info /= 0) then
-            stop !'Matrix is numerically singular!'
+            write(*,*) "zgetrf error", info
+            stop 'Matrix is numerically singular!'
         end if
 
         ! DGETRI computes the inverse of a matrix using the LU factorization
@@ -420,21 +435,22 @@ contains
         !  write (*,*) info
 
         if (info /= 0) then
-            stop !'Matrix inversion failed!'
+            write(*,*) "zgetri error", info
+            stop 'Matrix inversion failed!'
         end if
     end function inv
 
     function g(h, w)
-        complex(8), allocatable :: g(:,:)
-        complex(8), allocatable, intent(in) :: h(:,:)
+        double complex, allocatable :: g(:,:)
+        double complex, allocatable, intent(in) :: h(:,:)
         real(8), intent(in) :: w
         g = inv((w + complex(0, eta)) * complex_identity(size(h, 1)) &
             - h)
     end function g
 
     function trace(h)
-        complex(8), allocatable, intent(in) :: h(:,:)
-        complex(8) :: trace
+        double complex, allocatable, intent(in) :: h(:,:)
+        double complex :: trace
         integer :: j
         j = 1
         trace = 0
@@ -448,7 +464,7 @@ contains
         integer :: nlines
         integer :: i
 
-        complex(8), allocatable :: outputmatrix(:,:)
+        double complex, allocatable :: outputmatrix(:,:)
 
         nlines = 0
 
@@ -470,28 +486,31 @@ contains
     end subroutine
 
     function matprod(A, B)
-        complex(8), allocatable :: A(:,:)
-        complex(8), allocatable :: B(:,:)
-        complex(8), allocatable :: matprod(:,:)
+        double complex, allocatable :: A(:,:)
+        double complex, allocatable :: B(:,:)
+        double complex, allocatable :: matprod(:,:)
 
         integer :: i, j, n
 
         allocate(matprod(size(A, 1), size(B, 2)))
 
-        do i = 1, size(matprod, 1)
-            do j = 1, size(matprod, 2)
-                do n = 1, size(matprod, 2)
-                    matprod(i, j) = complex(0.0, 0.0)
-                end do
-            end do
-        end do
+        ! do i = 1, size(matprod, 1)
+        !     do j = 1, size(matprod, 2)
+        !         do n = 1, size(matprod, 2)
+        !             matprod(i, j) = complex(0.0, 0.0)
+        !         end do
+        !     end do
+        ! end do
+
+        matprod = complex (0.0,0.0)
 
         do i = 1, size(matprod, 1)
             do j = 1, size(matprod, 2)
                 do n = 1, size(matprod, 2)
                     matprod(i, j) = matprod(i, j) + &
-                    A(i, n) * B(n, j)
+                    ( A(i, n) * B(n, j) )
                 end do
+                ! matprod(i,j) = cmplxfilterbelow(matprod(i,j))
             end do
         end do
 
@@ -499,22 +518,43 @@ contains
     end function
 
     function tmm(A, B, C)
-        complex(8), allocatable :: A(:,:)
-        complex(8), allocatable :: B(:,:)
-        complex(8), allocatable :: C(:,:)
-        complex(8), allocatable :: tmm(:,:)
+        double complex, allocatable :: A(:,:)
+        double complex, allocatable :: B(:,:)
+        double complex, allocatable :: C(:,:)
+        double complex, allocatable :: tmm(:,:)
 
         tmm = matprod(A, matprod(B, C))
     end function
 
     function cmplxfilterbelow(z)
-        complex(8), intent(in) :: z
-        complex(8) :: cmplxfilterbelow
+        double complex, intent(in) :: z
+        double complex :: cmplxfilterbelow
         real(8) :: modsqz
-        modsqz = z * conjg(z)
-        if ( modsqz .le. 1.0E-20) then
+        modsqz = real(z * conjg(z))
+        if ( modsqz .le. 1.0E-10) then
             cmplxfilterbelow = complex(0.0, 0.0)
+        else
+            cmplxfilterbelow = z
         end if
     end function
+
+    subroutine diagonal_imaginary_part(A)
+        double complex, intent(in) :: A(:,:)
+        integer :: i
+        ! i = size(A, 1)
+        do i = 1, size(A, 1)
+            write(*,*) imag(A(i,i))
+        end do
+    end subroutine
+
+    subroutine diagonal_only_part(A)
+        double complex, intent(in) :: A(:,:)
+        integer :: i
+        ! i = size(A, 1)
+        do i = 1, size(A, 1)
+            write(*,*) A(i,i)
+        end do
+    end subroutine
+
 
 end module statemanip
