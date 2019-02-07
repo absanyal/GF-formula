@@ -1,5 +1,6 @@
 # Thu Feb 7 11:33:37 IST 2019
 eta = 0.1
+t = complex(1.0, 0.0)
 
 
 class state:
@@ -70,6 +71,8 @@ def getstatesize(s1):
         if (va == 1 and vb == 1):
             gs = \
                 factorial(vs - 1) / (factorial(vns - 1) * factorial(vs - vns))
+    else:
+        gs = 0
 
     return int(gs)
 
@@ -103,7 +106,7 @@ def getlstate(s1):
         k = "c"
     if (s1.alphas == 1 and s1.betas == 1):
         k = "d"
-    return str(s1.s) + k + str(s1.ns)
+    return str(int(s1.s)) + k + str(int(s1.ns))
 
 
 def splitstates(fname, s1):
@@ -152,21 +155,40 @@ def getletter(s1):
     if (s1.alphas == 1 and s1.betas == 0):
         return 3
     if (s1.alphas == 1 and s1.betas == 1):
-        return 1
+        return 4
 
 ########################################################
 
+
 def z(w):
-    import  numpy as np
+    import numpy as np
     return (w + np.complex(0, eta))
+
 
 def G(H, w):
     import numpy as np
-    return np.linalg.inv( z(w) - H )
+    return np.linalg.inv(z(w)*np.eye(len(H), dtype=np.complex) - H)
+
 
 def tmm(A, B, C):
     import numpy as np
-    np.dot( A, np.dot(B, C) )
+    return np.dot(A, np.dot(B, C))
 
 ########################################################
 
+
+def connecting_u(s1, s2):
+    import numpy as np
+    if (checkvalidity(s1) == 1 and checkvalidity(s2) == 1):
+        u = \
+            np.zeros((getstatesize(s1), getstatesize(s2)), 
+            dtype=np.complex)
+        s1s0 = relegate0(s1)
+        startindex = getstatesize(s1s0)
+        i = startindex
+        j = 0
+        while(i < getstatesize(s1)):
+            u[i, j] = np.complex(1, 0)
+            i += 1
+            j += 1
+    return u
