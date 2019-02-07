@@ -1,4 +1,5 @@
 # Thu Feb 7 11:33:37 IST 2019
+eta = 0.1
 
 
 class state:
@@ -66,7 +67,7 @@ def getstatesize(s1):
         if (va == 1 and vb == 0):
             gs = \
                 factorial(vs - 1) / (factorial(vns - 1) * factorial(vs - vns))
-        if (va == 1 and vb == 0):
+        if (va == 1 and vb == 1):
             gs = \
                 factorial(vs - 1) / (factorial(vns - 1) * factorial(vs - vns))
 
@@ -127,19 +128,21 @@ def splitstatesatlevel(fname, s1, level):
             s1s1 = relegate1(s1)
             splitstatesatlevel(fname, s1s1, level)
 
+
 def splitstatesatlevelraw(fname, s1, level):
     if (checkvalidity(s1) == 1):
         if (s1.s == level):
             fname.write(
-                str(getstate(s1)[0]) + '\t' + str(getstate(s1)[1]) + '\t' +\
-                str(getstate(s1)[2]) + '\t' + str(getstate(s1)[3]) + '\t' \
-                    + str(getstatesize(s1))+'\n'
+                str(getstate(s1)[0]) + '\t' + str(getstate(s1)[1]) + '\t' +
+                str(getstate(s1)[2]) + '\t' + str(getstate(s1)[3]) + '\t'
+                + str(getstatesize(s1))+'\n'
             )
         if (s1.s > level):
             s1s0 = relegate0(s1)
             splitstatesatlevelraw(fname, s1s0, level)
             s1s1 = relegate1(s1)
             splitstatesatlevelraw(fname, s1s1, level)
+
 
 def getletter(s1):
     if (s1.alphas == 0 and s1.betas == 0):
@@ -150,3 +153,20 @@ def getletter(s1):
         return 3
     if (s1.alphas == 1 and s1.betas == 1):
         return 1
+
+########################################################
+
+def z(w):
+    import  numpy as np
+    return (w + np.complex(0, eta))
+
+def G(H, w):
+    import numpy as np
+    return np.linalg.inv( z(w) - H )
+
+def tmm(A, B, C):
+    import numpy as np
+    np.dot( A, np.dot(B, C) )
+
+########################################################
+
