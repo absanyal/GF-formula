@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 os.system('rm *.dat')
 os.system('clear')
 
-num_sites = 6
-num_particles = 3
+num_sites = 12
+num_particles = 6
 smax = num_sites-1
 ns = num_particles
 t = np.complex(1, 0)
@@ -117,7 +117,7 @@ for w in w_list:
     level = 3
 
     while(level <= smax):
-        # while(level <= 3):  # Testing line
+    # while(level <= 3):  # Testing line
 
         # Grouping
         states = np.loadtxt('stateordinatesatlevel' + str(level) + '.dat')
@@ -130,7 +130,7 @@ for w in w_list:
             tns1 = line1[1]
             ta1 = line1[2]
             tb1 = line1[3]
-            tsize1 = line1[4]
+            tsize1 = int(line1[4])
             tpos1 = int(line1[5])
 
             if (i < n-1):
@@ -139,7 +139,7 @@ for w in w_list:
                 tns2 = line2[1]
                 ta2 = line2[2]
                 tb2 = line2[3]
-                tsize2 = line2[4]
+                tsize2 = int(line2[4])
                 tpos2 = int(line2[5])
 
             s1 = sm.state(ts1, tns1, ta1, tb1)
@@ -150,22 +150,34 @@ for w in w_list:
 
             if (i != n):
                 if (tl1 == 1 and tl2 == 3):
-                    # print(sm.getlstate(s1), sm.getlstate(s2), sep='\t')
+                    print(sm.getlstate(s1), sm.getlstate(s2), sep='\t')
+                    print(tpos1, tpos2)
+                    print(tsize1, tsize2)
 
                     f = 'g_'+str(level)+'_'+str(tpos1)+'.dat'
                     # print(f)
                     g11 = np.loadtxt(f, dtype=np.complex)
-                    if (tsize1 == 1):
-                        g11 = [[g11]]
+                    if (np.shape(g11) == ()):
+                        g11 = np.array([[g11]], dtype=complex)
 
                     f = 'g_'+str(level)+'_'+str(tpos2)+'.dat'
                     # print(f)
                     g22 = np.loadtxt(f, dtype=np.complex)
-                    if (tsize2 == 1):
-                        g22 = [[g22]]
+                    if (np.shape(g22) == ()):
+                        g22 = np.array([[g22]], dtype=complex)
 
                     u12 = sm.connecting_u(s1, s2)
                     u21 = np.transpose(u12)
+
+                    print(np.shape(g11))
+                    print(np.shape(g22))
+                    print(np.shape(u12))
+                    print(np.shape(u21))
+
+                    print(g11)
+                    print(g22)
+                    print(u12)
+                    print(u21)
 
                     fg11 = inv(inv(g11) - sm.tmm(u12, g22, u21))
                     fg22 = inv(inv(g22) - sm.tmm(u21, g11, u12))
@@ -179,22 +191,34 @@ for w in w_list:
 
                     i += 1
                 elif (tl1 == 2 and tl2 == 4):
-                    # print(sm.getlstate(s1), sm.getlstate(s2), sep='\t')
+                    print(sm.getlstate(s1), sm.getlstate(s2), sep='\t')
+                    print(tpos1, tpos2)
+                    print(tsize1, tsize2)
 
                     f = 'g_'+str(level)+'_'+str(tpos1)+'.dat'
                     # print(f)
                     g11 = np.loadtxt(f, dtype=np.complex)
-                    if (tsize1 == 1):
-                        g11 = [[g11]]
+                    if (np.shape(g11) == ()):
+                        g11 = np.array([[g11]], dtype=complex)
 
                     f = 'g_'+str(level)+'_'+str(tpos2)+'.dat'
                     # print(f)
                     g22 = np.loadtxt(f, dtype=np.complex)
-                    if (tsize2 == 1):
-                        g22 = [[g22]]
+                    if (np.shape(g22) == ()):
+                        g22 = np.array([[g22]], dtype=complex)
 
                     u12 = sm.connecting_u(s1, s2)
                     u21 = np.transpose(u12)
+
+                    print(np.shape(g11))
+                    print(np.shape(g22))
+                    print(np.shape(u12))
+                    print(np.shape(u21))
+
+                    print(g11)
+                    print(g22)
+                    print(u12)
+                    print(u21)
 
                     fg11 = inv(inv(g11) - sm.tmm(u12, g22, u21))
                     fg22 = inv(inv(g22) - sm.tmm(u21, g11, u12))
@@ -208,17 +232,20 @@ for w in w_list:
 
                     i += 1
                 else:
+                    print(sm.getlstate(s1))
+                    print(tpos1)
+                    print(tsize1)
+
                     f = 'g_'+str(level)+'_'+str(tpos1)+'.dat'
                     # print(f)
                     g11 = np.loadtxt(f, dtype=np.complex)
-                    if (tsize1 == 1):
-                        g11 = [[g11]]
+                    if (np.shape(g11) == ()):
+                        g11 = np.array([[g11]], dtype=complex)
 
+                    print(g11)
                     fg = g11.copy()
                     f = 'g_'+str(level+1)+'_'+str(tpos1)+'.dat'
                     np.savetxt(f, fg, fmt='%1.8f')
-
-                    # print(sm.getlstate(s1))
 
             i += 1
         # print('*'*50)
