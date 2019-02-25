@@ -10,8 +10,8 @@ import matplotlib.pyplot as plt
 os.system('rm *.dat')
 os.system('clear')
 
-num_sites = 6
-num_particles = 3
+num_sites = 14
+num_particles = 7
 smax = num_sites-1
 ns = num_particles
 t = np.complex(1, 0)
@@ -117,6 +117,7 @@ while (level > 3):
             str(tns) + '\t' + \
             str(ta) + '\t' + \
             str(tb) + '\t' + \
+            str(tsize) + '\t' + \
             str(tpos) + '\t' + \
             str(tp1) + '\t' + \
             str(tp2) + '\n'
@@ -125,6 +126,8 @@ while (level > 3):
     # print('-'*50)
     f.close()
     level -= 1
+
+# quit()
 
 # print('*'*50)
 for w in w_list:
@@ -158,131 +161,101 @@ for w in w_list:
 
     ####################################################
 
-    level = 3
+    level = 4
 
     while(level <= smax):
         # while(level <= 3):  # Testing line
 
         # Grouping
-        states = np.loadtxt('stateordinatesatlevel' + str(level) + '.dat')
+        states = np.loadtxt('statelinkedatlevel' + str(level) + '.dat')
         n = len(states)
         # print(level, n)
         i = 0
         while(i < n):
             line1 = states[i]
-            ts1 = line1[0]
-            tns1 = line1[1]
-            ta1 = line1[2]
-            tb1 = line1[3]
+            ts1 = int(line1[0])
+            tns1 = int(line1[1])
+            ta1 = int(line1[2])
+            tb1 = int(line1[3])
             tsize1 = int(line1[4])
             tpos1 = int(line1[5])
-
-            if (i < n-1):
-                line2 = states[i+1]
-                ts2 = line2[0]
-                tns2 = line2[1]
-                ta2 = line2[2]
-                tb2 = line2[3]
-                tsize2 = int(line2[4])
-                tpos2 = int(line2[5])
+            tchild1 = int(line1[6])
+            tchild2 = int(line1[7])
 
             s1 = sm.state(ts1, tns1, ta1, tb1)
-            s2 = sm.state(ts2, tns2, ta2, tb2)
 
-            tl1 = sm.getletter(s1)
-            tl2 = sm.getletter(s2)
+            if (tchild1 != 0 and tchild2 != 0):
 
-            pair = (tl1, tl2)
+                f = 'stateordinatesatlevel' + str(level-1) + '.dat'
+                childordinates = np.loadtxt(f, dtype=int)
+                for line in childordinates:
+                    ts = int(line[0])
+                    tns = int(line[1])
+                    ta = int(line[2])
+                    tb = int(line[3])
+                    tsize = int(line[4])
+                    tpos = int(line[5])
 
-            if (i != n):
-                if (pair == (1, 3) or pair == (2, 4)):
-                    print(sm.getlstate(s1), sm.getlstate(s2), sep='\t')
-                    # print(tpos1, tpos2)
-                    # print(tsize1, tsize2)
+                    if (tpos == tchild1):
+                        sc1 = sm.state(ts, tns, ta, tb)
+                        fc1 = 'g_'+str(level-1)+'_'+str(tpos)+'.dat'
 
-                    f = 'g_'+str(level)+'_'+str(tpos1)+'.dat'
-                    # print(f)
-                    g11 = np.loadtxt(f, dtype=np.complex)
+                    if (tpos == tchild2):
+                        sc2 = sm.state(ts, tns, ta, tb)
+                        fc2 = 'g_'+str(level-1)+'_'+str(tpos)+'.dat'
+
+                print(sm.getlstate(s1),
+                      sm.getlstate(sc1),
+                      sm.getlstate(sc2))
+
+                g11 = np.loadtxt(fc1, dtype=np.complex)
+                if (np.shape(g11) == ()):
+                    g11 = np.array([[g11]], dtype=complex)
+
+                g22 = np.loadtxt(fc2, dtype=np.complex)
+                if (np.shape(g22) == ()):
+                    g22 = np.array([[g22]], dtype=complex)
+
+                u12 = sm.connecting_u(sc1, sc2)
+                u21 = np.transpose(u12)
+
+                fg11 = inv(inv(g11) - sm.tmm(u12, g22, u21))
+                fg22 = inv(inv(g22) - sm.tmm(u21, g11, u12))
+                fg12 = sm.tmm(fg11, u12, g22)
+                fg21 = sm.tmm(fg22, u21, g11)
+
+                fg = np.block([[fg11, fg12], [fg21, fg22]])
+
+                f = 'g_'+str(level)+'_'+str(tpos1)+'.dat'
+                np.savetxt(f, fg, fmt='%1.8f')
+
+            else:
+                tchild1 = int(tchild1 + tchild2)
+                f = 'stateordinatesatlevel' + str(level-1) + '.dat'
+                childordinates = np.loadtxt(f, dtype=int)
+                for line in childordinates:
+                    ts = int(line[0])
+                    tns = int(line[1])
+                    ta = int(line[2])
+                    tb = int(line[3])
+                    tsize = int(line[4])
+                    tpos = int(line[5])
+
+                    if (tpos == tchild1):
+                        sc1 = sm.state(ts, tns, ta, tb)
+                        fc1 = 'g_'+str(level-1)+'_'+str(tpos)+'.dat'
+
+                    g11 = np.loadtxt(fc1, dtype=np.complex)
                     if (np.shape(g11) == ()):
                         g11 = np.array([[g11]], dtype=complex)
 
-                    f = 'g_'+str(level)+'_'+str(tpos2)+'.dat'
-                    # print(f)
-                    g22 = np.loadtxt(f, dtype=np.complex)
-                    if (np.shape(g22) == ()):
-                        g22 = np.array([[g22]], dtype=complex)
-
-                    u12 = sm.connecting_u(s1, s2)
-                    u21 = np.transpose(u12)
-
-                    # print(np.shape(g11))
-                    # print(np.shape(g22))
-                    # print(np.shape(u12))
-                    # print(np.shape(u21))
-
-                    # print(g11)
-                    # print(g22)
-                    # print(u12)
-                    # print(u21)
-
-                    fg11 = inv(inv(g11) - sm.tmm(u12, g22, u21))
-                    fg22 = inv(inv(g22) - sm.tmm(u21, g11, u12))
-                    fg12 = sm.tmm(fg11, u12, g22)
-                    fg21 = sm.tmm(fg22, u21, g11)
-
-                    fg = np.block([[fg11, fg12], [fg21, fg22]])
-
-                    f = 'g_'+str(level+1)+'_'+str(tpos1)+'.dat'
-                    np.savetxt(f, fg, fmt='%1.8f')
-
-                    i += 1
-                else:
-                    print(sm.getlstate(s1))
-
-                    # print(tpos1)
-                    # print(tsize1)
-
                     f = 'g_'+str(level)+'_'+str(tpos1)+'.dat'
-                    # print(f)
-                    g11 = np.loadtxt(f, dtype=np.complex)
-                    if (np.shape(g11) == ()):
-                        g11 = np.array([[g11]], dtype=complex)
+                    np.savetxt(f, g11, fmt='%1.8f')
 
-                    # print(g11)
-                    fg = g11.copy()
-                    f = 'g_'+str(level+1)+'_'+str(tpos1)+'.dat'
-                    np.savetxt(f, fg, fmt='%1.8f')
+                print(sm.getlstate(s1),
+                      sm.getlstate(sc1))
 
             i += 1
-        print('*'*50)
 
         level += 1
-
-    s1 = sm.state(smax+1, ns, 0, 0)
-    s2 = sm.state(smax+1, ns, 1, 0)
-
-    tsize1 = sm.getstatesize(s1)
-    tsize2 = sm.getstatesize(s2)
-
-    tpos1 = 1
-    tpos2 = tpos1 + sm.getstatesize(s1)
-
-    f = 'g_'+str(smax+1)+'_'+str(tpos1)+'.dat'
-    g11 = np.loadtxt(f, dtype=np.complex)
-
-    f = 'g_'+str(smax+1)+'_'+str(tpos2)+'.dat'
-    g22 = np.loadtxt(f, dtype=np.complex)
-
-    u12 = sm.connecting_u(s1, s2)
-    u21 = np.transpose(u12)
-
-    fg11 = inv(inv(g11) - sm.tmm(u12, g22, u21))
-    fg22 = inv(inv(g22) - sm.tmm(u21, g11, u12))
-
-    A = (-1/np.pi) * 1/(tsize1 + tsize2) * \
-        np.imag(np.trace(fg11) + np.trace(fg22))
-
-    A_list.append(A)
-
-# plt.plot(w_list, A_list)
-# plt.show()
+        print('*'*50)
