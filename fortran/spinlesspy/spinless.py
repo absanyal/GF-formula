@@ -6,18 +6,25 @@ import statemanip as sm
 from numpy.linalg import inv
 # from numpy import imag, trace
 import matplotlib.pyplot as plt
+import time
 
 os.system('rm *.dat')
 os.system('clear')
 
-num_sites = 14
-num_particles = 7
+num_sites = 12
+num_particles = 6
 smax = num_sites-1
 ns = num_particles
 t = np.complex(1, 0)
 
-wmax = -5
-wmin = 5
+print(num_sites, 'sites,', num_particles, 'particles.')
+
+wmax = 5
+wmin = -5
+
+A_list = []
+w_list = np.linspace(wmin, wmax, 10)
+# w_list = [0]  # For testing
 
 s1 = sm.state(smax, ns, 0, 0)
 s2 = sm.state(smax, ns, 1, 0)
@@ -33,6 +40,8 @@ s4 = sm.state(smax, ns-1, 1, 1)
 # sm.splitstates(f, s4)
 
 # f.close()
+
+t_start = time.perf_counter()
 
 # Generate splitting at all levels
 level_range = range(1, smax + 1)
@@ -79,9 +88,7 @@ for level in level_range:
         )
 
     f.close()
-A_list = []
-w_list = np.linspace(wmin, wmax, 1000)
-w_list = [0]  # For testing
+
 
 level = smax
 while (level > 3):
@@ -204,9 +211,9 @@ for w in w_list:
                         sc2 = sm.state(ts, tns, ta, tb)
                         fc2 = 'g_'+str(level-1)+'_'+str(tpos)+'.dat'
 
-                print(sm.getlstate(s1),
-                      sm.getlstate(sc1),
-                      sm.getlstate(sc2))
+                # print(sm.getlstate(s1),
+                #       sm.getlstate(sc1),
+                #       sm.getlstate(sc2))
 
                 g11 = np.loadtxt(fc1, dtype=np.complex)
                 if (np.shape(g11) == ()):
@@ -252,10 +259,142 @@ for w in w_list:
                     f = 'g_'+str(level)+'_'+str(tpos1)+'.dat'
                     np.savetxt(f, g11, fmt='%1.8f')
 
-                print(sm.getlstate(s1),
-                      sm.getlstate(sc1))
+                # print(sm.getlstate(s1),
+                #       sm.getlstate(sc1))
 
             i += 1
 
         level += 1
-        print('*'*50)
+        # print('*'*50)
+
+    # Connect the 4 states in pairs at smax level
+    states = np.loadtxt('stateordinatesatlevel' + str(smax) + '.dat')
+    # Connect 1 and 2
+    line1 = states[0]
+    ts1 = int(line1[0])
+    tns1 = int(line1[1])
+    ta1 = int(line1[2])
+    tb1 = int(line1[3])
+    tsize1 = int(line1[4])
+    tpos1 = int(line1[5])
+    s1 = sm.state(ts1, tns1, ta1, tb1)
+    fs1 = 'g_'+str(ts1)+'_'+str(tpos1)+'.dat'
+    g11 = np.loadtxt(fs1, dtype=np.complex)
+    if (np.shape(g11) == ()):
+        g11 = np.array([[g11]], dtype=complex)
+
+    # print(np.shape(g11))
+
+    line2 = states[1]
+    ts2 = int(line2[0])
+    tns2 = int(line2[1])
+    ta2 = int(line2[2])
+    tb2 = int(line2[3])
+    tsize2 = int(line2[4])
+    tpos2 = int(line2[5])
+    s2 = sm.state(ts2, tns2, ta2, tb2)
+    fs2 = 'g_'+str(ts2)+'_'+str(tpos2)+'.dat'
+    g22 = np.loadtxt(fs2, dtype=np.complex)
+    if (np.shape(g22) == ()):
+        g22 = np.array([[g22]], dtype=complex)
+    # print(np.shape(g22))
+    u12 = sm.connecting_u(s1, s2)
+    u21 = np.transpose(u12)
+
+    fg11 = inv(inv(g11) - sm.tmm(u12, g22, u21))
+    fg22 = inv(inv(g22) - sm.tmm(u21, g11, u12))
+    fg12 = sm.tmm(fg11, u12, g22)
+    fg21 = sm.tmm(fg22, u21, g11)
+
+    fg = np.block([[fg11, fg12], [fg21, fg22]])
+
+    # print(np.shape(fg))
+
+    f = 'g_'+str(smax+1)+'_'+str(tpos1)+'.dat'
+    np.savetxt(f, fg, fmt='%1.8f')
+
+    # Connect 3 and 4
+
+    line1 = states[2]
+    ts1 = int(line1[0])
+    tns1 = int(line1[1])
+    ta1 = int(line1[2])
+    tb1 = int(line1[3])
+    tsize1 = int(line1[4])
+    tpos1 = int(line1[5])
+    s1 = sm.state(ts1, tns1, ta1, tb1)
+    fs1 = 'g_'+str(ts1)+'_'+str(tpos1)+'.dat'
+    g11 = np.loadtxt(fs1, dtype=np.complex)
+    if (np.shape(g11) == ()):
+        g11 = np.array([[g11]], dtype=complex)
+
+    line2 = states[3]
+    ts2 = int(line2[0])
+    tns2 = int(line2[1])
+    ta2 = int(line2[2])
+    tb2 = int(line2[3])
+    tsize2 = int(line2[4])
+    tpos2 = int(line2[5])
+    s2 = sm.state(ts2, tns2, ta2, tb2)
+    fs2 = 'g_'+str(ts2)+'_'+str(tpos2)+'.dat'
+    g22 = np.loadtxt(fs2, dtype=np.complex)
+    if (np.shape(g22) == ()):
+        g22 = np.array([[g22]], dtype=complex)
+
+    u12 = sm.connecting_u(s1, s2)
+    u21 = np.transpose(u12)
+
+    fg11 = inv(inv(g11) - sm.tmm(u12, g22, u21))
+    fg22 = inv(inv(g22) - sm.tmm(u21, g11, u12))
+    fg12 = sm.tmm(fg11, u12, g22)
+    fg21 = sm.tmm(fg22, u21, g11)
+
+    fg = np.block([[fg11, fg12], [fg21, fg22]])
+    # print(np.shape(fg))
+
+    f = 'g_'+str(smax+1)+'_'+str(tpos1)+'.dat'
+    np.savetxt(f, fg, fmt='%1.8f')
+
+    # Connect two large blocks
+
+    s1 = sm.state(smax+1, ns, 0, 0)
+    s2 = sm.state(smax+1, ns, 1, 0)
+
+    tsize1 = sm.getstatesize(s1)
+    tsize2 = sm.getstatesize(s2)
+
+    tpos1 = 1
+    tpos2 = tpos1 + sm.getstatesize(s1)
+
+    f = 'g_'+str(smax+1)+'_'+str(tpos1)+'.dat'
+    g11 = np.loadtxt(f, dtype=np.complex)
+
+    f = 'g_'+str(smax+1)+'_'+str(tpos2)+'.dat'
+    g22 = np.loadtxt(f, dtype=np.complex)
+
+    u12 = sm.connecting_u(s1, s2)
+    u21 = np.transpose(u12)
+
+    fg11 = inv(inv(g11) - sm.tmm(u12, g22, u21))
+    fg22 = inv(inv(g22) - sm.tmm(u21, g11, u12))
+
+    A = (-1/np.pi) * 1/(tsize1 + tsize2) * \
+        np.imag(np.trace(fg11) + np.trace(fg22))
+
+    A_list.append(A)
+
+    print(w, A)
+
+t_stop = time.perf_counter()
+
+print("Time taken per omega loop is",
+      round((t_stop-t_start)/len(w_list), 5), 'seconds.')
+
+# plt.plot(w_list, A_list)
+# plt.show()
+
+
+# print(sm.getlstate(s1))
+# print(sm.getlstate(s2))
+# print(sm.getlstate(s3))
+# print(sm.getlstate(s4))
