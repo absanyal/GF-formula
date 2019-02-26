@@ -11,20 +11,25 @@ import time
 os.system('rm *.dat')
 os.system('clear')
 
-num_sites = 8
-num_particles = 1
+num_sites = 14
+num_particles = 7
 smax = num_sites-1
 ns = num_particles
 t = np.complex(1, 0)
 uint = 8.0
 
+num_w_points = 1000
+
 print(num_sites, 'sites,', num_particles, 'particles.')
 
-wmin = -5
-wmax = 5
+dirName = 'datafiles'
+if not os.path.exists(dirName):
+    os.mkdir(dirName)
+    print("Directory ", dirName,  " created.")
+else:
+    print("Directory ", dirName,  " already exists.")
 
-A_list = []
-w_list = np.linspace(wmin, wmax, 500)
+
 # w_list = [0]  # For testing
 
 s1 = sm.state(smax+1, ns, 0, 0)
@@ -94,6 +99,12 @@ for level in level_range:
     f.close()
 
 ulist = np.loadtxt('splitstatesatlevel1.dat', usecols=(2,), dtype=float)
+
+wmin = min(ulist-5)
+wmax = max(ulist+5)
+
+A_list = []
+w_list = np.linspace(wmin, wmax, int(num_w_points))
 
 level = smax+1
 while (level > 3):
@@ -320,5 +331,22 @@ t_stop = time.perf_counter()
 print("Time taken per omega loop is",
       round((t_stop-t_start)/len(w_list), 5), 'seconds.')
 
+datafname = 'datafiles/' + str(num_sites) + '_' + str(num_particles) + '_' \
+    + str(int(uint*100)) + '_' + str(int(num_w_points))
+
+f = open(datafname + '.dat', 'w')
+
+for i in range(len(w_list)):
+    p = str(w_list[i]) + '\t' + str(A_list[i]) + '\n'
+    f.write(p)
+
+f.close()
+
+
 plt.plot(w_list, A_list)
-plt.show()
+plt.xlabel(r'$\omega$')
+plt.ylabel('Density of states')
+plt.title(str(num_sites)+' sites, ' + str(num_particles) + ' particles, '
+          + r'$U =$ ' + str(uint))
+plt.savefig(datafname+'.pdf')
+# plt.show()
