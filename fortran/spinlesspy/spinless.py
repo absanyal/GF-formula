@@ -12,7 +12,7 @@ os.system('rm *.dat')
 os.system('clear')
 
 num_sites = 8
-num_particles = 7
+num_particles = 1
 smax = num_sites-1
 ns = num_particles
 t = np.complex(1, 0)
@@ -20,11 +20,11 @@ uint = 8.0
 
 print(num_sites, 'sites,', num_particles, 'particles.')
 
-wmax = -5
-wmin = 20
+wmin = -5
+wmax = 5
 
 A_list = []
-w_list = np.linspace(wmin, wmax, 10)
+w_list = np.linspace(wmin, wmax, 500)
 # w_list = [0]  # For testing
 
 s1 = sm.state(smax+1, ns, 0, 0)
