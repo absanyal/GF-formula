@@ -11,35 +11,36 @@ import time
 os.system('rm *.dat')
 os.system('clear')
 
-num_sites = 12
-num_particles = 6
+num_sites = 8
+num_particles = 1
 smax = num_sites-1
 ns = num_particles
 t = np.complex(1, 0)
+uint = 8.0
 
 print(num_sites, 'sites,', num_particles, 'particles.')
 
-wmax = 5
-wmin = -5
+wmax = -5
+wmin = 20
 
 A_list = []
-w_list = np.linspace(wmin, wmax, 10)
+w_list = np.linspace(wmin, wmax, 100)
 # w_list = [0]  # For testing
 
-s1 = sm.state(smax, ns, 0, 0)
-s2 = sm.state(smax, ns, 1, 0)
-s3 = sm.state(smax, ns-1, 0, 1)
-s4 = sm.state(smax, ns-1, 1, 1)
+s1 = sm.state(smax, ns, 0, 0, 0)
+s2 = sm.state(smax, ns, 1, 0, 0)
+s3 = sm.state(smax, ns-1, 0, 1, 0)
+s4 = sm.state(smax, ns-1, 1, 1, uint)
 
 # Optional, splitting entire list
-# f = open('splitstates.dat', 'w')
+f = open('splitstates.dat', 'w')
 
-# sm.splitstates(f, s1)
-# sm.splitstates(f, s2)
-# sm.splitstates(f, s3)
-# sm.splitstates(f, s4)
+sm.splitstates(f, s1)
+sm.splitstates(f, s2)
+sm.splitstates(f, s3)
+sm.splitstates(f, s4)
 
-# f.close()
+f.close()
 
 t_start = time.perf_counter()
 
@@ -89,6 +90,7 @@ for level in level_range:
 
     f.close()
 
+ulist = np.loadtxt('splitstatesatlevel1.dat', usecols=(2,), dtype=float)
 
 level = smax
 while (level > 3):
@@ -139,9 +141,6 @@ while (level > 3):
 # print('*'*50)
 for w in w_list:
 
-    # if (w % 10 == 0):
-    # print(w)
-
     # Generate the GF files for S = 3
 
     statesl3list = np.loadtxt('stateordinatesatlevel3.dat', dtype=int)
@@ -158,12 +157,15 @@ for w in w_list:
         fname = 'g_3_'+str(tpos)+'.dat'
         if (tsize == 1):
             h = np.array([[complex(0.0, 0.0)]], dtype=complex)
+            h[0][0] += ulist[tpos-1]
         else:
             h = np.array([[0, t], [t, 0]], dtype=complex)
+            h[0][0] += ulist[tpos-1]
+            h[1][1] += ulist[tpos]
         mat = sm.G(h, w)
         mat = mat.reshape((tsize, tsize))
         # print(tpos)
-        # print(mat)
+        # print(h)
         np.savetxt(fname, mat, fmt='%1.8f')
 
     ####################################################
@@ -266,8 +268,10 @@ for w in w_list:
 
         level += 1
         # print('*'*50)
+    
+    # quit()
 
-    # Connect the 4 states in pairs at smax level
+    # Connect the states in pairs at smax level
     states = np.loadtxt('stateordinatesatlevel' + str(smax) + '.dat')
     # Connect 1 and 2
     line1 = states[0]
@@ -383,18 +387,14 @@ for w in w_list:
 
     A_list.append(A)
 
-    print(w, A)
+    if ((len(A_list) % 100) == 0):
+        print(len(A_list), 'values calculated out of', len(w_list))
+        # print(w, A)
 
 t_stop = time.perf_counter()
 
 print("Time taken per omega loop is",
       round((t_stop-t_start)/len(w_list), 5), 'seconds.')
 
-# plt.plot(w_list, A_list)
-# plt.show()
-
-
-# print(sm.getlstate(s1))
-# print(sm.getlstate(s2))
-# print(sm.getlstate(s3))
-# print(sm.getlstate(s4))
+plt.plot(w_list, A_list)
+plt.show()

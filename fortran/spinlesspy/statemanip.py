@@ -1,15 +1,17 @@
 # Thu Feb 7 11:33:37 IST 2019
 eta = 0.1
 t = complex(1.0, 0.0)
+u_int = 8.0
 
 
 class state:
 
-    def __init__(self, s=0, ns=0, alphas=0, betas=0):
+    def __init__(self, s=0, ns=0, alphas=0, betas=0, totalu=0):
         self.s = s
         self.ns = ns
         self.alphas = alphas
         self.betas = betas
+        self.totalu = totalu
 
 
 def kdelta(x, y):
@@ -27,11 +29,12 @@ def factorial(n):
     return p
 
 
-def setstate(astate, vs, vns, valphas, vbetas):
+def setstate(astate, vs, vns, valphas, vbetas, vtotalu):
     astate.s = vs
     astate.ns = vns
     astate.alphas = valphas
     astate.betas = vbetas
+    astate.totalu = vtotalu
 
 
 def getstate(astate):
@@ -83,7 +86,8 @@ def relegate0(s1):
     betasm1 = s1.alphas
     alphasm1 = 0
     nsm1 = s1.ns - betasm1
-    setstate(r0, sm1, nsm1, alphasm1, betasm1)
+    tusm1 = s1.totalu
+    setstate(r0, sm1, nsm1, alphasm1, betasm1, tusm1)
     return r0
 
 
@@ -93,7 +97,10 @@ def relegate1(s1):
     betasm1 = s1.alphas
     alphasm1 = 1
     nsm1 = s1.ns - betasm1
-    setstate(r1, sm1, nsm1, alphasm1, betasm1)
+    tusm1 = s1.totalu
+    if (betasm1 == 1):
+        tusm1 += u_int
+    setstate(r1, sm1, nsm1, alphasm1, betasm1, tusm1)
     return r1
 
 
@@ -112,7 +119,11 @@ def getlstate(s1):
 def splitstates(fname, s1):
     if (checkvalidity(s1) == 1):
         # print(getlstate(s1), '\t', getstatesize(s1))
-        fname.write(str(getlstate(s1)) + '\t' + str(getstatesize(s1))+'\n')
+        p = str(getlstate(s1)) + '\t' \
+            + str(getstatesize(s1)) + '\t'\
+            + str(s1.totalu) + '\t' + \
+            '\n'
+        fname.write(p)
         s1s0 = relegate0(s1)
         splitstates(fname, s1s0)
         s1s1 = relegate1(s1)
@@ -122,9 +133,10 @@ def splitstates(fname, s1):
 def splitstatesatlevel(fname, s1, level):
     if (checkvalidity(s1) == 1):
         if (s1.s == level):
-            fname.write(
-                str(getlstate(s1)) + '\t' + str(getstatesize(s1))+'\n'
-            )
+            p = str(getlstate(s1)) + '\t' \
+                + str(getstatesize(s1)) + '\t'\
+                + str(s1.totalu) + '\n'
+            fname.write(p)
         if (s1.s > level):
             s1s0 = relegate0(s1)
             splitstatesatlevel(fname, s1s0, level)
@@ -181,8 +193,8 @@ def connecting_u(s1, s2):
     import numpy as np
     if (checkvalidity(s1) == 1 and checkvalidity(s2) == 1):
         u = \
-            np.zeros((getstatesize(s1), getstatesize(s2)), 
-            dtype=np.complex)
+            np.zeros((getstatesize(s1), getstatesize(s2)),
+                     dtype=np.complex)
         s1s0 = relegate0(s1)
         startindex = getstatesize(s1s0)
         i = startindex
