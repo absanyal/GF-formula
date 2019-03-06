@@ -1,5 +1,6 @@
 *
 **/*
+!costcalc
 !.gitignore
 !*.py
 test.py
