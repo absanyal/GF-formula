@@ -8,17 +8,17 @@ from numpy.linalg import inv
 import matplotlib.pyplot as plt
 import time
 
-os.system('rm *.dat')
+# os.system('rm *.dat')
 os.system('clear')
 
-num_sites = 14
-num_particles = 7
+num_sites = 12
+num_particles = 11
 smax = num_sites-1
 ns = num_particles
 t = np.complex(1, 0)
-uint = 8.0
+uint = 0.0
 
-num_w_points = 1000
+num_w_points = 1
 
 print(num_sites, 'sites,', num_particles, 'particles.')
 
@@ -83,7 +83,12 @@ for level in level_range:
 
     # print(sizelist)
     # print(rawlist)
-    n = len(sizelist)
+    
+    if (np.shape(sizelist) == ()):
+        n = 1
+        sizelist = np.array(sizelist)
+    else:
+        n = len(sizelist)
 
     for i in range(n):
         # print(sum(sizelist[:i]) + 1)
@@ -105,6 +110,7 @@ wmax = max(ulist+5)
 
 A_list = []
 w_list = np.linspace(wmin, wmax, int(num_w_points))
+w_list = [0] #For testing
 
 level = smax+1
 while (level > 3):
@@ -314,6 +320,10 @@ for w in w_list:
 
     fg11 = inv(inv(g11) - sm.tmm(u12, g22, u21))
     fg22 = inv(inv(g22) - sm.tmm(u21, g11, u12))
+    fg12 = sm.tmm(fg11, u12, g22)
+    fg21 = sm.tmm(fg22, u21, g11)
+
+    fg = np.block([[fg11, fg12], [fg21, fg22]])
 
     A = (-1/np.pi) * 1/(tsize1 + tsize2) * \
         np.imag(np.trace(fg11) + np.trace(fg22))
@@ -341,6 +351,8 @@ for i in range(len(w_list)):
     f.write(p)
 
 f.close()
+
+np.savetxt(datafname+'_fullgf.dat', fg, fmt='%1.8f')
 
 
 plt.plot(w_list, A_list)
