@@ -7,8 +7,8 @@ import os
 from numpy.linalg import inv
 os.system('clear')
 
-N = 8
-n = int(N/2)
+N = 12
+n = 11
 S_z = 0.5 * n
 
 U = 0
@@ -192,4 +192,8 @@ for w in w_list:
     print(w, A)
 
 plt.plot(w_list, A_list)
-plt.show()
+fname = str(N) + '_' + str(n) + '_' + str(int(Unn * 100))
+plt.savefig(fname+'.pdf')
+plt.clf()
+
+# plt.show()
