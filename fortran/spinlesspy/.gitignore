@@ -1,6 +1,7 @@
 *
 **/*
 !costcalc
+!connect_two
 !.gitignore
 !*.py
 test.py
