@@ -3,7 +3,7 @@ rm -r w*
 for i in {1..100}
 do
     WMIN=-5
-    WMAX=45
+    WMAX=10
     DELTA1=$((WMAX-WMIN))
     DELTA=`echo $DELTA1/100|bc -l`
     W=`echo $WMIN+$DELTA\*$i|bc`
@@ -17,5 +17,6 @@ do
     cp ../submit.sh submit.sh
     chmod 777 submit.sh
     qsub submit.sh
+    # python3 spinless.py
     cd ../
 done

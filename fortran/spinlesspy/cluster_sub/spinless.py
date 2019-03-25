@@ -16,7 +16,7 @@ num_particles = 2
 smax = num_sites-1
 ns = num_particles
 t = np.complex(1, 0)
-uint = 0.0
+uint = 8.0
 
 num_w_points = 1
 
@@ -110,11 +110,12 @@ wmax = max(ulist+5)
 
 w_val = np.loadtxt("omega_value.txt")
 w_list = [w_val]
+print(w_list)
 # w_list = np.linspace(wmin, wmax, num_w_points)
 
 A_list = []
-w_list = np.linspace(wmin, wmax, int(num_w_points))
-w_list = [0] #For testing
+# w_list = np.linspace(wmin, wmax, int(num_w_points))
+# w_list = [0] #For testing
 
 level = smax+1
 while (level > 3):
@@ -345,10 +346,10 @@ t_stop = time.perf_counter()
 print("Time taken per omega loop is",
       round((t_stop-t_start)/len(w_list), 5), 'seconds.')
 
-datafname = 'datafiles/' + str(num_sites) + '_' + str(num_particles) + '_' \
-    + str(int(uint*100)) + '_' + str(int(num_w_points))
+# datafname = 'datafiles/' + str(num_sites) + '_' + str(num_particles) + '_' \
+#     + str(int(uint*100)) + '_' + str(int(num_w_points))
 
-f = open(datafname + '.dat', 'w')
+f = open('datafiles/datafile.dat', 'w')
 
 for i in range(len(w_list)):
     p = str(w_list[i]) + '\t' + str(A_list[i]) + '\n'
