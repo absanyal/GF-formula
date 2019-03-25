@@ -16,6 +16,6 @@ do
     cp ../statemanip.py statemanip.py
     cp ../job.sh job.sh
     chmod 777 job.sh
-    # qsub job.sh
+    qsub job.sh
     cd ../
 done
