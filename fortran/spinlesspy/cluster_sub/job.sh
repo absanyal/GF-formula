@@ -14,8 +14,8 @@ do
     echo $W > omega_value.dat
     cp ../spinless.py spinless.py
     cp ../statemanip.py statemanip.py
-    cp ../job.sh job.sh
-    chmod 777 job.sh
-    qsub job.sh
+    cp ../submit.sh submit.sh
+    chmod 777 submit.sh
+    qsub submit.sh
     cd ../
 done
