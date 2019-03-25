@@ -2,6 +2,7 @@
 **/*
 !costcalc
 !connect_two
+!cluster_sub
 !.gitignore
 !*.py
 test.py
