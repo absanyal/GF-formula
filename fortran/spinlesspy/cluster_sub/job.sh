@@ -11,7 +11,7 @@ do
     # echo $W
     mkdir w${i}
     cd w${i}
-    echo $W > omega_value.dat
+    echo $W > omega_value.txt
     cp ../spinless.py spinless.py
     cp ../statemanip.py statemanip.py
     cp ../submit.sh submit.sh
