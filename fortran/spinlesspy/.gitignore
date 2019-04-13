@@ -3,6 +3,7 @@
 !costcalc
 !connect_two
 !cluster_sub
+!disorder
 !.gitignore
 !*.py
 test.py
